@@ -1,0 +1,6 @@
+.idea
+venv
+.ycm_extra_conf.py
+informatics_front/settings.cfg
+.pytest_cache
+node_modules
