@@ -1,0 +1,21 @@
+{
+  "name": "api-docs",
+  "version": "1.0.0",
+  "description": "Documentation for Tinkoff Education Service",
+  "main": "dev.js",
+  "scripts": {
+    "build": "node ./dev.js merge",
+    "watch": "node ./dev.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://stash.tcsbank.ru/projects/ED/repos/api-docs/browse"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chokidar": "^2.0.4",
+    "js-yaml": "^3.12.1",
+    "merge-yaml": "1.0.0"
+  }
+}

@@ -1,0 +1,60 @@
+openapi: 3.0.0
+
+info:
+  title: Informatics contest
+  version: 1.0.0
+  description: Informatics contest
+
+servers:
+  - url: http://localhost
+    description: Dev-сервер
+
+tags:
+  - name: Contest
+    description: Контест
+
+
+paths:
+  /contest/:
+    get:
+      tags:
+        - Contest
+
+      summary: Контест с проблемамаи по chapterid из moodle
+
+      security:
+        - jwt-token-auth: []
+
+      responses:
+        200:
+          description: Контест с проблемами
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/ContestSchema'
+        404:
+          allOf:
+            - Контест не найден
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+  /contest/problem/{problem_id}:
+    get:
+      tags:
+        - Contest
+
+      summary: Задача
+
+      security:
+        - jwt-token-auth: []
+
+      responses:
+        200:
+          description: Задача
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/ProblemSchema'
+        404:
+          allOf:
+            - Контест не найден
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'

@@ -1,0 +1,124 @@
+components:
+  schemas:
+    SampleTest:
+      type: object
+      description: Пример входных и выходных данных в задаче
+      properties:
+        input:
+          type: string
+          description: Входные данные
+        correct:
+          type: string
+          description: Выходные данные
+
+    ContestProblemSchema:
+      type: object
+      description: Проблема в контесте
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          description: ID Контеста
+
+        name:
+          type: string
+          description: Название проблемы
+
+        rank:
+          type: integer
+          description: Порядковый номер в Контесте
+
+    ContestSchema:
+      type: object
+      description: Контест
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          description: ID Контеста
+
+        name:
+          type: string
+          description: Название контеста
+
+        summary:
+          type: string
+          description: Полное название контеста
+
+        problems:
+          - $ref: '#/components/schemas/ContestProblemSchema'
+
+    ProblemSchema:
+      type: object
+      description: Задача
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          description: ID Контеста
+
+        name:
+          type: string
+          description: Название контеста
+
+        content:
+          type: string
+          description: Описание задачи
+
+        timelimit:
+          type: integer
+          description: Ограничение по времени
+
+        memorylimit:
+          type: integer
+          description: Ограничение по памяти
+
+        description:
+          type: string
+          description: ???
+
+        sample_tests_json:
+          - $ref: '#/components/schemas/SampleTest'
+
+        output_only:
+          type: boolean
+          description: Только output
+
+    Error:
+      type: object
+      properties:
+        status_code:
+          type: integer
+          minimum: 400
+          maximum: 526
+
+        status:
+          type: string
+          enum: [error]
+
+        error:
+          type: string
+
+      required:
+        - status_code
+        - status
+        - error
+
+    Success:
+      type: object
+      properties:
+        status_code:
+          type: integer
+          enum: [200, 201]
+
+        status:
+          type: string
+          enum: [success]
+
+        data:
+          type: object
+
+      required:
+        - status_code
+        - status
+        - data

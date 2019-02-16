@@ -1,0 +1,27 @@
+components:
+  responses:
+    UserToken:
+      description: Успешный логин
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: 'models.yaml#/components/schemas/Success'
+              - type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        format: email
+                        example: example@edu.com
+                      token:
+                        type: string
+                      refresh_token:
+                        type: string
+                    required:
+                      - token
+                      - refresh_token
+                      # TODO: define pattern of token and refresh_token
+                      # (https://swagger.io/docs/specification/data-models/data-types/#string)
