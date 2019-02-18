@@ -84,6 +84,29 @@ components:
           type: boolean
           description: Только output
 
+    UserAuthSchema:
+      type: object
+      properties:
+        id:
+        username:
+          type: string
+          description: Username (логинимся по нему)
+        firstname:
+          type: string
+          description: Имя
+        lastname:
+          type: string
+          description: Фамилия
+        email:
+          type: string
+          description: email
+        token:
+          type: string
+          description: Авторизационный токен
+        refresh_token:
+          type: string
+          description: Рефреш токен (только при логине)
+
     Error:
       type: object
       properties:

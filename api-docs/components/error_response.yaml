@@ -1,4 +1,4 @@
-rercomponents:
+components:
   responses:
     BadRequest:
       description: Ошибка в теле запроса
