@@ -2,7 +2,8 @@ from flask.views import MethodView
 from sqlalchemy.orm import Load
 from werkzeug.exceptions import NotFound, BadRequest
 
-from informatics_front.model import db, Problem, StatementProblem, Statement
+from informatics_front.model.base import db
+from informatics_front.model import Problem, StatementProblem, Statement
 from informatics_front.model import CourseModule
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.response import jsonify
@@ -10,7 +11,7 @@ from informatics_front.view.course.contest.serializers.contest import ContestSch
 
 
 class ContestApi(MethodView):
-    # @login_required
+    @login_required
     def get(self, course_module_id):
         course_module = db.session.query(CourseModule) \
             .filter(CourseModule.id == course_module_id) \

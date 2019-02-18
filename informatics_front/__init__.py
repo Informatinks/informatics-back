@@ -55,11 +55,4 @@ def create_app(config=None):
 if __name__ == "__main__":
     app = create_app()
 
-    with app.app_context():
-        # db.drop_all()
-        db.create_all()
-        pwd = hashlib.md5(b'lol').hexdigest()
-        u = User(username='abc', password_md5=pwd)
-        db.session.add(u)
-        db.session.commit()
     app.run(debug=False)

@@ -8,7 +8,7 @@ from informatics_front.view.course.contest.serializers.problem import ProblemSch
 
 
 class ProblemApi(MethodView):
-    # @login_required
+    @login_required
     def get(self, problem_id):
         problem = db.session.query(Problem).get(problem_id)
         if problem is None:

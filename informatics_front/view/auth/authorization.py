@@ -26,8 +26,6 @@ class LoginApi(MethodView):
 
     def post(self):
 
-        print(request.get_json())
-
         args = parser.parse(self.post_args, request)
 
         username, password = args['username'], args['password']
