@@ -15,7 +15,7 @@ tags:
 
 
 paths:
-  /contest/:
+  /contest/{contest_id}:
     get:
       tags:
         - Contest

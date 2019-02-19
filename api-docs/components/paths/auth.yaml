@@ -18,6 +18,18 @@ paths:
     post:
       tags:
         - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Username
+                password:
+                  type: string
+                  description: Пароль
 
       summary: Залогиниться (получить токены)
       responses:
@@ -62,11 +74,14 @@ paths:
         - jwt-token-auth: []
 
       requestBody:
-        type: object
-        properties:
-          refresh_token:
-            type: string
-            description: Refresh Token
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: Refresh Token
 
       responses:
         200:
