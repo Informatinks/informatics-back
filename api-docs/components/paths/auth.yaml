@@ -27,10 +27,15 @@ paths:
             application/json:
               schema:
                 $ref: '../models.yaml#/components/schemas/UserAuthSchema'
-        403:
+        404:
+          description: Пользовалель не найден
           allOf:
-            - Пользовалель не найден или неверные логин-пароль
-            - $ref: '../error_responses.yaml#/components/responses/BadRequest'
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+        401:
+          description: Неправильный пароль
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/Forbidden'
 
   /auth/signout/:
     post:
@@ -71,6 +76,6 @@ paths:
               schema:
                 $ref: '../models.yaml#/components/schemas/UserAuthSchema'
         403:
+          description: Рефреш токен протух
           allOf:
-            - Рефреш токен протух
             - $ref: '../error_responses.yaml#/components/responses/BadRequest'

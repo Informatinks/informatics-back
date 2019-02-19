@@ -37,15 +37,13 @@ class LoginApi(MethodView):
                          .one_or_none()
 
         if user is None:
-            # Avoid timing attack on checking user existing
-            User.check_password('any', password)
-            raise exc.BadRequest('Username or password is invalid')
+            raise exc.NotFound('User with this username does not exist')
 
         is_password_valid = User.check_password(user.password_md5, password)
         if not is_password_valid:
             current_app.logger.warning(f'user_email={args["username"]} '
                                        f'has failed to log in')
-            raise exc.BadRequest('Username or password is invalid')
+            raise exc.Forbidden('Invalid password')
 
         current_app.logger.debug(f'user_email={args["username"]} has logged in')
 

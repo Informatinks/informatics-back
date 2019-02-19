@@ -20,21 +20,21 @@ paths:
       tags:
         - Contest
 
-      summary: Контест с проблемамаи по chapterid из moodle
+      summary: Контест с задачами по chapterid из moodle
 
       security:
         - jwt-token-auth: []
 
       responses:
         200:
-          description: Контест с проблемами
+          description: Контест с задачами
           content:
             application/json:
               schema:
                 $ref: '../models.yaml#/components/schemas/ContestSchema'
         404:
+          description: Контест не найден
           allOf:
-            - Контест не найден
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
   /contest/problem/{problem_id}:
@@ -55,6 +55,6 @@ paths:
               schema:
                 $ref: '../models.yaml#/components/schemas/ProblemSchema'
         404:
+          description: Задача не найдена
           allOf:
-            - Контест не найден
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
