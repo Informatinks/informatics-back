@@ -12,6 +12,8 @@ servers:
 tags:
   - name: Contest
     description: Контест
+  - name: Submissions
+    descriprion: Посылки
 
 
 paths:
@@ -58,3 +60,101 @@ paths:
           description: Задача не найдена
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+  /contest/problem/{problem_id}/submission:
+    get:
+      tags:
+        - Submissions
+
+      summary: Фильтр по посылкам
+
+      security:
+        - jwt-token-auth: []
+
+      parameters:
+        - in: path
+          name: group_id
+          schema:
+            type: integer
+            description: Группа
+        - in: path
+          name: lang_id
+          schema:
+            type: integer
+            description: Язык
+        - in: path
+          name: status_id
+          schema:
+            type: integer
+            description: Статус посылки
+        - in: path
+          name: statement_id
+          schema:
+            type: integer
+            description: Id контеста
+        - in: path
+          name: count
+          schema:
+            type: integer
+            description: Количество на странице (не более 100)
+        - in: path
+          name: page
+          schema:
+            type: integer
+            description: Номер страницы
+        - in: path
+          name: from_timestamp
+          schema:
+            type: integer
+            description: С какого времени
+        - in: path
+          name: to_timestamp
+          schema:
+            type: integer
+            description: По какое время
+
+      responses:
+        200:
+          description: Отфильтрованные посылки
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/ProblemSubmissionSchema'
+    post:
+      tags:
+        - Submissions
+
+      summary: Отправить посылку
+
+      security:
+        - jwt-token-auth: []
+
+      requestBody:
+        content:
+          multipart/json:
+            shema:
+              type: object
+              properties:
+                lang_id:
+                  type: integer
+                  description: Язык
+                statement_id:
+                  type: integer
+                  description: id контеста
+                file:
+                  type: string
+                  format: binary
+
+      responses:
+        200:
+          description: Посылка отправлена
+
+        404:
+          description: Задача не найдена
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+        400:
+          description: Пустой файл или дубликат посылки
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/BadRequest'

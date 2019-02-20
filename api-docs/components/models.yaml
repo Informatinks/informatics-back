@@ -107,6 +107,50 @@ components:
           type: string
           description: Рефреш токен (только при логине)
 
+    ProblemSubmissionSchema:
+      type: object
+      description: Посылки по фильтру
+      properties:
+        id:
+          type: integer
+          description: id посылки
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: Id пользователя
+            firstname:
+              type: string
+              description: Имя
+            lastname:
+              type: string
+              description: Фамилия
+        problem:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: Id задачи
+            name:
+              type: string
+              description: Название задачи
+        ejudge_status:
+          type: integer
+          description: Статус посылки
+        create_time:
+          type: timestamp
+          description: Время отправки
+        ejudge_language_id:
+          type: integer
+          description: Язык
+        ejudge_test_num:
+          type: integer
+          description: Сколько тестов прошло
+        ejudge_score:
+          type: integer
+          description: Score
+
     Error:
       type: object
       properties:

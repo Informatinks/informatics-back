@@ -27,7 +27,6 @@ class ProblemApi(MethodView):
 
 class ProblemSubmissionApi(MethodView):
     get_args = {
-        'user_id': fields.Integer(),
         'group_id': fields.Integer(),
         'lang_id': fields.Integer(),
         'status_id': fields.Integer(),
@@ -43,6 +42,7 @@ class ProblemSubmissionApi(MethodView):
         'statement_id': fields.Integer(),
     }
 
+    # TODO: не прокидываются статусы
     @login_required
     def post(self, problem_id):
         user_id = g.user['id']
