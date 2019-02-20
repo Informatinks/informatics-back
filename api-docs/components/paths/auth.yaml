@@ -94,3 +94,10 @@ paths:
           description: Рефреш токен протух
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/BadRequest'
+
+components:
+  securitySchemes:
+    jwt-token-auth:
+      type: apiKey
+      in: header
+      name: Authorization
