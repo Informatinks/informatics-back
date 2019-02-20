@@ -11,3 +11,4 @@ pymysql
 pytest
 pytest-flask
 cryptography
+requests

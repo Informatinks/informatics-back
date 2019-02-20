@@ -6,6 +6,7 @@ from flask import Flask
 from informatics_front import cli
 from informatics_front.model import db
 from informatics_front.model.user.user import User
+from informatics_front.plugins import internal_rmatics
 from informatics_front.utils.auth import authenticate
 from informatics_front.utils.error_handlers import register_error_handlers
 from informatics_front.view import handle_api_exception
@@ -40,6 +41,8 @@ def create_app(config=None):
     app.url_map.strict_slashes = False
 
     db.init_app(app)
+
+    internal_rmatics.init_app(app)
 
     app.before_request(authenticate)
     register_error_handlers(app)
