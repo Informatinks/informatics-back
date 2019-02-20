@@ -80,7 +80,7 @@ class RefreshTokenApi(MethodView):
     def _validate_token(token) -> Optional[User]:
         payload = decode_jwt_token(token)
 
-        if not payload:
+        if not payload or not payload.get('user_id'):
             return None
 
         refresh_token = db.session.query(RefreshToken) \
