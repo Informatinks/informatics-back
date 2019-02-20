@@ -17,8 +17,11 @@ def app():
 
     yield flask_app
 
+    with flask_app.app_context():
+        db.drop_all()
 
-@pytest.fixture(scope='session')
+
+@pytest.yield_fixture(scope='session')
 def roles(app):
     short_names = [
         'admin',
@@ -40,11 +43,14 @@ def roles(app):
     roles = [Role(shortname=short_name) for short_name in short_names]
     db.session.add_all(roles)
     db.session.flush()
-
     roles_ids = {
         name: role.id for name, role in zip(short_names, roles)
     }
-
     db.session.commit()
 
-    return roles_ids
+    yield roles_ids
+
+    for role in roles:
+        db.session.delete(role)
+
+    db.session.commit()
