@@ -1,6 +1,10 @@
+from flask import request, g
 from flask.views import MethodView
+from marshmallow import fields
+from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound
 
+from informatics_front import internal_rmatics
 from informatics_front.model import db, Problem
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.response import jsonify
@@ -20,3 +24,40 @@ class ProblemApi(MethodView):
 
         return jsonify(response.data)
 
+
+class ProblemSubmissionApi(MethodView):
+    get_args = {
+        'user_id': fields.Integer(),
+        'group_id': fields.Integer(),
+        'lang_id': fields.Integer(),
+        'status_id': fields.Integer(),
+        'statement_id': fields.Integer(),
+        'count': fields.Integer(default=10, missing=10),
+        'page': fields.Integer(required=True),
+        'from_timestamp': fields.Integer(),  # Может быть -1, тогда не фильтруем
+        'to_timestamp': fields.Integer(),  # Может быть -1, тогда не фильтруем
+    }
+
+    post_args = {
+        'lang_id': fields.Integer(),
+        'statement_id': fields.Integer(),
+    }
+
+    @login_required
+    def post(self, problem_id):
+        user_id = g.user['id']
+        args = parser.parse(self.post_args, request)
+        file = parser.parse_files(request, 'file', 'file')
+
+        content = internal_rmatics.send_submit(file,
+                                               user_id,
+                                               problem_id,
+                                               args['statement_id'],
+                                               args['lang_id'])
+        return jsonify(content)
+
+    @login_required
+    def get(self, problem_id):
+        args = parser.parse(self.get_args, request)
+        content = internal_rmatics.get_runs_filter(problem_id, args, is_admin=False)
+        return jsonify(content)
