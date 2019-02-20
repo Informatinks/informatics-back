@@ -155,6 +155,6 @@ paths:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
         400:
-          description: Пустой файл или дубликат посылки
+          description: Пустой файл или дубликат посылки или файл слишком большой
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/BadRequest'

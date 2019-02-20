@@ -49,15 +49,15 @@ class ProblemSubmissionApi(MethodView):
         args = parser.parse(self.post_args, request)
         file = parser.parse_files(request, 'file', 'file')
 
-        content = internal_rmatics.send_submit(file,
-                                               user_id,
-                                               problem_id,
-                                               args['statement_id'],
-                                               args['lang_id'])
-        return jsonify(content)
+        content, status = internal_rmatics.send_submit(file,
+                                                       user_id,
+                                                       problem_id,
+                                                       args['statement_id'],
+                                                       args['lang_id'])
+        return jsonify(content, status_code=status)
 
     @login_required
     def get(self, problem_id):
         args = parser.parse(self.get_args, request)
-        content = internal_rmatics.get_runs_filter(problem_id, args, is_admin=False)
-        return jsonify(content)
+        content, status = internal_rmatics.get_runs_filter(problem_id, args, is_admin=False)
+        return jsonify(content, status_code=status)

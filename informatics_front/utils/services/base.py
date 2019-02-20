@@ -1,5 +1,6 @@
 import inspect
 import logging
+from typing import Tuple
 
 import requests
 
@@ -29,7 +30,7 @@ class ApiClient(requests.Session):
         self._allowed_kwargs = set(request_method_signature.parameters.keys())
 
     def _request(self, url, method='GET', json=None, data_key=None,
-                 default=None, silent=False, allow_bad_http_statuses=True, **kwargs):
+                 default=None, silent=False, allow_bad_http_statuses=True, **kwargs) -> Tuple[dict, int]:
         """Wrap self.request method."""
         kwargs = {**kwargs, 'timeout': self.timeout}
         headers = {
@@ -62,14 +63,14 @@ class ApiClient(requests.Session):
 
             if not silent:
                 raise ServerError()
-            return default
+            return default, 500
 
         if not allow_bad_http_statuses:
             if 400 <= response.status_code < 500:
                 self.logger.error(f'URL: {url}.\n Response: {response.content}')
                 if not silent:
                     raise ClientError(response.status_code)
-                return default
+                return default, response.status_code
 
             if 500 <= response.status_code < 600:
                 self.logger.exception(
@@ -79,7 +80,7 @@ class ApiClient(requests.Session):
 
                 if not silent:
                     raise ServerError()
-                return default
+                return default, response.status_code
 
         data_key = data_key if data_key else 'data'
 
@@ -87,7 +88,7 @@ class ApiClient(requests.Session):
             data_key = 'error'
 
         json_response = response.json()[data_key]
-        return json_response
+        return json_response, response.status_code
 
     def put_data(self, url, json, default=None,
                  silent=False, data_key=None, **kwargs):
