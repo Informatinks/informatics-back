@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from informatics_front.utils.services.base import ApiClient, BaseService
+from werkzeug.datastructures import FileStorage
 
 
 class InternalRmatics(BaseService):
@@ -11,7 +12,8 @@ class InternalRmatics(BaseService):
         self.service_url = None
         self.client = ApiClient(timeout=timeout, logger=logger)
 
-    def send_submit(self, file,
+    def send_submit(self,
+                    file: FileStorage,
                     user_id: int,
                     problem_id: int,
                     statement_id: int,
@@ -23,8 +25,7 @@ class InternalRmatics(BaseService):
         }
         url = self.service_url + f'/problem/trusted/{problem_id}/submit_v2'
 
-        content, status = self.client.post_data(url, json=data, files={'file': file}, silent=True)
-        return content, status
+        return self.client.post_data(url, json=data, files={'file': file}, silent=True)
 
     def get_runs_filter(self, problem_id: int,
                         args: dict,
@@ -34,6 +35,5 @@ class InternalRmatics(BaseService):
             'is_admin': is_admin,
         }
         url = self.service_url + f'/problem/{problem_id}/submissions/'
-        content, status = self.client.get_data(url, params=filter_args, silent=True, default=[])
 
-        return content, status
+        return self.client.get_data(url, params=filter_args, silent=True, default=[])

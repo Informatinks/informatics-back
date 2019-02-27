@@ -32,14 +32,14 @@ class ProblemSubmissionApi(MethodView):
         'status_id': fields.Integer(),
         'statement_id': fields.Integer(),
         'count': fields.Integer(default=10, missing=10),
-        'page': fields.Integer(required=True),
+        'page': fields.Integer(required=True),  # FIXME: provide `missing=1` default
         'from_timestamp': fields.Integer(),  # Может быть -1, тогда не фильтруем
         'to_timestamp': fields.Integer(),  # Может быть -1, тогда не фильтруем
     }
 
     post_args = {
-        'lang_id': fields.Integer(),
-        'statement_id': fields.Integer(),
+        'lang_id': fields.Integer(required=True),
+        'statement_id': fields.Integer(required=True),
     }
 
     @login_required
@@ -57,6 +57,6 @@ class ProblemSubmissionApi(MethodView):
 
     @login_required
     def get(self, problem_id):
-        args = parser.parse(self.get_args, request)
+        args = parser.parse(self.get_args, request, error_status_code=400)
         content, status = internal_rmatics.get_runs_filter(problem_id, args, is_admin=False)
         return jsonify(content, status_code=status)
