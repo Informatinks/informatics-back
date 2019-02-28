@@ -1,0 +1,10 @@
+openapi: 3.0.0
+info:
+  title: Education service
+  version: 1.0.0
+  description: Education service
+servers:
+  - url: 'http://edu.dev2.k8s.tcsbank.ru/api/v1'
+    description: Dev-сервер
+  - url: 'http://edu.qa2.k8s.tcsbank.ru/api/v1'
+    description: QA-сервер

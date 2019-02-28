@@ -1,0 +1,160 @@
+openapi: 3.0.0
+
+info:
+  title: Informatics contest
+  version: 1.0.0
+  description: Informatics contest
+
+servers:
+  - url: http://localhost
+    description: Dev-сервер
+
+tags:
+  - name: Contest
+    description: Контест
+  - name: Submissions
+    descriprion: Посылки
+
+
+paths:
+  /contest/{contest_id}:
+    get:
+      tags:
+        - Contest
+
+      summary: Контест с задачами по chapterid из moodle
+
+      security:
+        - jwt-token-auth: []
+
+      responses:
+        200:
+          description: Контест с задачами
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/ContestSchema'
+        404:
+          description: Контест не найден
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+  /contest/problem/{problem_id}:
+    get:
+      tags:
+        - Contest
+
+      summary: Задача
+
+      security:
+        - jwt-token-auth: []
+
+      responses:
+        200:
+          description: Задача
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/ProblemSchema'
+        404:
+          description: Задача не найдена
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+  /contest/problem/{problem_id}/submission:
+    get:
+      tags:
+        - Submissions
+
+      summary: Фильтр по посылкам
+
+      security:
+        - jwt-token-auth: []
+
+      parameters:
+        - in: path
+          name: group_id
+          schema:
+            type: integer
+            description: Группа
+        - in: path
+          name: lang_id
+          schema:
+            type: integer
+            description: Язык
+        - in: path
+          name: status_id
+          schema:
+            type: integer
+            description: Статус посылки
+        - in: path
+          name: statement_id
+          schema:
+            type: integer
+            description: Id контеста
+        - in: path
+          name: count
+          schema:
+            type: integer
+            description: Количество на странице (не более 100)
+        - in: path
+          name: page
+          schema:
+            type: integer
+            description: Номер страницы
+        - in: path
+          name: from_timestamp
+          schema:
+            type: integer
+            description: С какого времени
+        - in: path
+          name: to_timestamp
+          schema:
+            type: integer
+            description: По какое время
+
+      responses:
+        200:
+          description: Отфильтрованные посылки
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/ProblemSubmissionSchema'
+    post:
+      tags:
+        - Submissions
+
+      summary: Отправить посылку
+
+      security:
+        - jwt-token-auth: []
+
+      requestBody:
+        content:
+          multipart/json:
+            shema:
+              type: object
+              properties:
+                lang_id:
+                  type: integer
+                  description: Язык
+                statement_id:
+                  type: integer
+                  description: id контеста
+                file:
+                  type: string
+                  format: binary
+
+      responses:
+        200:
+          description: Посылка отправлена
+
+        404:
+          description: Задача не найдена
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+        400:
+          description: Пустой файл или дубликат посылки или файл слишком большой
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/BadRequest'

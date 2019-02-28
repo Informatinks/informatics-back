@@ -1,0 +1,15 @@
+werkzeug
+flask
+sqlalchemy
+flask-sqlalchemy
+jsonschema
+teamcity-messages
+PyJWT==1.6.4
+marshmallow
+webargs
+pymysql
+pytest
+pytest-flask
+cryptography
+requests
+click

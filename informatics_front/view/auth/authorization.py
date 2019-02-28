@@ -26,8 +26,6 @@ class LoginApi(MethodView):
 
     def post(self):
 
-        print(request.get_json())
-
         args = parser.parse(self.post_args, request)
 
         username, password = args['username'], args['password']
@@ -39,15 +37,13 @@ class LoginApi(MethodView):
                          .one_or_none()
 
         if user is None:
-            # Avoid timing attack on checking user existing
-            User.check_password('any', password)
-            raise exc.BadRequest('Username or password is invalid')
+            raise exc.NotFound('User with this username does not exist')
 
         is_password_valid = User.check_password(user.password_md5, password)
         if not is_password_valid:
             current_app.logger.warning(f'user_email={args["username"]} '
                                        f'has failed to log in')
-            raise exc.BadRequest('Username or password is invalid')
+            raise exc.Forbidden('Invalid password')
 
         current_app.logger.debug(f'user_email={args["username"]} has logged in')
 
@@ -84,7 +80,7 @@ class RefreshTokenApi(MethodView):
     def _validate_token(token) -> Optional[User]:
         payload = decode_jwt_token(token)
 
-        if not payload:
+        if not payload or not payload.get('user_id'):
             return None
 
         refresh_token = db.session.query(RefreshToken) \

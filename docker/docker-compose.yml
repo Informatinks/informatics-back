@@ -1,0 +1,13 @@
+version: '3.0'
+
+services:
+  mariadb:
+    image: mariadb:5.5
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_USER=testuser
+      - MYSQL_PASSWORD=123456sud
+    volumes:
+      - ./create-databases.sql:/docker-entrypoint-initdb.d/setup.sql
+    ports:
+      - 3306:3306

@@ -1,5 +1,7 @@
 import datetime
 
+from sqlalchemy.orm import backref
+
 from informatics_front.model.base import db
 from informatics_front.model.user.user import User
 
@@ -18,6 +20,6 @@ class RefreshToken(db.Model):
     valid = db.Column(db.Boolean(), default=True, nullable=False)
     created_at = db.Column(db.DateTime(), default=datetime.datetime.utcnow)
     user = db.relationship('User', lazy='joined',
-                           cascade="all, delete-orphan",
+                           backref=backref('refresh_tokens', cascade="all, delete-orphan"),
                            single_parent=True)
 
