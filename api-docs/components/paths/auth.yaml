@@ -6,7 +6,7 @@ info:
   description: Informatics auth API
 
 servers:
-  - url: http://localhost
+  - url: http://85.93.88.189:12347
     description: Dev-сервер
 
 tags:
