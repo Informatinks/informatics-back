@@ -24,6 +24,14 @@ paths:
 
       summary: Контест с задачами по chapterid из moodle
 
+      parameters:
+        - in: path
+          name: contest_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the contest to get
+
       security:
         - jwt-token-auth: []
 
@@ -45,6 +53,14 @@ paths:
         - Contest
 
       summary: Задача
+
+      parameters:
+        - in: path
+          name: problem_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the problem to get
 
       security:
         - jwt-token-auth: []
@@ -72,6 +88,12 @@ paths:
         - jwt-token-auth: []
 
       parameters:
+        - in: path
+          name: problem_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the problem to get
         - in: path
           name: group_id
           schema:
@@ -106,12 +128,12 @@ paths:
           name: from_timestamp
           schema:
             type: integer
-            description: С какого времени
+            description: С какого времени (-1 если фильтровать не нужно)
         - in: path
           name: to_timestamp
           schema:
             type: integer
-            description: По какое время
+            description: По какое время (-1 если фильтровать не нужно)
 
       responses:
         200:

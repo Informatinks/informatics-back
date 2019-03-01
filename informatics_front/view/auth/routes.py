@@ -2,7 +2,7 @@ from flask import Blueprint
 
 from informatics_front.view.auth.authorization import LoginApi, LogoutApi, RefreshTokenApi
 
-auth_blueprint = Blueprint('auth', __name__, url_prefix='/auth')
+auth_blueprint = Blueprint('auth', __name__, url_prefix='/api/v1/auth')
 
 auth_blueprint.add_url_rule('/signin', methods=('POST', ),
                             view_func=LoginApi.as_view('login'))

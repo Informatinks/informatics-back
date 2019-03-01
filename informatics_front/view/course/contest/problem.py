@@ -33,13 +33,13 @@ class ProblemSubmissionApi(MethodView):
         'statement_id': fields.Integer(),
         'count': fields.Integer(default=10, missing=10),
         'page': fields.Integer(required=True),  # FIXME: provide `missing=1` default
-        'from_timestamp': fields.Integer(),  # Может быть -1, тогда не фильтруем
-        'to_timestamp': fields.Integer(),  # Может быть -1, тогда не фильтруем
+        'from_timestamp': fields.Integer(),
+        'to_timestamp': fields.Integer(),
     }
 
     post_args = {
         'lang_id': fields.Integer(required=True),
-        'statement_id': fields.Integer(required=True),
+        'statement_id': fields.Integer(),
     }
 
     @login_required

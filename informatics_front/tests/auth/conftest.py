@@ -61,11 +61,10 @@ def token(app: Flask, users: dict):
 
     previous_config_data = app.config.get('JWT_TOKEN_EXP')
     app.config['JWT_TOKEN_EXP'] = VALID_TIME
-
     token = generate_jwt_token(user)
-    yield token
-
     app.config['JWT_TOKEN_EXP'] = previous_config_data
+
+    yield token
 
 
 @pytest.yield_fixture
