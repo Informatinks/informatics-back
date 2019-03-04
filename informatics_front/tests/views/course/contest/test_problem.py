@@ -25,6 +25,8 @@ def test_problem(client, problem, authorized_user):
     for field in ('content', 'description', 'memorylimit', 'name', 'output_only', 'timelimit',):
         assert getattr(problem, field) == content.get(field, -1)  # avoid None is None comparison
 
+#     Добавить ассерт на сэмплы
+
 
 @pytest.mark.problem
 def test_get_problem_submission(client, authorized_user, problem, ):
