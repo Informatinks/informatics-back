@@ -1,4 +1,5 @@
 import pytest
+
 from flask import url_for
 
 from informatics_front import User, db
@@ -6,9 +7,9 @@ from informatics_front.model.refresh_tokens import RefreshToken
 
 
 @pytest.mark.auth
-def test_refresh_token(client, authorized_user):
+def test_refresh_token(client, user_with_token):
     url = url_for('auth.refresh')
-    token = authorized_user.get('token')
+    token = user_with_token.get('token')
     resp = client.post(url, data={'refresh_token': token})
 
     assert resp.status_code == 200
@@ -17,7 +18,7 @@ def test_refresh_token(client, authorized_user):
 
     content = resp.json['data']
 
-    user: User = authorized_user['user']
+    user: User = user_with_token['user']
     assert content.get('id') == user.id
     assert content.get('username') == user.username
     assert 'token' in content
@@ -34,7 +35,7 @@ def test_signin(client, users):
         'password': user['password'],
     }
 
-    resp = client.post(url, data=auth_credentials)
+    resp = client.post(url, data=auth_credentials)\
 
     assert resp.status_code == 200
 
@@ -51,7 +52,11 @@ def test_signin(client, users):
 
     rt = db.session.query(RefreshToken) \
         .filter(RefreshToken.token == token) \
-        .filter(RefreshToken.user_id == user['id'])\
+        .filter(RefreshToken.user_id == user['id']) \
         .one_or_none()
 
     assert rt is not None
+#
+#
+# @pytest.mark.auth
+# def test_signout(client, users):

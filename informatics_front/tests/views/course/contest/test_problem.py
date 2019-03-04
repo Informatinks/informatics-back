@@ -1,8 +1,7 @@
-import pytest
-import json
-from unittest.mock import patch, Mock, MagicMock
-from unittest.mock import sentinel
 import io
+import pytest
+
+from unittest.mock import patch
 
 from flask import g, url_for
 
@@ -24,6 +23,7 @@ def test_problem(client, problem, authorized_user):
 
     for field in ('content', 'description', 'memorylimit', 'name', 'output_only', 'timelimit',):
         assert getattr(problem, field) == content.get(field, -1)  # avoid None is None comparison
+
 
 #     Добавить ассерт на сэмплы
 
@@ -72,4 +72,3 @@ def test_post_problem_submission(client, authorized_user, problem, ):
         resp = client.post(url, data=data)
         assert resp.status_code == 200
         send_submit.assert_called_with(True, g.user['id'], problem.id, None, 2, )
-

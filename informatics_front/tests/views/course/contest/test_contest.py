@@ -1,6 +1,6 @@
 import pytest
 
-from flask import g, url_for
+from flask import url_for
 
 NON_EXISTING_ID = -1
 

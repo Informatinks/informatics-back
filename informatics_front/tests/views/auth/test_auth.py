@@ -1,6 +1,7 @@
+import pytest
+
 from unittest import mock
 
-import pytest
 from flask import g
 from werkzeug.exceptions import Unauthorized
 

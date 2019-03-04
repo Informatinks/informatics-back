@@ -1,7 +1,11 @@
 import pytest
 
-from informatics_front import create_app, authenticate, db
+from informatics_front import create_app, authenticate
 from informatics_front.model import Role
+from informatics_front import db
+
+VALID_TIME = 100500
+COURSE_VISIBLE = 1
 
 
 @pytest.yield_fixture(scope='session')
