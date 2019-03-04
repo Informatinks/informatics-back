@@ -14,7 +14,6 @@ from informatics_front.utils.auth import login_required
 from informatics_front.utils.auth.make_jwt import decode_jwt_token, generate_refresh_token
 from informatics_front.utils.response import jsonify
 
-
 from informatics_front.view.auth.serializers.auth import UserAuthSerializer
 
 
@@ -31,10 +30,10 @@ class LoginApi(MethodView):
         username, password = args['username'], args['password']
 
         user = db.session.query(User) \
-                         .filter(User.username == username)\
-                         .filter(User.deleted.isnot(True)) \
-                         .options(joinedload(User.roles)) \
-                         .one_or_none()
+            .filter(User.username == username) \
+            .filter(User.deleted.isnot(True)) \
+            .options(joinedload(User.roles)) \
+            .one_or_none()
 
         if user is None:
             raise exc.NotFound('User with this username does not exist')
@@ -60,10 +59,17 @@ class LoginApi(MethodView):
 
 
 class LogoutApi(MethodView):
+    post_args = {
+        'refresh_token': fields.String(required=True),
+    }
+
     @login_required
     def post(self):
         user = g.user
-        db.session.query(RefreshToken).filter_by(user_id=user['id']).delete()
+        args = parser.parse(self.post_args, request)
+
+        db.session.query(RefreshToken).filter_by(user_id=user['id'],
+                                                 token=args.get('refresh_token')).delete()
         db.session.commit()
 
         current_app.logger.debug(f'user_id={user["id"]} has logged out')
@@ -101,7 +107,7 @@ class RefreshTokenApi(MethodView):
             current_app.logger.warning(f'Someone has sent invalid refresh token')
             raise exc.Forbidden('Refresh token has been expired')
 
-        excludes = ('refresh_token', )
+        excludes = ('refresh_token',)
         serializer = UserAuthSerializer(exclude=excludes)
         user_data = serializer.dump(user)
 
