@@ -7,6 +7,7 @@ from flask import Flask, g
 from werkzeug.local import LocalProxy
 
 from informatics_front import User, Problem, CourseModule, CourseModuleInstance, Statement, db
+from informatics_front.model import StatementProblem
 from informatics_front.model.refresh_tokens import RefreshToken
 
 from informatics_front.utils.auth.make_jwt import generate_refresh_token, generate_jwt_token
@@ -82,11 +83,13 @@ def problem(app) -> dict:
 
 
 @pytest.yield_fixture
-def course_module(app) -> dict:
-    statement = Statement(name='foo', summary='bar', )
+def course_module(app, problem) -> dict:
+    statement = Statement(name='foo', summary='bar')
     db.session.add(statement)
     db.session.flush()
 
+    statement_problem = StatementProblem(statement_id=statement.id, problem_id=problem.id, rank=1)
+    db.session.add(statement_problem)
     course_module = CourseModule(instance_id=statement.id, module=Statement.MODULE, visible=COURSE_VISIBLE, )
     db.session.add(course_module)
     db.session.commit()
@@ -107,6 +110,7 @@ def problem(app) -> dict:
         name='baz',
         output_only=True,
         timelimit=3.14,
+        hidden=False,
     )
 
     db.session.add(problem)
