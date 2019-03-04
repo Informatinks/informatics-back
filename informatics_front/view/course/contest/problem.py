@@ -39,7 +39,7 @@ class ProblemSubmissionApi(MethodView):
 
     post_args = {
         'lang_id': fields.Integer(required=True),
-        'statement_id': fields.Integer(),
+        'statement_id': fields.Integer(missing=None),
     }
 
     @login_required

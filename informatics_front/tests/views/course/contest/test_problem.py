@@ -63,11 +63,11 @@ def test_post_problem_submission(client, authorized_user, problem, ):
         send_submit.assert_called_with(True, g.user['id'], problem.id, 1, 2, )
         send_submit.reset_mock()
 
-        # 422 is a valid response for invalid payload
+        # statement_id is an optional argument
         del data['statement_id']
         data['file'] = io.BytesIO(b'sample data'), 'test.cpp'
         url = url_for('contest.submissions', problem_id=problem.id)
         resp = client.post(url, data=data)
-        assert resp.status_code == 422
-        send_submit.assert_not_called()
+        assert resp.status_code == 200
+        send_submit.assert_called_with(True, g.user['id'], problem.id, None, 2, )
 
