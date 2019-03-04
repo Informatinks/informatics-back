@@ -29,7 +29,7 @@ class ContestApi(MethodView):
         problems_statement_problems = db.session.query(Problem, StatementProblem) \
             .join(StatementProblem, StatementProblem.problem_id == Problem.id) \
             .filter(StatementProblem.statement_id == contest.id) \
-            .filter(Problem.hidden.isnot(True)) \
+            .filter(StatementProblem.hidden == 0) \
             .options(Load(Problem).load_only('id', 'name')) \
             .options(Load(StatementProblem).load_only('rank'))
 
