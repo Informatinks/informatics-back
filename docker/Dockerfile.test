@@ -15,4 +15,4 @@ WORKDIR /app
 
 RUN pip install -r requirements.txt
 
-CMD flask test
+CMD sleep 30 && flask test
