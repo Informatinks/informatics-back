@@ -39,7 +39,7 @@ def test_get_problem_submission(client, authorized_user, problem, ):
         get_runs_filter.assert_called_with(problem.id, {'page': DEFAULT_PAGE, 'count': DEFAULT_COUNT}, is_admin=False)
 
 
-@pytest.mark.post_problem_submission
+@pytest.mark.problem
 def test_post_problem_submission(client, authorized_user, problem, ):
     with patch('informatics_front.internal_rmatics.send_submit') as send_submit, \
             patch('webargs.flaskparser.parser.parse_files') as parse_files:

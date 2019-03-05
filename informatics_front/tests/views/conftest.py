@@ -9,7 +9,7 @@ from werkzeug.local import LocalProxy
 
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.utils.auth.make_jwt import generate_refresh_token
-from informatics_front.view.auth.serializers.auth import UserAuthSerializer
+from informatics_front.view.auth.serializers.auth import UserAuthSerializer, RoleAuthSerializer
 from informatics_front import User, db
 
 
@@ -58,10 +58,14 @@ def user_with_token(users) -> dict:
 
 @pytest.yield_fixture
 def authorized_user(app, user_with_token) -> LocalProxy:
-    user_serializer = UserAuthSerializer()
-    user_data = user_serializer.dump(user_with_token['user'])
+    roles_serializer = RoleAuthSerializer(many=True)
+    roles = roles_serializer.dumps(user_with_token['user'].roles)
+    user_data = {
+        'id': user_with_token['user'].id,
+        'roles': roles.data,
+    }
 
-    g.user = user_data.data
+    g.user = user_data
 
     yield g
 
