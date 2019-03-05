@@ -42,6 +42,6 @@ def test_send_submit():
     client.client.post_data.assert_called_with(
         f'{client.service_url}/problem/trusted/{PROBLEM_ID}/submit_v2',
         json=data,
-        files={'file': file},
+        files={'file': file.stream},
         silent=True
     )

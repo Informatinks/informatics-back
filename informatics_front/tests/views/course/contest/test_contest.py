@@ -6,7 +6,7 @@ NON_EXISTING_ID = -1
 
 
 @pytest.mark.contest_problem
-def test_contest(client, authorized_user, course_module, problem):
+def test_contest(client, authorized_user, course_module):
     contest = course_module.instance
 
     url = url_for('contest.contest', course_module_id=NON_EXISTING_ID)
@@ -26,11 +26,9 @@ def test_contest(client, authorized_user, course_module, problem):
     for field in ('name', 'summary', ):
         assert getattr(contest, field) == content.get(field, -1)  # avoid None is None comparison
 
-    assert len(content['problems']) == 1
+    assert len(content['problems']) == 3
 
     problem_content = content['problems'][0]
 
-    for field in ('id', 'name'):
-        assert getattr(problem, field) == problem_content.get(field, -1)  # avoid None is None comparison
-
     assert problem_content['rank'] == 1
+    assert problem_content['name'].startswith('Problem')

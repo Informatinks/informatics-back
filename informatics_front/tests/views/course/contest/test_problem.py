@@ -33,13 +33,6 @@ def test_get_problem_submission(client, authorized_user, problem, ):
     with patch('informatics_front.internal_rmatics.get_runs_filter') as get_runs_filter:
         get_runs_filter.return_value = ({}, 200)
 
-        # `page` is a required query parameter in Schema
-        url = url_for('contest.submissions', problem_id=problem.id)
-        resp = client.get(url)
-        assert resp.status_code == 400
-        get_runs_filter.assert_not_called()
-        get_runs_filter.reset_mock()
-
         url = url_for('contest.submissions', problem_id=problem.id, page=DEFAULT_PAGE, )
         resp = client.get(url)
         assert resp.status_code == 200

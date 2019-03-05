@@ -14,7 +14,11 @@ def authenticate():
     if not auth_header:
         return
 
-    auth_token = auth_header.split(' ')[1]
+    try:
+        auth_token = auth_header.split(' ')[1]
+    except IndexError:
+        raise Unauthorized('Invalid token')
+
     secret_key = current_app.config.get('SECRET_KEY')
     try:
         user = jwt.decode(auth_token, secret_key, options={'require_exp': True},
