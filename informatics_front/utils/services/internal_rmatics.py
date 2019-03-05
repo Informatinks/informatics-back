@@ -25,7 +25,7 @@ class InternalRmatics(BaseService):
         }
         url = self.service_url + f'/problem/trusted/{problem_id}/submit_v2'
 
-        return self.client.post_data(url, json=data, files={'file': file}, silent=True)
+        return self.client.post_data(url, json=data, files={'file': file.stream}, silent=True)
 
     def get_runs_filter(self, problem_id: int,
                         args: dict,

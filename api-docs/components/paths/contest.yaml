@@ -124,6 +124,7 @@ paths:
           schema:
             type: integer
             description: Номер страницы
+            default: 1
         - in: path
           name: from_timestamp
           schema:

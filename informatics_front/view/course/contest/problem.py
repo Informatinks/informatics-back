@@ -1,6 +1,7 @@
 from flask import request, g
 from flask.views import MethodView
 from marshmallow import fields
+from sqlalchemy.orm import joinedload
 from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound
 
@@ -14,7 +15,9 @@ from informatics_front.view.course.contest.serializers.problem import ProblemSch
 class ProblemApi(MethodView):
     @login_required
     def get(self, problem_id):
-        problem = db.session.query(Problem).get(problem_id)
+        problem = db.session.query(Problem) \
+            .options(joinedload(Problem.ejudge_problem)) \
+            .get(problem_id)
         if problem is None:
             raise NotFound(f'Problem with id #{problem_id} is not found')
 
@@ -32,7 +35,7 @@ class ProblemSubmissionApi(MethodView):
         'status_id': fields.Integer(),
         'statement_id': fields.Integer(),
         'count': fields.Integer(default=10, missing=10),
-        'page': fields.Integer(required=True),  # FIXME: provide `missing=1` default
+        'page': fields.Integer(default=1, missing=1),
         'from_timestamp': fields.Integer(),
         'to_timestamp': fields.Integer(),
     }
