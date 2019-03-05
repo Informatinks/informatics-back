@@ -151,6 +151,37 @@ components:
           type: integer
           description: Score
 
+    RunProtocolSchema:
+      type: object
+      descroption: Протокол тестирования посылки
+      properties:
+        compiler_output:
+          type: string
+        host:
+          type: string
+          descroption: Хост системы тестирования
+        tests:
+          type: object
+          additionalProperties:
+            type: string
+            description: Номер теста
+          properties:
+            status:
+              type: string
+              description: Результат теста, например, "OK"
+            time:
+              type: integer
+              description: Затраченное время, например, 33
+            real_time:
+              type: integer
+              description: Реальное время системы, например, 34
+            max_memory_used:
+              type: string
+              description: Затраченная память, в байтах, например, "380928"
+            string_status:
+              type: string
+              descroption: Результат прохождения теста, например "OK"
+
     Error:
       type: object
       properties:
