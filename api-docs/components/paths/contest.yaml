@@ -184,7 +184,7 @@ paths:
 
   /contest/run/{run_id}/source:
     get:
-      summary: Получиь исходник посылки
+      summary: Получить исходник посылки
       parameters:
         - in: path
           name: run_id
@@ -217,7 +217,7 @@ paths:
 
   /contest/run/{run_id}/protocol:
     get:
-      summary: Получиь протокол тестирования посылки
+      summary: Получить протокол тестирования посылки
       parameters:
         - in: path
           name: run_id
