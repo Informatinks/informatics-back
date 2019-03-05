@@ -1,56 +1,68 @@
 import pytest
 
-from informatics_front import create_app, authenticate, db
-from informatics_front.model import Role
+import hashlib
+
+from typing import List
+
+from flask import g
+from werkzeug.local import LocalProxy
+
+from informatics_front.model.refresh_tokens import RefreshToken
+from informatics_front.utils.auth.make_jwt import generate_refresh_token
+from informatics_front.view.auth.serializers.auth import UserAuthSerializer
+from informatics_front import User, db
 
 
-@pytest.yield_fixture(scope='session')
-def app():
-    flask_app = create_app()
-    flask_app.before_request_funcs[None].remove(authenticate)
+@pytest.yield_fixture
+def users(app) -> List[dict]:
+    password = 'simple_pass'
+    password_hash = hashlib.md5(password.encode('utf-8')).hexdigest()
+    users = [
+        User(username=f'user{i}', password_md5=password_hash) for i in range(1, 3)
+    ]
+    db.session.add_all(users)
+    db.session.flush()
 
-    with flask_app.app_context():
-        # Prevent tests from failing due to existing test database
-        # (you might have cancelled previous test suite or something)
-        db.drop_all()
-        db.create_all()
-
-    yield flask_app
-
-    with flask_app.app_context():
-        db.drop_all()
-
-
-@pytest.yield_fixture(scope='session')
-def roles(app):
-    short_names = [
-        'admin',
-        'coursecreator',
-        'editingteacher',
-        'teacher',
-        'student',
-        'guest',
-        'user',
-        'group',
-        'ejudge_teacher',
-        'editor',
-        'testing',
-        'source_editor',
-        'course_editor',
-        'view_courses',
+    users_json = [
+        {'user_name': user.username,
+         'id': user.id,
+         'password': password} for user in users
     ]
 
-    roles = [Role(shortname=short_name) for short_name in short_names]
-    db.session.add_all(roles)
-    db.session.flush()
-    roles_ids = {
-        name: role.id for name, role in zip(short_names, roles)
-    }
     db.session.commit()
 
-    yield roles_ids
+    yield users_json
 
-    for role in roles:
-        db.session.delete(role)
+    for u in users:
+        db.session.delete(u)
 
     db.session.commit()
+
+
+@pytest.yield_fixture
+def user_with_token(users) -> dict:
+    user_id = users[0]['id']
+    user = db.session.query(User).get(user_id)
+    token = generate_refresh_token(user)
+
+    rt = RefreshToken(token=token, user_id=user_id)
+
+    db.session.add(rt)
+    db.session.commit()
+
+    yield {'user': user, 'token': token}
+
+    db.session.delete(rt)
+    db.session.commit()
+
+
+@pytest.yield_fixture
+def authorized_user(app, user_with_token) -> LocalProxy:
+    user_serializer = UserAuthSerializer()
+    user_data = user_serializer.dump(user_with_token['user'])
+
+    g.user = user_data.data
+
+    yield g
+
+    del g.user
