@@ -1,5 +1,4 @@
 import pytest
-
 from typing import List
 
 from informatics_front import Problem, CourseModule, Statement, Comment, db

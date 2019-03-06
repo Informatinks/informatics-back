@@ -1,7 +1,6 @@
-from unittest.mock import patch
-
 import pytest
 from flask import url_for, g
+from unittest.mock import patch
 
 NON_EXISTING_USER = -1
 NON_EXISTING_RUN = 1337

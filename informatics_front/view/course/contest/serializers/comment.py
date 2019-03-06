@@ -1,4 +1,5 @@
 from marshmallow import Schema, fields
+
 from informatics_front.view.course.contest.serializers.author import CommentAuthorSerializer
 
 

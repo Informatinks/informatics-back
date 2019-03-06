@@ -1,9 +1,7 @@
 import io
 import pytest
-
-from unittest.mock import patch
-
 from flask import g, url_for
+from unittest.mock import patch
 
 DEFAULT_PAGE = 1
 DEFAULT_COUNT = 10

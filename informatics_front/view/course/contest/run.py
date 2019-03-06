@@ -2,12 +2,10 @@ from flask import g
 from flask.views import MethodView
 
 from informatics_front import internal_rmatics
+from informatics_front.model import Comment
+from informatics_front.model.base import db
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.response import jsonify
-
-from informatics_front.model.base import db
-from informatics_front.model import Comment
-
 from informatics_front.view.course.contest.serializers.comment import CommentSchema
 
 PROTOCOL_EXCLUDE_FIELDS = ['audit']

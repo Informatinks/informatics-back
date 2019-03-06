@@ -2,9 +2,9 @@ from flask.views import MethodView
 from sqlalchemy.orm import Load
 from werkzeug.exceptions import NotFound, BadRequest
 
-from informatics_front.model.base import db
-from informatics_front.model import Problem, StatementProblem, Statement
 from informatics_front.model import CourseModule
+from informatics_front.model import Problem, StatementProblem, Statement
+from informatics_front.model.base import db
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.response import jsonify
 from informatics_front.view.course.contest.serializers.contest import ContestSchema
