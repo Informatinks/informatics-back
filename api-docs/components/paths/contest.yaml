@@ -181,3 +181,64 @@ paths:
           description: Пустой файл или дубликат посылки или файл слишком большой
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/BadRequest'
+
+  /contest/run/{run_id}/source:
+    get:
+      summary: Получить исходник посылки
+      parameters:
+        - in: path
+          name: run_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the run to get source
+
+      security:
+       - jwt-token-auth: []
+
+      responses:
+        200:
+          description: Исходник посылки
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  language_id:
+                    type: integer
+                    description: Язык программирования посылкии
+                  source:
+                    type: string
+                    descroption: Исходник посылки
+        404:
+          description: Посылка не найдена
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+  /contest/run/{run_id}/protocol:
+    get:
+      summary: Получить протокол тестирования посылки
+      parameters:
+        - in: path
+          name: run_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the run to get source
+
+      security:
+       - jwt-token-auth: []
+
+      responses:
+        200:
+          description: Протокол тестирования посылки
+          content:
+            application/json:
+              schema:
+                $ref: '../error_responses.yaml#/components/responses/RunProtocolSchema'
+        404:
+          description: Посылка не найдена
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+
