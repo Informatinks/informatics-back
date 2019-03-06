@@ -8,3 +8,4 @@ from .statement import Statement, StatementProblem, StatementUser
 from .user.user import User
 from .user.role import Role, RoleAssignment
 from .course import Course
+from .comment import Comment

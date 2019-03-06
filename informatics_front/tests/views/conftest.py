@@ -1,16 +1,13 @@
-import pytest
-
 import hashlib
-
-from typing import List
-
+import pytest
 from flask import g
+from typing import List
 from werkzeug.local import LocalProxy
 
+from informatics_front import User, db
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.utils.auth.make_jwt import generate_refresh_token
 from informatics_front.view.auth.serializers.auth import UserAuthSerializer, RoleAuthSerializer
-from informatics_front import User, db
 
 
 @pytest.yield_fixture
