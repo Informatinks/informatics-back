@@ -19,5 +19,5 @@ contest_blueprint.add_url_rule('/problem/<int:problem_id>/submission', methods=(
 contest_blueprint.add_url_rule('/run/<int:run_id>/source', methods=('GET', ),
                                view_func=RunSourceApi.as_view('run_source'))
 
-contest_blueprint.add_url_rule('/run/<int:run_id>', methods=('GET', ),
+contest_blueprint.add_url_rule('/run/<int:run_id>/protocol', methods=('GET', ),
                                view_func=RunProtocolApi.as_view('run_protocol'))
