@@ -1,5 +1,6 @@
 from flask import g
 from flask.views import MethodView
+from sqlalchemy.orm import joinedload
 
 from informatics_front import internal_rmatics
 from informatics_front.model import Comment
@@ -65,6 +66,7 @@ class RunCommentsApi(MethodView):
         comments = db.session.query(Comment) \
             .filter(Comment.py_run_id == run_id,
                     Comment.user_id == user.get('id')) \
+            .options(joinedload(Comment.author_user)) \
             .order_by(Comment.date.desc()) \
             .all()
 

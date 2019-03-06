@@ -14,7 +14,7 @@ class Comment(db.Model):
     contest_id = db.Column(db.Integer)
     user_id = db.Column(db.Integer, nullable=False)
     author_user_id = db.Column(db.Integer, db.ForeignKey('moodle.mdl_user.id'), nullable=False)
-    author_user = db.relation("User", uselist=False, lazy=False)
+    author_user = db.relation("User", uselist=False, lazy='select')
     run_id = db.Column(db.Integer)  # deprecated
     lines = db.Column(db.Text)
     comment = db.Column(db.Text)
