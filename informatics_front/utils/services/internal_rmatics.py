@@ -39,7 +39,7 @@ class InternalRmatics(BaseService):
         return self.client.get_data(url, params=filter_args, silent=True, default=[])
 
     def get_run_source(self, run_id: int, user_id, is_admin: bool = False) -> Tuple[dict, int]:
-        url = f'{self.service_url}/problem/run/{run_id}/source'
+        url = f'{self.service_url}/problem/run/{run_id}/source/'
 
         user_args = {
             'user_id': user_id,
@@ -49,7 +49,7 @@ class InternalRmatics(BaseService):
         return self.client.get_data(url, params=user_args, silent=True)
 
     def get_full_run_protocol(self, run_id: int, user_id: int, is_admin: bool = False) -> Tuple[dict, int]:
-        url = f'{self.service_url}/problem/run/{run_id}/source'
+        url = f'{self.service_url}/problem/run/{run_id}/protocol'
 
         user_args = {
             'user_id': user_id,
