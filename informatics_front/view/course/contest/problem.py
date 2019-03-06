@@ -1,9 +1,9 @@
 from flask import request, g
 from flask.views import MethodView
-from marshmallow import fields
+from marshmallow import fields, missing
 from sqlalchemy.orm import joinedload
 from webargs.flaskparser import parser
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, BadRequest
 
 from informatics_front import internal_rmatics
 from informatics_front.model import db, Problem
@@ -50,6 +50,9 @@ class ProblemSubmissionApi(MethodView):
         user_id = g.user['id']
         args = parser.parse(self.post_args, request)
         file = parser.parse_files(request, 'file', 'file')
+
+        if file is missing:
+            raise BadRequest('Parameter \'file\' is not fulfilled')
 
         content, status = internal_rmatics.send_submit(file,
                                                        user_id,

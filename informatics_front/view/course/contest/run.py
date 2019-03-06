@@ -29,6 +29,9 @@ class RunProtocolApi(MethodView):
         user_id = g.user['id']
         context, status = internal_rmatics.get_full_run_protocol(run_id, user_id)
 
+        if status > 299:
+            return jsonify(context, status_code=status)
+
         protocol = self._remove_fields_from_full_protocol(context)
 
         return jsonify(protocol, status_code=status)
