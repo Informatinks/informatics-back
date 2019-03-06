@@ -14,5 +14,5 @@ class ProblemSchema(Schema):
     output_only = fields.Boolean(dump_only=True)
 
     def serialize_sample_tests(self, obj: Problem):
-        obj.generateSamplesJson()
-        return obj.sample_tests_json
+        obj.ejudge_problem.generateSamplesJson()
+        return obj.ejudge_problem.sample_tests_json

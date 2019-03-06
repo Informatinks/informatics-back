@@ -33,20 +33,13 @@ def test_get_problem_submission(client, authorized_user, problem, ):
     with patch('informatics_front.internal_rmatics.get_runs_filter') as get_runs_filter:
         get_runs_filter.return_value = ({}, 200)
 
-        # `page` is a required query parameter in Schema
-        url = url_for('contest.submissions', problem_id=problem.id)
-        resp = client.get(url)
-        assert resp.status_code == 400
-        get_runs_filter.assert_not_called()
-        get_runs_filter.reset_mock()
-
         url = url_for('contest.submissions', problem_id=problem.id, page=DEFAULT_PAGE, )
         resp = client.get(url)
         assert resp.status_code == 200
         get_runs_filter.assert_called_with(problem.id, {'page': DEFAULT_PAGE, 'count': DEFAULT_COUNT}, is_admin=False)
 
 
-@pytest.mark.post_problem_submission
+@pytest.mark.problem
 def test_post_problem_submission(client, authorized_user, problem, ):
     with patch('informatics_front.internal_rmatics.send_submit') as send_submit, \
             patch('webargs.flaskparser.parser.parse_files') as parse_files:
