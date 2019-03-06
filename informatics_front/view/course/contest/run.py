@@ -5,6 +5,10 @@ from informatics_front import internal_rmatics
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.response import jsonify
 
+from informatics_front.model.base import db
+from informatics_front.model import Comment
+
+from informatics_front.view.course.contest.serializers.comment import CommentSchema
 
 PROTOCOL_EXCLUDE_FIELDS = ['audit']
 PROTOCOL_EXCLUDE_TEST_FIELDS = [
@@ -49,3 +53,24 @@ class RunProtocolApi(MethodView):
                 test.pop(field, None)
 
         return protocol
+
+
+class RunCommentsApi(MethodView):
+    @login_required
+    def get(self, run_id):
+        '''
+        Returns List[Comment] for current authorized user for requested run_id
+        '''
+        user = g.user
+
+        # if provided run_id not not found, return []
+        comments = db.session.query(Comment) \
+            .filter(Comment.py_run_id == run_id,
+                    Comment.user_id == user.get('id')) \
+            .order_by(Comment.date.desc()) \
+            .all()
+
+        comment_schema = CommentSchema(many=True)
+        response = comment_schema.dump(comments)
+
+        return jsonify(response.data)

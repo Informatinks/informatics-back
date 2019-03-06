@@ -19,11 +19,9 @@ from informatics_front.utils.error_handlers import register_error_handlers
 from informatics_front.view import handle_api_exception
 from informatics_front.view.auth.routes import auth_blueprint
 from informatics_front.view.course.contest.route import contest_blueprint
-from informatics_front.view.comment.route import comment_blueprint
 
 
 def create_app(config=None):
-
     dictConfig({
         'version': 1,
         'formatters': {'default': {
@@ -57,7 +55,6 @@ def create_app(config=None):
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(contest_blueprint)
-    app.register_blueprint(comment_blueprint)
 
     app.cli.add_command(cli.test)
 

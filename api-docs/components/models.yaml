@@ -183,6 +183,51 @@ components:
                 type: string
                 descroption: Результат прохождения теста, например "OK"
 
+    CommentAuthorSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Id пользователя
+        username:
+          type: string
+          description: Имя пользователя, может подадобиться при генерации ссылок
+        firstname:
+          type: string
+          description: Имя
+        lastname:
+          type: string
+          description: Фамилия
+
+    CommentSchema:
+      type: object
+      description: Комментарии к запуску от учителя для ученика. Получаются для текущего авторизованного пользователя
+      properties:
+        id:
+          type: integer
+          description: id комментария
+
+        date:
+          type: string
+          format: date-time
+          description: время создания комментария
+
+        comment:
+          type: string
+          description: текст комментария
+
+        run_id:
+          type: integer
+          description: id run/submission (посылки), для которой запрошены комментарии
+
+        user_id:
+          type: integer
+          description: id юзера, для кого предназначается комментарий. В штатном режиме это id текущего авторизованного пользователя
+
+        author_user:
+          $ref: '#/components/schemas/CommentAuthorSchema'
+          description: объект с данными пользователя — автора комментария (подгружается на основе author_user_id)
+
     Error:
       type: object
       properties:
