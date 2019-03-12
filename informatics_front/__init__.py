@@ -1,4 +1,3 @@
-import hashlib
 from logging.config import dictConfig
 
 from flask import Flask

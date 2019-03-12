@@ -96,9 +96,9 @@ class ApiClient(requests.Session):
                              data_key=data_key, default=default,
                              silent=silent, **kwargs)
 
-    def post_data(self, url, json, default=None,
+    def post_data(self, url, data=None, json=None, default=None,
                   silent=False, data_key=None, **kwargs):
-        return self._request(url, method='POST', json=json,
+        return self._request(url, method='POST', data=data, json=json,
                              data_key=data_key, default=default,
                              silent=silent, **kwargs)
 
