@@ -23,7 +23,7 @@ def test_contest(client, authorized_user, course_module):
     content = content['data']
     assert content.get('id') == course_module.id
 
-    for field in ('name', 'summary', ):
+    for field in ('name', 'summary',):
         assert getattr(contest, field) == content.get(field, -1)  # avoid None is None comparison
 
     assert len(content['problems']) == 3
