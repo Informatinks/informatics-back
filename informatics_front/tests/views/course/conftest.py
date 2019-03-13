@@ -1,8 +1,7 @@
 import pytest
 from typing import List
 
-from informatics_front import Problem, CourseModule, Statement, Comment, db
-from informatics_front.model import StatementProblem
+from informatics_front.model import StatementProblem, Problem, CourseModule, Statement, Comment, db
 from informatics_front.model.problem import EjudgeProblem
 
 VALID_TIME = 100500

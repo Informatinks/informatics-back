@@ -2,7 +2,7 @@ import pytest
 
 from flask import Flask
 
-from informatics_front import User, db
+from informatics_front.model import User, db
 from informatics_front.utils.auth.make_jwt import generate_jwt_token
 
 VALID_TIME = 100500

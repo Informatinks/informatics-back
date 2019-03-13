@@ -3,11 +3,6 @@ from logging.config import dictConfig
 
 from informatics_front import cli
 from informatics_front.model import db
-from informatics_front.model.comment import Comment
-from informatics_front.model.course_module import CourseModule, CourseModuleInstance
-from informatics_front.model.problem import Problem
-from informatics_front.model.statement import Statement
-from informatics_front.model.user.user import User
 from informatics_front.plugins import internal_rmatics
 from informatics_front.utils.auth import authenticate
 from informatics_front.utils.error_handlers import register_error_handlers
