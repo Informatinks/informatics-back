@@ -16,6 +16,7 @@
   "dependencies": {
     "chokidar": "^2.0.4",
     "js-yaml": "^3.12.1",
-    "merge-yaml": "1.0.0"
+    "merge-yaml": "1.0.0",
+    "package.json": "^2.0.1"
   }
 }
