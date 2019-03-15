@@ -83,21 +83,76 @@ paths:
                   type: string
                   description: Refresh Token
 
+  /auth/change/:
+    post:
+      tags:
+        - Auth
+
+      summary: Запросить ссылку на сброс пароля на почту
+
+      security:
+        - jwt-token-auth: []
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - email:
+                  format: email
+                  type: string
+                  description: User email, who we request password change for
+                - username:
+                  type: string
+                  description: User username, who we request password change for
+
       responses:
         200:
-          description: Пользователь
+          description: Запрос выполнен. Если email или username не найден, будет вернут код 200 для предотвращения enumeration attack.
+
+  /auth/reset/:
+    post:
+      tags:
+        - Auth
+
+      summary: Установить новый пароль для пользователя
+
+      security:
+        - jwt-token-auth: []
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  format: password
+                  type: string
+                  description: User email, who we request password change for
+                password:
+                  format: password
+                  type: string
+                  description: User email, who we request password change for
+
+      responses:
+        200:
+          description: Запрос на смену пароля выполнен успешно
+        400:
+          description: Запрос не выполнен. Пароль не соответствует требованиям.
           content:
             application/json:
               schema:
-                $ref: '../models.yaml#/components/schemas/UserAuthSchema'
+                $ref: '../error_response.yaml#/components/responses/BadRequest'
         403:
-          description: Рефреш токен протух
-          allOf:
-            - $ref: '../error_responses.yaml#/components/responses/BadRequest'
+          description: Запрос не выполнен. Авториазционный токен недействителен.
+          content:
+            application/json:
+              schema:
+                $ref: '../error_response.yaml#/components/responses/Forbidden'
 
 components:
   securitySchemes:
     jwt-token-auth:
       type: apiKey
       in: header
-      name: Authorization
