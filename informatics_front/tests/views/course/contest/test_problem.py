@@ -36,7 +36,9 @@ def test_get_problem_submission(client, authorized_user, problem):
         url = url_for('contest.submissions', problem_id=problem.id, page=DEFAULT_PAGE, )
         resp = client.get(url)
         assert resp.status_code == 200
-        get_runs_filter.assert_called_with(problem.id, {'page': DEFAULT_PAGE, 'count': DEFAULT_COUNT}, is_admin=False)
+        get_runs_filter.assert_called_with(problem.id, {'page': DEFAULT_PAGE,
+                                                        'user_id': authorized_user.user['id'],
+                                                        'count': DEFAULT_COUNT}, is_admin=False)
 
 
 @pytest.mark.problem

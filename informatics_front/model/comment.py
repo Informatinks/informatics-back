@@ -1,7 +1,5 @@
 import datetime
 
-from sqlalchemy.schema import ForeignKeyConstraint
-
 from informatics_front.model.base import db
 
 
