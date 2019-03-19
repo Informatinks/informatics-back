@@ -49,9 +49,7 @@ class User(SimpleUser):
 
     @classmethod
     def check_password(cls, password_md5: str, password: str) -> bool:
-        if password_md5 == cls.hash_password(password):
-            return True
-        return False
+        return password_md5 == cls.hash_password(password)
 
     @staticmethod
     def hash_password(plan_password: str) -> str:
