@@ -122,7 +122,7 @@ class RefreshTokenApi(MethodView):
 
 
 class PasswordResetApi(MethodView):
-    """API handler for invoding password reset action for User.email or User.user_name
+    """API handler for invoking password reset action for User.email or User.user_name
     """
     post_args = {
         'email': fields.String(missing=None),
@@ -130,17 +130,19 @@ class PasswordResetApi(MethodView):
     }
 
     def post(self):
-        # TODO: raise 422 if none of params found
         args = parser.parse(self.post_args, request)
 
         # prevent equal-None filter query
-        user = None
-        query_kwargs = {k: args[k] for k in ('email', 'username') if k in args and args[k] is not None}
+        email, username = args.get('email'), args.get('username')
+        if not any((email, username)):
+            raise BadRequest()
 
-        if query_kwargs:  # if at least one condition exists
-            user = db.session.query(User) \
-                .filter_by(**query_kwargs) \
-                .one_or_none()
+        user_q = db.session.query(User)
+        if email is not None:
+            user_q = user_q.filter(User.email == email)
+        elif username is not None:
+            user_q = user_q.filter(User.username == username)
+        user = user_q.one_or_none()
 
         # if user not found or user has no email
         if user is None or user.email is None:
