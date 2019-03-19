@@ -2,22 +2,22 @@ from typing import Optional
 
 from flask import current_app, g, request
 from flask.views import MethodView
-
+from gmail import Message
 from marshmallow import fields
 from sqlalchemy.orm import joinedload
 from webargs.flaskparser import parser
 from werkzeug import exceptions as exc
-from gmail import Message
+from werkzeug.exceptions import BadRequest
+
 from informatics_front import db
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.model.user.user import User
+from informatics_front.plugins import gmail
+from informatics_front.plugins import tokenizer
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.auth.make_jwt import decode_jwt_token, generate_refresh_token
 from informatics_front.utils.response import jsonify
 from informatics_front.view.auth.serializers.auth import UserAuthSerializer
-from informatics_front.plugins import tokenizer
-from informatics_front.plugins import gmail
-from werkzeug.exceptions import BadRequest
 
 
 class LoginApi(MethodView):
@@ -134,22 +134,16 @@ class PasswordResetApi(MethodView):
         args = parser.parse(self.post_args, request)
 
         # prevent equal-None filter query
-        user, query_kwars, email, username = \
-            None, {}, args.get('email'), args.get('username')
+        user = None
+        query_kwargs = {k: args[k] for k in ('email', 'username') if k in args and args[k] is not None}
 
-        # prepare request query
-        if email:
-            query_kwars['email'] = email
-        elif username:
-            query_kwars['username'] = username
-
-        # run query only if at least one condition exists
-        if len(query_kwars) > 0:
+        if query_kwargs:  # if at least one condition exists
             user = db.session.query(User) \
-                .filter_by(**query_kwars) \
+                .filter_by(**query_kwargs) \
                 .one_or_none()
 
-        if not user:  # user was not populated with parsed conditions
+        # if user not found or user has no email
+        if user is None or user.email is None:
             raise BadRequest()
 
         payload = {
@@ -159,7 +153,7 @@ class PasswordResetApi(MethodView):
 
         text = f"Ссылка для сброса пароля: {current_app.config.get('APP_URL')}/change_password?token={token}"
 
-        msg = Message('Test Message', to='xyz <xyz@xyz.com>', text='Hello')
+        msg = Message('Сброс пароля', to=user.email, text=text)
         gmail.send(msg)
 
         return jsonify({})

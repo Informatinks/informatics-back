@@ -138,6 +138,28 @@ def test_password_reset(client, users):
         user = users[-1]
         url = url_for('auth.reset')
 
+        # reset with well-signed, but insufficent payload
+        resp = client.post(url, data={})
+        assert resp.status_code == 400
+
+        gmail.send.assert_not_called()
+        gmail.reset_mock()
+
+        # reset pass for user with no email
+        data = {
+            'username': user.get('user_name')
+        }
+        resp = client.post(url, data=data)
+        assert resp.status_code == 400
+
+        gmail.send.assert_not_called()
+        gmail.reset_mock()
+
+        db.session.query(User). \
+            filter(User.id == user['id']). \
+            update({'email': USER_EMAIL})
+        db.session.commit()
+
         # reset by username
         data = {
             'username': user.get('user_name')
@@ -149,11 +171,6 @@ def test_password_reset(client, users):
         gmail.reset_mock()
 
         # reset by email
-        db.session.query(User). \
-            filter(User.id == user['id']). \
-            update({'email': USER_EMAIL})
-        db.session.commit()
-
         data = {
             'email': USER_EMAIL,
         }
@@ -161,14 +178,6 @@ def test_password_reset(client, users):
         assert resp.status_code == 200
 
         gmail.send.assert_called_with(Message())  # test mail was sent
-        gmail.reset_mock()
-
-        # reset with well-signed, but insufficent payload
-        resp = client.post(url, data={})
-        assert resp.status_code == 400
-
-        # test mail was sent
-        gmail.send.assert_not_called()
         gmail.reset_mock()
 
 
