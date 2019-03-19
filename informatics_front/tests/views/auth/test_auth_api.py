@@ -1,12 +1,21 @@
-import pytest
-
-from time import sleep
 from collections import namedtuple
+from time import sleep
+from unittest import mock
+from unittest.mock import Mock
 
+import pytest
 from flask import url_for, g
 
 from informatics_front import User, db
 from informatics_front.model.refresh_tokens import RefreshToken
+from informatics_front.plugins import tokenizer
+from informatics_front.utils.tokenizer.handlers import map_action_routes
+from informatics_front.view.auth.authorization import PasswordChangeApi
+
+NEW_PASSWORD = 'new-password'
+CHANGE_ACTION_ROUTE_NAME = 'change'
+SECRET_KEY = 'foo'
+USER_EMAIL = 'user@example.com'
 
 
 @pytest.mark.auth
@@ -118,3 +127,80 @@ def test_signout(client, users):
 
     # ensure second logged out
     assert db.session.query(RefreshToken).filter_by(user_id=user['id']).count() == 0
+
+
+@pytest.mark.auth
+def test_password_reset(client, users):
+    """Test password change link is sent with generated token to user
+    """
+    with mock.patch('informatics_front.view.auth.authorization.gmail') as gmail, \
+            mock.patch('informatics_front.view.auth.authorization.Message') as Message:
+        user = users[-1]
+        url = url_for('auth.reset')
+
+        # reset by username
+        data = {
+            'username': user.get('user_name')
+        }
+        resp = client.post(url, data=data)
+        assert resp.status_code == 200
+
+        gmail.send.assert_called_with(Message())  # test mail was sent
+        gmail.reset_mock()
+
+        # reset by email
+        db.session.query(User). \
+            filter(User.id == user['id']). \
+            update({'email': USER_EMAIL})
+        db.session.commit()
+
+        data = {
+            'email': USER_EMAIL,
+        }
+        resp = client.post(url, data=data)
+        assert resp.status_code == 200
+
+        gmail.send.assert_called_with(Message())  # test mail was sent
+        gmail.reset_mock()
+
+        # reset with well-signed, but insufficent payload
+        resp = client.post(url, data={})
+        assert resp.status_code == 400
+
+        # test mail was sent
+        gmail.send.assert_not_called()
+        gmail.reset_mock()
+
+
+@pytest.mark.auth
+def test_password_change(client, app, users):
+    """Test ...
+    """
+    user = users[0]
+
+    # register password change action to app
+    map_action_routes(app, (
+        (CHANGE_ACTION_ROUTE_NAME, PasswordChangeApi.as_view(CHANGE_ACTION_ROUTE_NAME), 86000),
+    ))
+
+    # generate valid reset token
+    payload = {
+        'user_id': user.get('id')
+    }
+    token = tokenizer.pack(payload)
+
+    # generate password hash
+    new_password_hash = User.hash_password(NEW_PASSWORD)
+
+    # request password change
+    url = url_for(f'actions.{CHANGE_ACTION_ROUTE_NAME}', token=token)
+    resp = client.post(url, data={
+        'password': NEW_PASSWORD,
+    })
+
+    # ensure password is changed
+    user = db.session.query(User). \
+        filter_by(id=user['id']). \
+        one_or_none()
+
+    assert new_password_hash == user.password_md5

@@ -4,7 +4,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from informatics_front.model.base import db
 from informatics_front.model.statement import StatementUser
-from informatics_front.utils.auth.make_jwt import generate_jwt_token
+from informatics_front.utils.auth.make_jwt import generate_auth_token
 
 
 class SimpleUser(db.Model):
@@ -45,14 +45,25 @@ class User(SimpleUser):
 
     @property
     def token(self):
-        return generate_jwt_token(self)
+        return generate_auth_token(self)
 
-    @staticmethod
-    def check_password(password_md5: str, password: str) -> bool:
-        hashed_password = hashlib.md5(password.encode('utf-8')).hexdigest()
-        if password_md5 == hashed_password:
+    @classmethod
+    def check_password(cls, password_md5: str, password: str) -> bool:
+        if password_md5 == cls.hash_password(password):
             return True
         return False
+
+    @staticmethod
+    def hash_password(plan_password: str) -> str:
+        '''Returns MD5 hash for plan password string.
+        Raises ValueError if password string is invalid.
+
+        :param plan_password: password string to hash
+        :return: hashed password
+        '''
+        if plan_password is None:
+            raise ValueError
+        return hashlib.md5(plan_password.encode('utf-8')).hexdigest()
 
 
 class PynformaticsUser(User):

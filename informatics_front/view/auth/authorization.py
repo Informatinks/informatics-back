@@ -1,20 +1,23 @@
 from typing import Optional
 
-from sqlalchemy.orm import joinedload
-from webargs.flaskparser import parser
 from flask import current_app, g, request
 from flask.views import MethodView
-from marshmallow import fields
-from werkzeug import exceptions as exc
 
+from marshmallow import fields
+from sqlalchemy.orm import joinedload
+from webargs.flaskparser import parser
+from werkzeug import exceptions as exc
+from gmail import Message
 from informatics_front import db
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.model.user.user import User
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.auth.make_jwt import decode_jwt_token, generate_refresh_token
 from informatics_front.utils.response import jsonify
-
 from informatics_front.view.auth.serializers.auth import UserAuthSerializer
+from informatics_front.plugins import tokenizer
+from informatics_front.plugins import gmail
+from werkzeug.exceptions import BadRequest
 
 
 class LoginApi(MethodView):
@@ -116,3 +119,69 @@ class RefreshTokenApi(MethodView):
                                  f'been refreshed')
 
         return jsonify(user_data.data)
+
+
+class PasswordResetApi(MethodView):
+    """API handler for invoding password reset action for User.email or User.user_name
+    """
+    post_args = {
+        'email': fields.String(missing=None),
+        'username': fields.String(missing=None),
+    }
+
+    def post(self):
+        # TODO: raise 422 if none of params found
+        args = parser.parse(self.post_args, request)
+
+        # prevent equal-None filter query
+        user, query_kwars, email, username = \
+            None, {}, args.get('email'), args.get('username')
+
+        # prepare request query
+        if email:
+            query_kwars['email'] = email
+        elif username:
+            query_kwars['username'] = username
+
+        # run query only if at least one condition exists
+        if len(query_kwars) > 0:
+            user = db.session.query(User) \
+                .filter_by(**query_kwars) \
+                .one_or_none()
+
+        if not user:  # user was not populated with parsed conditions
+            raise BadRequest()
+
+        payload = {
+            'user_id': user.id
+        }
+        token = tokenizer.pack(payload)
+
+        text = f"Ссылка для сброса пароля: {current_app.config.get('APP_URL')}/change_password?token={token}"
+
+        msg = Message('Test Message', to='xyz <xyz@xyz.com>', text='Hello')
+        gmail.send(msg)
+
+        return jsonify({})
+
+
+class PasswordChangeApi(MethodView):
+    """API handler for setting new password
+
+    This method should NOT be mounted directly to route as it relies on external action authorization.
+    """
+    post_args = {
+        'password': fields.String(required=True),
+    }
+
+    def post(self):
+        args = parser.parse(self.post_args, request)
+        user = db.session.query(User). \
+            filter_by(id=g.payload.get('user_id')). \
+            one_or_none()
+
+        if user:
+            user.password_md5 = User.hash_password(args.get('password'))
+            db.session.commit()
+
+        return jsonify({})

@@ -1,6 +1,6 @@
-import hashlib
-from flask import Flask
 from logging.config import dictConfig
+
+from flask import Flask
 
 from informatics_front import cli
 from informatics_front.model import db
@@ -10,6 +10,8 @@ from informatics_front.model.problem import Problem
 from informatics_front.model.statement import Statement
 from informatics_front.model.user.user import User
 from informatics_front.plugins import internal_rmatics
+from informatics_front.plugins import tokenizer
+from informatics_front.plugins import gmail
 from informatics_front.utils.auth import authenticate
 from informatics_front.utils.error_handlers import register_error_handlers
 from informatics_front.view import handle_api_exception
@@ -46,6 +48,10 @@ def create_app(config=None):
 
     internal_rmatics.init_app(app)
 
+    tokenizer.init_app(app)
+
+    gmail.init_mailer(app)
+
     app.before_request(authenticate)
     register_error_handlers(app)
 
@@ -53,7 +59,6 @@ def create_app(config=None):
     app.register_blueprint(contest_blueprint)
 
     app.cli.add_command(cli.test)
-
     return app
 
 
