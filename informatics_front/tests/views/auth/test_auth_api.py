@@ -1,7 +1,6 @@
 from collections import namedtuple
 from time import sleep
 from unittest import mock
-from unittest.mock import Mock
 
 import pytest
 from flask import url_for, g
@@ -13,7 +12,8 @@ from informatics_front.utils.tokenizer.handlers import map_action_routes
 from informatics_front.view.auth.authorization import PasswordChangeApi
 
 NEW_PASSWORD = 'new-password'
-CHANGE_ACTION_ROUTE_NAME = 'change'
+ACTIONS_URL_MOUNTPOINT = 'foo'
+CHANGE_ACTION_ROUTE_NAME = 'bar'
 SECRET_KEY = 'foo'
 USER_EMAIL = 'user@example.com'
 
@@ -178,10 +178,14 @@ def test_password_change(client, app, users):
     """
     user = users[0]
 
+    # FIXME: switch to local_app to prevent blueprint confusing
+    reset_action_mountpoint = f'{ACTIONS_URL_MOUNTPOINT}_reset'
+    reset_action_route_name = f'{CHANGE_ACTION_ROUTE_NAME}_reset'
+
     # register password change action to app
     map_action_routes(app, (
-        (CHANGE_ACTION_ROUTE_NAME, PasswordChangeApi.as_view(CHANGE_ACTION_ROUTE_NAME), 86000),
-    ))
+        (reset_action_route_name, PasswordChangeApi.as_view(reset_action_route_name), 86000),
+    ), reset_action_mountpoint)
 
     # generate valid reset token
     payload = {
@@ -193,7 +197,7 @@ def test_password_change(client, app, users):
     new_password_hash = User.hash_password(NEW_PASSWORD)
 
     # request password change
-    url = url_for(f'actions.{CHANGE_ACTION_ROUTE_NAME}', token=token)
+    url = url_for(f'{reset_action_mountpoint}.{reset_action_route_name}', token=token)
     resp = client.post(url, data={
         'password': NEW_PASSWORD,
     })

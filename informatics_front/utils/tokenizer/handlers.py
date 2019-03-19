@@ -54,7 +54,7 @@ def run_action(f: Callable, ttl: int = DEFAULT_ACTION_TTL) -> Callable:
     return runner
 
 
-def map_action_routes(app: Flask = None, routes: Tuple = (), url_prefix: str = '/system'):
+def map_action_routes(app: Flask = None, routes: Tuple = (), url_prefix: str = 'system'):
     """Builds and adds a new blueprint to provided Flask instance.
 
     :param app: Flask app instance to bind blueprint
@@ -66,7 +66,7 @@ def map_action_routes(app: Flask = None, routes: Tuple = (), url_prefix: str = '
     if not routes or not app:
         raise ValueError
 
-    blueprint = Blueprint('actions', __name__, url_prefix=url_prefix)
+    blueprint = Blueprint(url_prefix, __name__, url_prefix=f'/{url_prefix}')
 
     for route, handler, ttl in routes:
         blueprint.add_url_rule(f'/{route}', methods=('GET', 'POST',), view_func=run_action(handler, ttl))

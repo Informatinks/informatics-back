@@ -8,8 +8,8 @@ from flask.views import MethodView
 from informatics_front.plugins import tokenizer
 from informatics_front.utils.tokenizer.handlers import map_action_routes
 
-BLUEPRINT_PREFIX_NAME = 'actions'
-ROUTE_NAME = 'test'
+BLUEPRINT_PREFIX_NAME = 'foo'
+ROUTE_NAME = 'bar'
 ACTION_PAYLOAD = {}
 
 
@@ -23,7 +23,7 @@ def test_create_blueprint(app):
     initial_blueprints_len = len(app.blueprints)
 
     # create handler with one route
-    map_action_routes(app, ((ROUTE_NAME, view, 60),), f'/{BLUEPRINT_PREFIX_NAME}')
+    map_action_routes(app, ((ROUTE_NAME, view, 60),), BLUEPRINT_PREFIX_NAME)
 
     # test blueprints added
     assert len(app.blueprints) == initial_blueprints_len + 1
@@ -47,10 +47,9 @@ def test_call_methodview(local_app, local_client):
 
     # create handler with one route
     map_action_routes(local_app,
-                      ((ROUTE_NAME, View.as_view(ROUTE_NAME), 60),),
-                      f'/{BLUEPRINT_PREFIX_NAME}')
+                      ((ROUTE_NAME, View.as_view(ROUTE_NAME), 60),), BLUEPRINT_PREFIX_NAME)
 
-    url = url_for(f'actions.{ROUTE_NAME}', token=tokenizer.pack(ACTION_PAYLOAD))
+    url = url_for(f'{BLUEPRINT_PREFIX_NAME}.{ROUTE_NAME}', token=tokenizer.pack(ACTION_PAYLOAD))
     local_client.get(url, )
 
     View.get.assert_called()
@@ -66,10 +65,9 @@ def test_call_plan_function(local_app, local_client):
 
     # create handler with one route
     map_action_routes(local_app,
-                      ((ROUTE_NAME, view, 60),),
-                      f'/{BLUEPRINT_PREFIX_NAME}')
+                      ((ROUTE_NAME, view, 60),), BLUEPRINT_PREFIX_NAME)
 
-    url = url_for(f'actions.{ROUTE_NAME}', token=tokenizer.pack(ACTION_PAYLOAD))
+    url = url_for(f'{BLUEPRINT_PREFIX_NAME}.{ROUTE_NAME}', token=tokenizer.pack(ACTION_PAYLOAD))
     local_client.get(url)
 
     view.assert_called()
@@ -89,8 +87,7 @@ def test_invalid_token_decoding(local_app, local_client):
 
     # create handler with one route
     map_action_routes(local_app,
-                      ((ROUTE_NAME, view, TOKEN_TTL),),
-                      f'/{BLUEPRINT_PREFIX_NAME}')
+                      ((ROUTE_NAME, view, TOKEN_TTL),), BLUEPRINT_PREFIX_NAME)
 
     # test token expiration
     url = url_for(f'{BLUEPRINT_PREFIX_NAME}.{ROUTE_NAME}', token=VALID_TOKEN)
@@ -107,5 +104,3 @@ def test_invalid_token_decoding(local_app, local_client):
     local_client.get(url)
     view.assert_not_called()
     view.reset_mock()
-
-
