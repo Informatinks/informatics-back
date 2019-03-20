@@ -59,8 +59,6 @@ class User(SimpleUser):
         :param plan_password: password string to hash
         :return: hashed password
         '''
-        if plan_password is None:
-            raise ValueError
         return hashlib.md5(plan_password.encode('utf-8')).hexdigest()
 
 
