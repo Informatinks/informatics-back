@@ -67,8 +67,7 @@ class ProblemSubmissionApi(MethodView):
         args = parser.parse(self.get_args, request, error_status_code=400)
 
         # set current authorized user to args
-        current_user = g.user
-        args['user_id'] = current_user['id']
+        args['user_id'] = g.user['id']
 
         content, status = internal_rmatics.get_runs_filter(problem_id, args, is_admin=False)
         return jsonify(content, status_code=status)
