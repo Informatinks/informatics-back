@@ -54,7 +54,7 @@ def run_action(f: Callable, ttl: int = DEFAULT_ACTION_TTL) -> Callable:
     return runner
 
 
-def map_action_routes(app: Flask = None, routes: Tuple = (), url_prefix: str = 'system'):
+def map_action_routes(app: Flask, routes: Tuple = (), url_prefix: str = 'system'):
     """Builds and adds a new blueprint to provided Flask instance.
 
     :param app: Flask app instance to bind blueprint
@@ -63,9 +63,6 @@ def map_action_routes(app: Flask = None, routes: Tuple = (), url_prefix: str = '
     :param url_prefix: top level url prefix to prepend blueprint's URL
     :return: None
     """
-    if not routes or not app:
-        raise ValueError
-
     blueprint = Blueprint(url_prefix, __name__, url_prefix=f'/{url_prefix}')
 
     for route, handler, ttl in routes:
