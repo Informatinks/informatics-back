@@ -1,19 +1,22 @@
 from typing import Optional
 
-from sqlalchemy.orm import joinedload
-from webargs.flaskparser import parser
 from flask import current_app, g, request
 from flask.views import MethodView
+from gmail import Message
 from marshmallow import fields
+from sqlalchemy.orm import joinedload
+from webargs.flaskparser import parser
 from werkzeug import exceptions as exc
+from werkzeug.exceptions import BadRequest
 
 from informatics_front import db
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.model.user.user import User
+from informatics_front.plugins import gmail
+from informatics_front.plugins import tokenizer
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.auth.make_jwt import decode_jwt_token, generate_refresh_token
 from informatics_front.utils.response import jsonify
-
 from informatics_front.view.auth.serializers.auth import UserAuthSerializer
 
 
@@ -116,3 +119,67 @@ class RefreshTokenApi(MethodView):
                                  f'been refreshed')
 
         return jsonify(user_data.data)
+
+
+class PasswordResetApi(MethodView):
+    """API handler for invoking password reset action for User.email or User.user_name
+    """
+    post_args = {
+        'email': fields.String(missing=None),
+        'username': fields.String(missing=None),
+    }
+
+    def post(self):
+        args = parser.parse(self.post_args, request)
+
+        # prevent equal-None filter query
+        email, username = args.get('email'), args.get('username')
+        if not any((email, username)):
+            raise BadRequest()
+
+        user_q = db.session.query(User)
+        if email is not None:
+            user_q = user_q.filter(User.email == email)
+        elif username is not None:
+            user_q = user_q.filter(User.username == username)
+        user = user_q.one_or_none()
+
+        # if user not found or user has no email
+        if user is None or user.email is None:
+            raise BadRequest()
+
+        payload = {
+            'user_id': user.id
+        }
+        token = tokenizer.pack(payload)
+
+        text = f"Ссылка для сброса пароля: {current_app.config.get('APP_URL')}/actions/change_password?token={token}"
+        msg = Message('Сброс пароля', to=user.email, text=text)
+        try:
+            gmail.send(msg)
+        except Exception as e:  # TODO: handle smtplib errors
+            current_app.logger.exception('Unable to send reset password message to', user.email)
+
+        return jsonify({})
+
+
+class PasswordChangeApi(MethodView):
+    """API handler for setting new password
+
+    This method should NOT be mounted directly to route as it relies on external action authorization.
+    """
+    post_args = {
+        'password': fields.String(required=True),
+    }
+
+    def post(self):
+        args = parser.parse(self.post_args, request)
+        user = db.session.query(User). \
+            filter_by(id=g.payload.get('user_id')). \
+            one_or_none()
+
+        if user:
+            user.password_md5 = User.hash_password(args.get('password'))
+            db.session.commit()
+
+        return jsonify({})

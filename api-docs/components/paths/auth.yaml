@@ -83,7 +83,7 @@ paths:
                   type: string
                   description: Refresh Token
 
-  /auth/change/:
+  /auth/reset/:
     post:
       tags:
         - Auth
@@ -110,7 +110,7 @@ paths:
         200:
           description: Запрос выполнен. Если email или username не найден, будет вернут код 200 для предотвращения enumeration attack.
 
-  /auth/reset/:
+  /actions/change_password:
     post:
       tags:
         - Auth
@@ -120,20 +120,22 @@ paths:
       security:
         - jwt-token-auth: []
 
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+          description: Auth token from reset URL
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                token:
-                  format: password
-                  type: string
-                  description: User email, who we request password change for
                 password:
                   format: password
                   type: string
-                  description: User email, who we request password change for
+                  description: New password for user
 
       responses:
         200:

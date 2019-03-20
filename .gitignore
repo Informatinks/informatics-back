@@ -318,3 +318,4 @@ venv
 informatics_front/settings.cfg
 .pytest_cache
 node_modules
+api-docs/result.yaml

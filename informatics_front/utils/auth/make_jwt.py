@@ -7,8 +7,7 @@ from flask import current_app
 from informatics_front.view.auth.serializers.auth import RoleAuthSerializer
 
 
-def generate_jwt_token(user: 'User') -> str:
-
+def generate_auth_token(user: 'User') -> str:
     roles_serializer = RoleAuthSerializer(many=True)
     roles = roles_serializer.dumps(user.roles)
 
@@ -26,7 +25,7 @@ def generate_jwt_token(user: 'User') -> str:
 
 def generate_refresh_token(user: 'User') -> str:
     expiration = datetime.datetime.utcnow() + datetime.timedelta(
-        seconds=current_app.config.get('JWT_REFRESH_TOKEN_EXP'))
+        seconds=current_app.config.get('JWT_REFRESH_TOKEN_EXP', ))
     d = {
         'user_id': user.id,
         'exp': expiration,

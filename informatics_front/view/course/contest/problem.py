@@ -65,5 +65,9 @@ class ProblemSubmissionApi(MethodView):
     @login_required
     def get(self, problem_id):
         args = parser.parse(self.get_args, request, error_status_code=400)
+
+        # set current authorized user to args
+        args['user_id'] = g.user['id']
+
         content, status = internal_rmatics.get_runs_filter(problem_id, args, is_admin=False)
         return jsonify(content, status_code=status)

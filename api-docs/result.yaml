@@ -1,0 +1,707 @@
+openapi: 3.0.0
+info:
+  title: Education service
+  version: 1.0.0
+  description: Education service
+servers:
+  - url: 'http://85.93.88.189:12347/api/v1'
+    description: Dev-сервер
+tags:
+  - name: Contest
+    description: Контест
+  - name: Submissions
+    descriprion: Посылки
+paths:
+  /auth/signin/:
+    post:
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Username
+                password:
+                  type: string
+                  description: Пароль
+      summary: Залогиниться (получить токены)
+      responses:
+        '200':
+          description: Пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAuthSchema'
+        '401':
+          description: Неправильный пароль
+          allOf:
+            - $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Пользовалель не найден
+          allOf:
+            - $ref: '#/components/responses/NotFound'
+  /auth/signout/:
+    post:
+      tags:
+        - Auth
+      summary: Разлогиниться
+      security:
+        - jwt-token-auth: []
+      responses:
+        '200':
+          description: Токены удалены
+  /auth/refresh/:
+    post:
+      tags:
+        - Auth
+      summary: Получить новый token
+      security:
+        - jwt-token-auth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: Refresh Token
+  /auth/reset/:
+    post:
+      tags:
+        - Auth
+      summary: Запросить ссылку на сброс пароля на почту
+      security:
+        - jwt-token-auth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - email: null
+                  format: email
+                  type: string
+                  description: 'User email, who we request password change for'
+                - username: null
+                  type: string
+                  description: 'User username, who we request password change for'
+      responses:
+        '200':
+          description: >-
+            Запрос выполнен. Если email или username не найден, будет вернут код
+            200 для предотвращения enumeration attack.
+  /actions/change_password:
+    post:
+      tags:
+        - Auth
+      summary: Установить новый пароль для пользователя
+      security:
+        - jwt-token-auth: []
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+          description: Auth token from reset URL
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  format: password
+                  type: string
+                  description: 'User email, who we request password change for'
+      responses:
+        '200':
+          description: Запрос на смену пароля выполнен успешно
+        '400':
+          description: Запрос не выполнен. Пароль не соответствует требованиям.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        '403':
+          description: Запрос не выполнен. Авториазционный токен недействителен.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/Forbidden'
+  '/contest/{contest_id}':
+    get:
+      tags:
+        - Contest
+      summary: Контест с задачами по chapterid из moodle
+      parameters:
+        - in: path
+          name: contest_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the contest to get
+      security:
+        - jwt-token-auth: []
+      responses:
+        '200':
+          description: Контест с задачами
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContestSchema'
+        '404':
+          description: Контест не найден
+          allOf:
+            - $ref: '#/components/responses/NotFound'
+  '/contest/problem/{problem_id}':
+    get:
+      tags:
+        - Contest
+      summary: Задача
+      parameters:
+        - in: path
+          name: problem_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the problem to get
+      security:
+        - jwt-token-auth: []
+      responses:
+        '200':
+          description: Задача
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemSchema'
+        '404':
+          description: Задача не найдена
+          allOf:
+            - $ref: '#/components/responses/NotFound'
+  '/contest/problem/{problem_id}/submission':
+    get:
+      tags:
+        - Submissions
+      summary: Фильтр по посылкам
+      security:
+        - jwt-token-auth: []
+      parameters:
+        - in: path
+          name: problem_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the problem to get
+        - in: path
+          name: group_id
+          schema:
+            type: integer
+            description: Группа
+        - in: path
+          name: lang_id
+          schema:
+            type: integer
+            description: Язык
+        - in: path
+          name: status_id
+          schema:
+            type: integer
+            description: Статус посылки
+        - in: path
+          name: statement_id
+          schema:
+            type: integer
+            description: Id контеста
+        - in: path
+          name: count
+          schema:
+            type: integer
+            description: Количество на странице (не более 100)
+        - in: path
+          name: page
+          schema:
+            type: integer
+            description: Номер страницы
+            default: 1
+        - in: path
+          name: from_timestamp
+          schema:
+            type: integer
+            description: С какого времени (-1 если фильтровать не нужно)
+        - in: path
+          name: to_timestamp
+          schema:
+            type: integer
+            description: По какое время (-1 если фильтровать не нужно)
+      responses:
+        '200':
+          description: Отфильтрованные посылки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemSubmissionSchema'
+    post:
+      tags:
+        - Submissions
+      summary: Отправить посылку
+      security:
+        - jwt-token-auth: []
+      requestBody:
+        content:
+          multipart/json:
+            shema:
+              type: object
+              properties:
+                lang_id:
+                  type: integer
+                  description: Язык
+                statement_id:
+                  type: integer
+                  description: id контеста
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Посылка отправлена
+        '400':
+          description: Пустой файл или дубликат посылки или файл слишком большой
+          allOf:
+            - $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Задача не найдена
+          allOf:
+            - $ref: '#/components/responses/NotFound'
+  '/contest/run/{run_id}/source':
+    get:
+      tags:
+        - Run
+      summary: Получить исходник посылки
+      parameters:
+        - in: path
+          name: run_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the run to get source
+      security:
+        - jwt-token-auth: []
+      responses:
+        '200':
+          description: Исходник посылки
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  language_id:
+                    type: integer
+                    description: Язык программирования посылкии
+                  source:
+                    type: string
+                    descroption: Исходник посылки
+        '404':
+          description: Посылка не найдена
+          allOf:
+            - $ref: '#/components/responses/NotFound'
+  '/contest/run/{run_id}/protocol':
+    get:
+      tags:
+        - Run
+      summary: Получить протокол тестирования посылки
+      parameters:
+        - in: path
+          name: run_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the run to get source
+      security:
+        - jwt-token-auth: []
+      responses:
+        '200':
+          description: Протокол тестирования посылки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunProtocolSchema'
+        '404':
+          description: Посылка не найдена
+          allOf:
+            - $ref: '#/components/responses/NotFound'
+  '/contest/run/{run_id}/comments':
+    get:
+      tags:
+        - Run
+      summary: >-
+        Получить комментарии для посылки (Run), отсортированные по дате создания
+        по убыванию
+      parameters:
+        - in: path
+          name: run_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the run to get source
+      security:
+        - jwt-token-auth: []
+      responses:
+        '200':
+          description: Комментарии учителя для посылки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentSchema'
+components:
+  securitySchemes:
+    jwt-token-auth:
+      type: apiKey
+      in: header
+  responses:
+    BadRequest:
+      description: Ошибка в теле запроса
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  status_code:
+                    type: integer
+                    enum:
+                      - 400
+                  error:
+                    type: string
+                    example: The request body contains errors and is not validated.
+    Unauthorized:
+      description: Неавторизованый запрос
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  status_code:
+                    type: integer
+                    enum:
+                      - 401
+                  error:
+                    type: string
+                    example: Unauthorized request
+    Forbidden:
+      description: Доступ отказан
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  status_code:
+                    type: integer
+                    enum:
+                      - 403
+                  error:
+                    type: string
+                    example: Access denied
+    NotFound:
+      description: Запрашиваемый ресурс не найден
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  status_code:
+                    type: integer
+                    enum:
+                      - 404
+                  error:
+                    type: string
+                    example: The specified resource was not found
+    Error:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unexpected error
+    UserToken:
+      description: Успешный логин
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Success'
+              - type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        format: email
+                        example: example@edu.com
+                      token:
+                        type: string
+                      refresh_token:
+                        type: string
+                    required:
+                      - token
+                      - refresh_token
+  schemas:
+    SampleTest:
+      type: object
+      description: Пример входных и выходных данных в задаче
+      properties:
+        input:
+          type: string
+          description: Входные данные
+        correct:
+          type: string
+          description: Выходные данные
+    ContestProblemSchema:
+      type: object
+      description: Проблема в контесте
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          description: ID Контеста
+        name:
+          type: string
+          description: Название проблемы
+        rank:
+          type: integer
+          description: Порядковый номер в Контесте
+    ContestSchema:
+      type: object
+      description: Контест
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          description: ID Контеста
+        name:
+          type: string
+          description: Название контеста
+        summary:
+          type: string
+          description: Полное название контеста
+        problems:
+          - $ref: '#/components/schemas/ContestProblemSchema'
+    ProblemSchema:
+      type: object
+      description: Задача
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          description: ID Контеста
+        name:
+          type: string
+          description: Название контеста
+        content:
+          type: string
+          description: Описание задачи
+        timelimit:
+          type: integer
+          description: Ограничение по времени
+        memorylimit:
+          type: integer
+          description: Ограничение по памяти
+        description:
+          type: string
+          description: '???'
+        sample_tests_json:
+          - $ref: '#/components/schemas/SampleTest'
+        output_only:
+          type: boolean
+          description: Только output
+    UserAuthSchema:
+      type: object
+      properties:
+        id: null
+        username:
+          type: string
+          description: Username (логинимся по нему)
+        firstname:
+          type: string
+          description: Имя
+        lastname:
+          type: string
+          description: Фамилия
+        email:
+          type: string
+          description: email
+        token:
+          type: string
+          description: Авторизационный токен
+        refresh_token:
+          type: string
+          description: Рефреш токен (только при логине)
+    ProblemSubmissionSchema:
+      type: object
+      description: Посылки по фильтру
+      properties:
+        id:
+          type: integer
+          description: id посылки
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: Id пользователя
+            firstname:
+              type: string
+              description: Имя
+            lastname:
+              type: string
+              description: Фамилия
+        problem:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: Id задачи
+            name:
+              type: string
+              description: Название задачи
+        ejudge_status:
+          type: integer
+          description: Статус посылки
+        create_time:
+          type: timestamp
+          description: Время отправки
+        ejudge_language_id:
+          type: integer
+          description: Язык
+        ejudge_test_num:
+          type: integer
+          description: Сколько тестов прошло
+        ejudge_score:
+          type: integer
+          description: Score
+    RunProtocolSchema:
+      type: object
+      descroption: Протокол тестирования посылки
+      properties:
+        compiler_output:
+          type: string
+        host:
+          type: string
+          descroption: Хост системы тестирования
+        tests:
+          type: object
+          description: map (номер теста -> данные теста)
+          additionalProperties:
+            type: object
+            description: Номер теста
+            properties:
+              status:
+                type: string
+                description: 'Результат теста, например, "OK"'
+              time:
+                type: integer
+                description: 'Затраченное время, например, 33'
+              real_time:
+                type: integer
+                description: 'Реальное время системы, например, 34'
+              max_memory_used:
+                type: string
+                description: 'Затраченная память, в байтах, например, "380928"'
+              string_status:
+                type: string
+                descroption: 'Результат прохождения теста, например "OK"'
+    CommentAuthorSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Id пользователя
+        username:
+          type: string
+          description: 'Имя пользователя, может подадобиться при генерации ссылок'
+        firstname:
+          type: string
+          description: Имя
+        lastname:
+          type: string
+          description: Фамилия
+    CommentSchema:
+      type: object
+      description: >-
+        Комментарии к запуску от учителя для ученика. Получаются для текущего
+        авторизованного пользователя
+      properties:
+        id:
+          type: integer
+          description: id комментария
+        date:
+          type: string
+          format: date-time
+          description: время создания комментария
+        comment:
+          type: string
+          description: текст комментария
+        run_id:
+          type: integer
+          description: 'id run/submission (посылки), для которой запрошены комментарии'
+        user_id:
+          type: integer
+          description: >-
+            id юзера, для кого предназначается комментарий. В штатном режиме это
+            id текущего авторизованного пользователя
+        author_user:
+          $ref: '#/components/schemas/CommentAuthorSchema'
+          description: >-
+            объект с данными пользователя — автора комментария (подгружается на
+            основе author_user_id)
+    Error:
+      type: object
+      properties:
+        status_code:
+          type: integer
+          minimum: 400
+          maximum: 526
+        status:
+          type: string
+          enum:
+            - error
+        error:
+          type: string
+      required:
+        - status_code
+        - status
+        - error
+    Success:
+      type: object
+      properties:
+        status_code:
+          type: integer
+          enum:
+            - 200
+            - 201
+        status:
+          type: string
+          enum:
+            - success
+        data:
+          type: object
+      required:
+        - status_code
+        - status
+        - data

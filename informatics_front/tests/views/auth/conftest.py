@@ -3,7 +3,7 @@ import pytest
 from flask import Flask
 
 from informatics_front.model import User, db
-from informatics_front.utils.auth.make_jwt import generate_jwt_token
+from informatics_front.utils.auth.make_jwt import generate_auth_token
 
 VALID_TIME = 100500
 
@@ -15,7 +15,7 @@ def token(app: Flask, users: dict):
     previous_config_data = app.config.get('JWT_TOKEN_EXP')
     app.config['JWT_TOKEN_EXP'] = VALID_TIME
 
-    token = generate_jwt_token(user)
+    token = generate_auth_token(user)
     yield token
 
     app.config['JWT_TOKEN_EXP'] = previous_config_data
@@ -28,7 +28,7 @@ def expired_token(app: Flask, users: dict):
     previous_config_data = app.config.get('JWT_TOKEN_EXP')
     app.config['JWT_TOKEN_EXP'] = -1
 
-    token = generate_jwt_token(user)
+    token = generate_auth_token(user)
     yield token
 
     app.config['JWT_TOKEN_EXP'] = previous_config_data

@@ -1,12 +1,22 @@
-import pytest
-
-from time import sleep
 from collections import namedtuple
+from time import sleep
+from unittest import mock
 
+import pytest
 from flask import url_for, g
 
 from informatics_front.model import User, db
 from informatics_front.model.refresh_tokens import RefreshToken
+from informatics_front.plugins import tokenizer
+from informatics_front.utils.tokenizer.handlers import map_action_routes
+from informatics_front.view.auth.authorization import PasswordChangeApi
+
+NEW_PASSWORD = 'new-password'
+ACTIONS_URL_MOUNTPOINT = 'foo'
+CHANGE_ACTION_ROUTE_NAME = 'bar'
+SECRET_KEY = 'foo'
+USER_EMAIL = 'user@example.com'
+RESET_TOKEN = 'baz'
 
 
 @pytest.mark.auth
@@ -118,3 +128,112 @@ def test_signout(client, users):
 
     # ensure second logged out
     assert db.session.query(RefreshToken).filter_by(user_id=user['id']).count() == 0
+
+
+@pytest.mark.auth
+def test_password_reset_invalid_payload(client, users):
+    """Test password change link is not send if payload is invalid
+    """
+    with mock.patch('informatics_front.view.auth.authorization.gmail') as gmail, \
+            mock.patch('informatics_front.view.auth.authorization.Message') as Message, \
+            mock.patch('informatics_front.view.auth.authorization.tokenizer') as tokenizer:
+        user = users[-1]
+        url = url_for('auth.reset')
+
+        # reset with well-signed, but insufficient payload
+        resp = client.post(url, data={})
+        assert resp.status_code == 400
+        gmail.send.assert_not_called()
+
+        gmail.reset_mock()
+        Message.reset_mock()
+
+        # reset pass for user with no email
+        data = {
+            'username': user.get('user_name')
+        }
+        resp = client.post(url, data=data)
+        assert resp.status_code == 400
+        gmail.send.assert_not_called()
+
+
+
+@pytest.mark.auth
+def test_password_reset_valid_payload(client, users):
+    """Test password change link is sent with generated valid token to user
+    """
+    with mock.patch('informatics_front.view.auth.authorization.gmail') as gmail, \
+            mock.patch('informatics_front.view.auth.authorization.Message') as Message, \
+            mock.patch('informatics_front.view.auth.authorization.tokenizer') as tokenizer:
+        user = users[-1]
+        url = url_for('auth.reset')
+        tokenizer.pack.return_value = RESET_TOKEN
+
+        # set email for user
+        db.session.query(User). \
+            filter(User.id == user['id']). \
+            update({'email': USER_EMAIL})
+        db.session.commit()
+
+        # reset by username
+        data = {
+            'username': user.get('user_name')
+        }
+        resp = client.post(url, data=data)
+        assert resp.status_code == 200
+
+        message_text = Message.call_args[1]['text']
+        assert RESET_TOKEN in message_text
+        gmail.send.assert_called()
+
+        gmail.reset_mock()
+        Message.reset_mock()
+
+        # reset by email
+        data = {
+            'email': USER_EMAIL,
+        }
+        resp = client.post(url, data=data)
+        assert resp.status_code == 200
+
+        message_text = Message.call_args[1]['text']
+        assert RESET_TOKEN in message_text
+        gmail.send.assert_called()
+
+
+@pytest.mark.auth
+def test_password_change(client, app, users):
+    """Test ...
+    """
+    user = users[0]
+
+    # FIXME: switch to local_app to prevent blueprint confusing
+    reset_action_mountpoint = f'{ACTIONS_URL_MOUNTPOINT}_reset'
+    reset_action_route_name = f'{CHANGE_ACTION_ROUTE_NAME}_reset'
+
+    # register password change action to app
+    map_action_routes(app, (
+        (reset_action_route_name, PasswordChangeApi.as_view(reset_action_route_name), 86000),
+    ), reset_action_mountpoint)
+
+    # generate valid reset token
+    payload = {
+        'user_id': user.get('id')
+    }
+    token = tokenizer.pack(payload)
+
+    # generate password hash
+    new_password_hash = User.hash_password(NEW_PASSWORD)
+
+    # request password change
+    url = url_for(f'{reset_action_mountpoint}.{reset_action_route_name}', token=token)
+    resp = client.post(url, data={
+        'password': NEW_PASSWORD,
+    })
+
+    # ensure password is changed
+    user = db.session.query(User). \
+        filter_by(id=user['id']). \
+        one_or_none()
+
+    assert new_password_hash == user.password_md5
