@@ -3,7 +3,7 @@ from flask import Flask
 
 
 class BaseMailer():
-    def init_mailer(self, app: Flask):
+    def init_app(self, app: Flask):
         username = app.config.get('GMAIL_USERNAME')
         password = app.config.get('GMAIL_PASSWORD')
         mail_from = app.config.get('MAIL_FROM')

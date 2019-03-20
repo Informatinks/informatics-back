@@ -48,12 +48,9 @@ def create_app(config=None):
     app.url_map.strict_slashes = False
 
     db.init_app(app)
-
     internal_rmatics.init_app(app)
-
     tokenizer.init_app(app)
-
-    gmail.init_mailer(app)
+    gmail.init_app(app)
 
     # register password change action to app
     map_action_routes(app, (
