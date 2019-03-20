@@ -154,9 +154,11 @@ class PasswordResetApi(MethodView):
         token = tokenizer.pack(payload)
 
         text = f"Ссылка для сброса пароля: {current_app.config.get('APP_URL')}/actions/change_password?token={token}"
-
         msg = Message('Сброс пароля', to=user.email, text=text)
-        gmail.send(msg)
+        try:
+            gmail.send(msg)
+        except Exception as e:  # TODO: handle smtplib errors
+            current_app.logger.exception('Unable to send reset password message to', user.email)
 
         return jsonify({})
 
