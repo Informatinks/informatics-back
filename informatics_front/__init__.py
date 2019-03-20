@@ -4,6 +4,8 @@ from logging.config import dictConfig
 from informatics_front import cli
 from informatics_front.model import db
 from informatics_front.plugins import internal_rmatics
+from informatics_front.plugins import gmail
+from informatics_front.plugins import tokenizer
 from informatics_front.utils.auth import authenticate
 from informatics_front.utils.error_handlers import register_error_handlers
 from informatics_front.utils.tokenizer.handlers import map_action_routes
