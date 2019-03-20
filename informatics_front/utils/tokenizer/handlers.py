@@ -22,7 +22,7 @@ def check_auth(ttl: int):
         def wrapped_f(*args, **kwargs):
             token = request.args.get('token')
             if not token:
-                raise Forbidden()
+                raise Forbidden('No signed token found')
             try:
                 g.payload = tokenizer.unpack(token, ttl)
             except Exception as e:
