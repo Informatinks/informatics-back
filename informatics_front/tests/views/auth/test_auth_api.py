@@ -16,6 +16,7 @@ ACTIONS_URL_MOUNTPOINT = 'foo'
 CHANGE_ACTION_ROUTE_NAME = 'bar'
 SECRET_KEY = 'foo'
 USER_EMAIL = 'user@example.com'
+RESET_TOKEN = 'baz'
 
 
 @pytest.mark.auth
@@ -130,20 +131,22 @@ def test_signout(client, users):
 
 
 @pytest.mark.auth
-def test_password_reset(client, users):
-    """Test password change link is sent with generated token to user
+def test_password_reset_invalid_payload(client, users):
+    """Test password change link is not send if payload is invalid
     """
     with mock.patch('informatics_front.view.auth.authorization.gmail') as gmail, \
-            mock.patch('informatics_front.view.auth.authorization.Message') as Message:
+            mock.patch('informatics_front.view.auth.authorization.Message') as Message, \
+            mock.patch('informatics_front.view.auth.authorization.tokenizer') as tokenizer:
         user = users[-1]
         url = url_for('auth.reset')
 
-        # reset with well-signed, but insufficent payload
+        # reset with well-signed, but insufficient payload
         resp = client.post(url, data={})
         assert resp.status_code == 400
-
         gmail.send.assert_not_called()
+
         gmail.reset_mock()
+        Message.reset_mock()
 
         # reset pass for user with no email
         data = {
@@ -151,10 +154,22 @@ def test_password_reset(client, users):
         }
         resp = client.post(url, data=data)
         assert resp.status_code == 400
-
         gmail.send.assert_not_called()
-        gmail.reset_mock()
 
+
+
+@pytest.mark.auth
+def test_password_reset_valid_payload(client, users):
+    """Test password change link is sent with generated valid token to user
+    """
+    with mock.patch('informatics_front.view.auth.authorization.gmail') as gmail, \
+            mock.patch('informatics_front.view.auth.authorization.Message') as Message, \
+            mock.patch('informatics_front.view.auth.authorization.tokenizer') as tokenizer:
+        user = users[-1]
+        url = url_for('auth.reset')
+        tokenizer.pack.return_value = RESET_TOKEN
+
+        # set email for user
         db.session.query(User). \
             filter(User.id == user['id']). \
             update({'email': USER_EMAIL})
@@ -167,8 +182,12 @@ def test_password_reset(client, users):
         resp = client.post(url, data=data)
         assert resp.status_code == 200
 
-        gmail.send.assert_called_with(Message())  # test mail was sent
+        message_text = Message.call_args[1]['text']
+        assert RESET_TOKEN in message_text
+        gmail.send.assert_called()
+
         gmail.reset_mock()
+        Message.reset_mock()
 
         # reset by email
         data = {
@@ -177,8 +196,9 @@ def test_password_reset(client, users):
         resp = client.post(url, data=data)
         assert resp.status_code == 200
 
-        gmail.send.assert_called_with(Message())  # test mail was sent
-        gmail.reset_mock()
+        message_text = Message.call_args[1]['text']
+        assert RESET_TOKEN in message_text
+        gmail.send.assert_called()
 
 
 @pytest.mark.auth
