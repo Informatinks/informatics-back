@@ -108,7 +108,9 @@ paths:
 
       responses:
         200:
-          description: Запрос выполнен. Если email или username не найден, будет вернут код 200 для предотвращения enumeration attack.
+          description: Запрос выполнен.
+        400:
+          description: Запрос не выполнен. Или пользователь с такими данными не найден, или у найденого пользователя нет email
 
   /actions/change_password:
     post:

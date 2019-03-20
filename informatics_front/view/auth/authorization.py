@@ -144,9 +144,9 @@ class PasswordResetApi(MethodView):
             user_q = user_q.filter(User.username == username)
         user = user_q.one_or_none()
 
-        # if user not found or user has no email
-        if user is None or user.email is None:
-            raise BadRequest()
+        # if user not found or user has no valid email
+        if user is None or user.email is None or user.email == '':
+            raise BadRequest('Either user is not found or has no valid email')
 
         payload = {
             'user_id': user.id
