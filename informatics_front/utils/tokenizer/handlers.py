@@ -27,7 +27,7 @@ def check_auth(ttl: int):
                 g.payload = tokenizer.unpack(token, ttl)
             except Exception as e:
                 # catch all exceptions: Signature, Expiration, Bad formatted
-                raise Forbidden()
+                raise Forbidden('Invalid token signature')
             return f(*args, **kwargs)
 
         return wrapped_f
