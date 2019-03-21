@@ -39,7 +39,7 @@ class ApiClient(requests.Session):
         }
 
         if method in ('POST', 'PUT', 'PATCH'):
-            kwargs['json'] = json
+            kwargs['data'] = json
 
         if self.tracer:
             # Creates tracing header
