@@ -1,8 +1,12 @@
+import os
+
 from sqlalchemy.orm import relationship
 
+from informatics_front.ejudge.serve_internal import EjudgeContestCfg
 from informatics_front.model.base import db
 from informatics_front.utils.decorators import deprecated
 from informatics_front.utils.json_type import JsonType
+from informatics_front.utils.run import read_file_unknown_encoding
 
 
 class Problem(db.Model):
@@ -100,7 +104,7 @@ class EjudgeProblem(Problem):
     @deprecated('view.serializers.ProblemSchema')
     def serialize(self):
         if self.sample_tests:
-            self.generateSamplesJson(force_update=True)
+            self.generate_samples_json(force_update=True)
 
         attrs = [
             'id',
@@ -119,31 +123,30 @@ class EjudgeProblem(Problem):
         # problem_dict['languages'] = context.get_allowed_languages()
         return problem_dict
 
-    def generateSamples(self):
-        res = ""
-        if self.sample_tests != '':
-            res = "<div class='problem-statement'><div class='sample-tests'><div class='section-title'>Примеры</div>"
+    def get_test(self, test_num, size=255):
+        conf = EjudgeContestCfg(number=self.ejudge_contest_id)
+        prob = conf.get_problem(self.problem_id)
 
-            for i in self.sample_tests.split(","):
-                inp = self.get_test(i, 4096)
-                if inp[-1] == '\n':
-                    inp = inp[:-1]
-                corr = self.get_corr(i, 4096)
-                if corr[-1] == '\n':
-                    corr = corr[:-1]
-                res += "<div class='sample-test'>"
-                res += "<div class='input'><div class='title'>Входные данные</div><pre class='content'>"
-                res += inp
-                res += "</pre></div><div class='output'><div class='title'>Выходные данные</div><pre class='content'>"
-                res += corr
-                res += "</pre></div></div>"
+        test_file_name = (prob.tests_dir + prob.test_pat) % int(test_num)
 
-            res += "</div></div>"
+        if os.path.exists(test_file_name):
+            res = read_file_unknown_encoding(test_file_name, size)
+        else:
+            res = test_file_name
+        return res
 
-        self.sample_tests_html = res
-        return self.sample_tests
+    def get_corr(self, test_num, size=255):
+        conf = EjudgeContestCfg(number = self.ejudge_contest_id)
+        prob = conf.get_problem(self.problem_id)
 
-    def generateSamplesJson(self, force_update=False):
+        corr_file_name = (prob.tests_dir + prob.corr_pat) % int(test_num)
+        if os.path.exists(corr_file_name):
+            res = read_file_unknown_encoding(corr_file_name, size)
+        else:
+            res = corr_file_name
+        return res
+
+    def generate_samples_json(self, force_update=False):
         if self.sample_tests != '':
             if not self.sample_tests_json:
                 self.sample_tests_json = {}
