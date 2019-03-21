@@ -119,7 +119,7 @@ class BaseService:
 
         app = Flask()
         tracer.init_app(app)
-        users_service.init_app(app, tracer)
+        users_service.init_app(app)
 
 
         # views.py
@@ -129,13 +129,25 @@ class BaseService:
             result = users_service.get_user(user_id)
             return result
     """
+    default_timeout = 5 * 60
 
-    def init_app(self, app, tracer=None, timeout=5 * 60):
+    def __init__(self, app=None, timeout=None, tracer=None, logger=None):
+        self.client = ApiClient(timeout or self.default_timeout, tracer, logger)
+        if app is not None:
+            self.init_app(app)
+
+    def init_app(self, app):
         """Configure service settings based on flask app config."""
-        service_url = app.config.get(self.service_url_param,
-                                     self.default_service_url)
+        self.service_url = app.config.get(self.service_url_param)
 
-        self.service_url = service_url
-        self.client.tracer = tracer
-        self.client.logger = app.logger
-        self.client.timeout = timeout
+        @app.teardown_appcontext
+        def shutdown_apiclient():
+            if self.client is not None:
+                self.client.close()
+
+        app.extensions[self.service_url] = self
+
+    @property
+    def service_url_param(self):
+        raise NotImplementedError
+
