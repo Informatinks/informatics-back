@@ -38,8 +38,12 @@ class ApiClient(requests.Session):
             **kwargs.pop('headers', {})
         }
 
+        # set payload data key based on files persistence
         if method in ('POST', 'PUT', 'PATCH'):
-            kwargs['json'] = json
+            if kwargs.get('files'):  # and kwargs['files'] to check empty file payload
+                kwargs['data'] = json
+            else:
+                kwargs['json'] = json
 
         if self.tracer:
             # Creates tracing header
