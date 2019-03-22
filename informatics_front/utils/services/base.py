@@ -141,7 +141,7 @@ class BaseService:
         self.service_url = app.config.get(self.service_url_param)
 
         @app.teardown_appcontext
-        def shutdown_apiclient():
+        def shutdown_apiclient(response_or_exc):
             if self.client is not None:
                 self.client.close()
 
