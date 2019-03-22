@@ -1,5 +1,16 @@
 # rmatics-back
 
+## Configuring app
+
+### Settings
+
+1. Copy `informatics_front/settings.sample.cfg` to `informatics_front/settings.cfg`.
+2. Edit `informatics_front/settings.cfg` with actual environment settings. 
+
+### Database population 
+
+Create databases as described in `docker/create-databases.sql`. This DB schema is valid for all environments.
+
 ## Running tests
 
 ### Docker
