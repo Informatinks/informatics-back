@@ -1,7 +1,8 @@
 from typing import Tuple
 
-from informatics_front.utils.services.base import ApiClient, BaseService
 from werkzeug.datastructures import FileStorage
+
+from informatics_front.utils.services.base import BaseService
 
 
 class InternalRmatics(BaseService):
