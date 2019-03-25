@@ -123,7 +123,7 @@ class BaseService:
 
         app = Flask()
         tracer.init_app(app)
-        users_service.init_app(app, tracer)
+        users_service.init_app(app)
 
 
         # views.py
@@ -134,12 +134,15 @@ class BaseService:
             return result
     """
 
-    def init_app(self, app, tracer=None, timeout=5 * 60):
-        """Configure service settings based on flask app config."""
-        service_url = app.config.get(self.service_url_param,
-                                     self.default_service_url)
+    default_timeout: int = 5 * 60
+    service_url_param: str
 
-        self.service_url = service_url
-        self.client.tracer = tracer
-        self.client.logger = app.logger
-        self.client.timeout = timeout
+    def __init__(self, app=None, timeout=None, tracer=None, logger=None):
+        self.client = ApiClient(timeout or self.default_timeout, tracer, logger)
+        if app:
+            self.init_app(app)
+
+    def init_app(self, app):
+        """Configure service settings based on flask app config."""
+        self.service_url = app.config.get(self.service_url_param)
+        app.extensions[self.service_url] = self
