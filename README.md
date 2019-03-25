@@ -4,8 +4,11 @@
 
 ### Settings
 
-1. `FLASK_ENV` variable should be set (`development`, `testing`, `production`).
-2. Settings should be provided as env vars. A complete list of supported ones can be found in `informatics_front/config.py`. 
+1. `FLASK_ENV` variable should point to `development`, `testing` or `production`;
+2. `FLASK_APP` (target) should point to app constructor with specified config class (e.g `FLASK_APP=informatics_front:create_app('informatics_front.config.DevConfig')`);
+2. App-specific settings should be provided as env vars. A complete list of supported ones can be found in `informatics_front/config.py`.
+
+#### Flask 
 
 ### Database population 
 
