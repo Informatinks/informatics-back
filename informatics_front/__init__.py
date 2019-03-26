@@ -38,8 +38,8 @@ def create_app(config):
 
     app = Flask(__name__)
     app.config.from_object(config)
-
     app.url_map.strict_slashes = False
+    app.logger.info(f'Running with {config} module')
 
     db.init_app(app)
     internal_rmatics.init_app(app)
