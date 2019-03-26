@@ -53,6 +53,15 @@ paths:
     post:
       tags:
         - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: Токен для обновления авторизационного токена. По нему будет найдена и удалена текущая сессия
 
       summary: Разлогиниться
 
