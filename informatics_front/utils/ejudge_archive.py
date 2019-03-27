@@ -62,7 +62,7 @@ class EjudgeArchiveReader:
         else:
             self.file = path
 
-        if (self.file.read(7) != b'Ej. Ar.'):
+        if self.file.read(7) != b'Ej. Ar.':
             raise ValueError("file is not ejudge archive")
 
         self.file.seek(0, 2)

@@ -2,7 +2,7 @@ from gmail import GMail, Message
 from flask import Flask
 
 
-class BaseMailer():
+class BaseMailer:
     def init_app(self, app: Flask):
         username = app.config.get('GMAIL_USERNAME')
         password = app.config.get('GMAIL_PASSWORD')

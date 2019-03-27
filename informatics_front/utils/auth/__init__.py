@@ -1,9 +1,9 @@
-import jwt
 import functools
 
+import jwt
 from flask import current_app, request, g
 from jwt import ExpiredSignatureError
-from werkzeug.exceptions import Unauthorized, Forbidden
+from werkzeug.exceptions import Unauthorized
 
 from informatics_front.utils.decorators import deprecated
 

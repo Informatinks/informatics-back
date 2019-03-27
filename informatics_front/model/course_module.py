@@ -73,22 +73,22 @@ class CourseModuleInstance(AbstractConcreteBase):
     MODULE = -1
 
     @declared_attr
-    def id(cls):
+    def id(self):
         return db.Column(db.Integer)
 
     @declared_attr
-    def name(cls):
+    def name(self):
         return db.Column(db.Unicode(255))
 
     @declared_attr
-    def course_module(cls):
-        class_name = cls.__name__
-        class_module = cls.MODULE
+    def course_module(self):
+        class_name = self.__name__
+        class_module = self.MODULE
         return db.relationship(
             CourseModule,
             primaryjoin=f'and_({class_name}.id==CourseModule.instance_id,'
                 f'CourseModule.module=={class_module})',
-            foreign_keys='%s.id' % cls.__name__,
+            foreign_keys='%s.id' % self.__name__,
         )
 
     @property

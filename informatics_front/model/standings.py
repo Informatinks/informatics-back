@@ -18,7 +18,7 @@ class StandingsMixin:
     __table_args__ = {'schema': 'pynformatics'}
 
     @declared_attr
-    def json(cls):
+    def json(self):
         return db.Column('json', MutableDict.as_mutable(JsonType))
 
     def update(self, user):

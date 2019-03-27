@@ -1,14 +1,15 @@
 import hashlib
+from typing import List
+
 import pytest
 from flask import g
-from typing import List
 from werkzeug.local import LocalProxy
 
 from informatics_front import db
 from informatics_front.model import User
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.utils.auth.make_jwt import generate_refresh_token
-from informatics_front.view.auth.serializers.auth import UserAuthSerializer, RoleAuthSerializer
+from informatics_front.view.auth.serializers.auth import RoleAuthSerializer
 
 
 @pytest.yield_fixture

@@ -53,12 +53,12 @@ class User(SimpleUser):
 
     @staticmethod
     def hash_password(plan_password: str) -> str:
-        '''Returns MD5 hash for plan password string.
+        """Returns MD5 hash for plan password string.
         Raises ValueError if password string is invalid.
 
         :param plan_password: password string to hash
         :return: hashed password
-        '''
+        """
         return hashlib.md5(plan_password.encode('utf-8')).hexdigest()
 
 

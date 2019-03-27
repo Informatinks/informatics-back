@@ -127,7 +127,7 @@ class Statement(CourseModuleInstance, db.Model):
 
         if 'type' in settings:
             type_ = settings['type']
-            if type_ == None:
+            if type_ is None:
                 self.olympiad = False
                 self.virtual_olympiad = False
             elif type_ == 'olympiad':
