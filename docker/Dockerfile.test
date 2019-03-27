@@ -6,10 +6,6 @@ RUN apk update
 RUN apk add gcc libressl-dev musl-dev libffi-dev
 
 COPY . /app
-RUN echo $'SQLALCHEMY_DATABASE_URI="mysql+pymysql://root:123456@mariadb/informatics" \n\
-JWT_TOKEN_EXP=15*60 \n\
-JWT_REFRESH_TOKEN_EXP=10*24*60 \n\
-SECRET_KEY="dkjbnfjnvfvkmflvmflmv"' > /app/informatics_front/settings.cfg
 
 WORKDIR /app
 
