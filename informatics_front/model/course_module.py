@@ -69,7 +69,6 @@ class CourseModule(db.Model):
         return serialized
 
 
-# noinspection PyMethodParameters
 class CourseModuleInstance(AbstractConcreteBase):
     MODULE = -1
 

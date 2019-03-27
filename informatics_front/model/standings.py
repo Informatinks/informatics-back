@@ -14,7 +14,6 @@ from informatics_front.utils.json_type import (
 log = logging.getLogger(__name__)
 
 
-# noinspection PyMethodParameters
 class StandingsMixin:
     __table_args__ = {'schema': 'pynformatics'}
 
