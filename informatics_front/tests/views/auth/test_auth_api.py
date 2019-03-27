@@ -157,7 +157,6 @@ def test_password_reset_invalid_payload(client, users):
         gmail.send.assert_not_called()
 
 
-
 @pytest.mark.auth
 def test_password_reset_valid_payload(client, users):
     """Test password change link is sent with generated valid token to user
@@ -202,19 +201,15 @@ def test_password_reset_valid_payload(client, users):
 
 
 @pytest.mark.auth
-def test_password_change(client, app, users):
+def test_password_change(local_app, local_client, users):
     """Test ...
     """
     user = users[0]
 
-    # FIXME: switch to local_app to prevent blueprint confusing
-    reset_action_mountpoint = f'{ACTIONS_URL_MOUNTPOINT}_reset'
-    reset_action_route_name = f'{CHANGE_ACTION_ROUTE_NAME}_reset'
-
     # register password change action to app
-    map_action_routes(app, (
-        (reset_action_route_name, PasswordChangeApi.as_view(reset_action_route_name), 86000),
-    ), reset_action_mountpoint)
+    map_action_routes(local_app, (
+        (CHANGE_ACTION_ROUTE_NAME, PasswordChangeApi.as_view(CHANGE_ACTION_ROUTE_NAME), 86000),
+    ), ACTIONS_URL_MOUNTPOINT)
 
     # generate valid reset token
     payload = {
@@ -226,8 +221,8 @@ def test_password_change(client, app, users):
     new_password_hash = User.hash_password(NEW_PASSWORD)
 
     # request password change
-    url = url_for(f'{reset_action_mountpoint}.{reset_action_route_name}', token=token)
-    resp = client.post(url, data={
+    url = url_for(f'{ACTIONS_URL_MOUNTPOINT}.{CHANGE_ACTION_ROUTE_NAME}', token=token)
+    resp = local_client.post(url, data={
         'password': NEW_PASSWORD,
     })
 

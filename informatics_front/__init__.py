@@ -1,10 +1,11 @@
-from flask import Flask
 from logging.config import dictConfig
+
+from flask import Flask
 
 from informatics_front import cli
 from informatics_front.model import db
-from informatics_front.plugins import internal_rmatics
 from informatics_front.plugins import gmail
+from informatics_front.plugins import internal_rmatics
 from informatics_front.plugins import tokenizer
 from informatics_front.utils.auth import authenticate
 from informatics_front.utils.error_handlers import register_error_handlers
@@ -18,7 +19,7 @@ ACTIONS_URL_MOUNTPOINT = 'actions'
 CHANGE_PASSWORD_ACTION_ROUTENAME = 'change_password'
 
 
-def create_app(config=None):
+def create_app(config):
     dictConfig({
         'version': 1,
         'formatters': {'default': {
@@ -36,12 +37,9 @@ def create_app(config=None):
     })
 
     app = Flask(__name__)
-
-    app.config.from_pyfile('settings.cfg', silent=True)
-    app.config.from_envvar('INFROMATICS_FRONT_SETTINGS', silent=True)
-    if config:
-        app.config.update(config)
+    app.config.from_object(config)
     app.url_map.strict_slashes = False
+    app.logger.info(f'Running with {config} module')
 
     db.init_app(app)
     internal_rmatics.init_app(app)
@@ -62,9 +60,3 @@ def create_app(config=None):
     app.cli.add_command(cli.test)
 
     return app
-
-
-if __name__ == "__main__":
-    app = create_app()
-
-    app.run(debug=False)

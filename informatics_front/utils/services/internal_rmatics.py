@@ -1,16 +1,13 @@
 from typing import Tuple
 
-from informatics_front.utils.services.base import ApiClient, BaseService
 from werkzeug.datastructures import FileStorage
+
+from informatics_front.utils.services.base import BaseService
 
 
 class InternalRmatics(BaseService):
     service_url_param = 'INTERNAL_RMATICS_URL'
-    default_service_url = 'http://localhost:12346'
-
-    def __init__(self, timeout: int = 60, logger=None):
-        self.service_url = None
-        self.client = ApiClient(timeout=timeout, logger=logger)
+    default_timeout = 60
 
     def send_submit(self,
                     file: FileStorage,

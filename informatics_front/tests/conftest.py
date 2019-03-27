@@ -1,8 +1,8 @@
 import pytest
 
 from informatics_front import create_app, authenticate
-from informatics_front.model import Role
 from informatics_front import db
+from informatics_front.model import Role
 
 VALID_TIME = 100500
 COURSE_VISIBLE = 1
@@ -10,7 +10,7 @@ COURSE_VISIBLE = 1
 
 @pytest.yield_fixture(scope='session')
 def app():
-    flask_app = create_app()
+    flask_app = create_app(config='informatics_front.config.TestConfig')
     flask_app.before_request_funcs[None].remove(authenticate)
 
     with flask_app.app_context():
@@ -23,6 +23,25 @@ def app():
 
     with flask_app.app_context():
         db.drop_all()
+
+
+@pytest.yield_fixture(scope='function')
+def local_app():
+    flask_app = create_app(config='informatics_front.config.TestConfig')
+
+    flask_app.before_request_funcs[None].remove(authenticate)
+
+    yield flask_app
+
+
+@pytest.yield_fixture(scope='function')
+def local_client(local_app):
+    """A Flask test client. An instance of :class:`flask.testing.TestClient`
+    by default.
+    """
+    with local_app.app_context():
+        with local_app.test_client() as test_client:
+            yield test_client
 
 
 @pytest.yield_fixture(scope='session')
