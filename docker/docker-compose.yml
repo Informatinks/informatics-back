@@ -6,8 +6,21 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_USER=testuser
-      - MYSQL_PASSWORD=123456sud
+      - MYSQL_PASSWORD=123456
     volumes:
       - ./create-databases.sql:/docker-entrypoint-initdb.d/setup.sql
     ports:
       - 3306:3306
+
+  informatics:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile.test
+
+    volumes:
+      - ./test-settings.cfg:/app/informatics_front/settings.cfg
+
+    depends_on:
+      - mariadb
+
+    command: 'sh -c "sleep 10 && flask test --teamcity"'
