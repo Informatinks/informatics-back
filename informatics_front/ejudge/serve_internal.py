@@ -1,6 +1,7 @@
 from . import configparser
 import os
 from collections import OrderedDict
+from flask import current_app
 
 
 def normalize_memory_limit(limit):
@@ -126,13 +127,14 @@ class EjudgeProblemCfg:
                 "abstract": self.abstract}
 
 
-HOME_JUDGES = '/home/judges/'
-
-
 class EjudgeContestCfg:
     @staticmethod
     def get_contest_path(number):
-        return HOME_JUDGES + '0' * (6 - len(str(number))) + str(number) + '/'
+        return current_app.config['JUDGES_PATH'] \
+               + '0' \
+               * (6 - len(str(number))) \
+               + str(number) \
+               + '/'
 
     @staticmethod
     def get_contest_path_conf(number):
