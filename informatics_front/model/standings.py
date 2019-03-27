@@ -14,11 +14,12 @@ from informatics_front.utils.json_type import (
 log = logging.getLogger(__name__)
 
 
+# noinspection PyMethodParameters
 class StandingsMixin:
     __table_args__ = {'schema': 'pynformatics'}
 
     @declared_attr
-    def json(self):
+    def json(cls):
         return db.Column('json', MutableDict.as_mutable(JsonType))
 
     def update(self, user):

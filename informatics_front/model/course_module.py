@@ -69,26 +69,27 @@ class CourseModule(db.Model):
         return serialized
 
 
+# noinspection PyMethodParameters
 class CourseModuleInstance(AbstractConcreteBase):
     MODULE = -1
 
     @declared_attr
-    def id(self):
+    def id(cls):
         return db.Column(db.Integer)
 
     @declared_attr
-    def name(self):
+    def name(cls):
         return db.Column(db.Unicode(255))
 
     @declared_attr
-    def course_module(self):
-        class_name = self.__name__
-        class_module = self.MODULE
+    def course_module(cls):
+        class_name = cls.__name__
+        class_module = cls.MODULE
         return db.relationship(
             CourseModule,
             primaryjoin=f'and_({class_name}.id==CourseModule.instance_id,'
                 f'CourseModule.module=={class_module})',
-            foreign_keys='%s.id' % self.__name__,
+            foreign_keys='%s.id' % cls.__name__,
         )
 
     @property
