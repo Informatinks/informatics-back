@@ -1,8 +1,8 @@
 import functools
 from typing import Callable
 
-from rmatics.utils.cacher.cacher import Cacher
-from rmatics.utils.cacher.locker import RedisLocker
+from informatics_front.utils.cacher.cacher import Cacher
+from informatics_front.utils.cacher.locker import RedisLocker
 
 
 class DeferredWrapper:

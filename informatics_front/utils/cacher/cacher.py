@@ -8,9 +8,9 @@ from typing import Callable, List
 import redis
 from sqlalchemy import or_, and_
 
-from rmatics.model.base import db
-from rmatics.model.cache_meta import CacheMeta
-from rmatics.utils.cacher.locker import ILocker
+from informatics_front.model.base import db
+from informatics_front.model.cache_meta import CacheMeta
+from informatics_front.utils.cacher.locker import ILocker
 
 PICKLE_ASCII_PROTO = 0
 
