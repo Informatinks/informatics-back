@@ -127,7 +127,7 @@ class Statement(CourseModuleInstance, db.Model):
 
         if 'type' in settings:
             type_ = settings['type']
-            if type_ == None:
+            if type_ is None:
                 self.olympiad = False
                 self.virtual_olympiad = False
             elif type_ == 'olympiad':
@@ -148,7 +148,7 @@ class Statement(CourseModuleInstance, db.Model):
                 and self.course.require_password() \
                 and password != self.course.password:
             raise ValueError()
-
+        # TODO: Где класс Participant?
         if self.participants.filter(Participant.user_id == user.id).count():
             raise ValueError()
 

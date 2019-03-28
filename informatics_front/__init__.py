@@ -48,7 +48,8 @@ def create_app(config):
 
     # register password change action to app
     map_action_routes(app, (
-        (CHANGE_PASSWORD_ACTION_ROUTENAME, PasswordChangeApi.as_view(CHANGE_PASSWORD_ACTION_ROUTENAME), 86000),
+        (CHANGE_PASSWORD_ACTION_ROUTENAME,
+         PasswordChangeApi.as_view(CHANGE_PASSWORD_ACTION_ROUTENAME), 86000),
     ), ACTIONS_URL_MOUNTPOINT)
 
     app.before_request(authenticate)

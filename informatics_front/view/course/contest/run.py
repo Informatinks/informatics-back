@@ -60,9 +60,9 @@ class RunProtocolApi(MethodView):
 class RunCommentsApi(MethodView):
     @login_required
     def get(self, run_id):
-        '''
+        """
         Returns List[Comment] for current authorized user for requested run_id
-        '''
+        """
         user = g.user
 
         # if provided run_id not not found, return []

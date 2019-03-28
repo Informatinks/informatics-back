@@ -4,8 +4,7 @@ from flask import (
 )
 from functools import wraps
 from jsonschema import Draft4Validator
-
-from rmatics.utils.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest
 
 
 def validate_schema(schema):
