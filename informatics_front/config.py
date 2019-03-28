@@ -7,8 +7,9 @@ class BaseConfig:
     TESTING = False
 
     # instance
-    SERVER_NAME = os.getenv('SERVER_NAME', 'localhost')
-    PREFERRED_URL_SCHEME = os.getenv('URL_SCHEME ', 'http')
+    SERVER_NAME = os.getenv('SERVER_NAME', None)
+    PREFERRED_URL_SCHEME = os.getenv('URL_SCHEME ', None)
+    APP_URL = os.getenv('APP_URL', 'http://localhost')
 
     # secrets
     SECRET_KEY = os.getenv('SECRET_KEY', 'ZlXRrZypKWulCQuaMTdhkppPJSQXMRIqoFVMkqvHD5jbbYNO')
@@ -31,6 +32,7 @@ class BaseConfig:
     MAIL_FROM = os.getenv('MAIL_FROM', '')
     GMAIL_USERNAME = os.getenv('GMAIL_USERNAME', '')
     GMAIL_PASSWORD = os.getenv('GMAIL_PASSWORD', '')
+
 
 
 class DevConfig(BaseConfig):
