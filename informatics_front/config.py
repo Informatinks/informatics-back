@@ -28,6 +28,9 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True
 
+    # services
+    INTERNAL_RMATICS_URL = os.getenv('INTERNAL_RMATICS_URL')
+
     # mailers
     MAIL_FROM = os.getenv('MAIL_FROM', '')
     GMAIL_USERNAME = os.getenv('GMAIL_USERNAME', '')
