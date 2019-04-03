@@ -121,49 +121,6 @@ paths:
         400:
           description: Запрос не выполнен. Или пользователь с такими данными не найден, или у найденого пользователя нет email
 
-  /actions/change_password:
-    post:
-      tags:
-        - Auth
-
-      summary: Установить новый пароль для пользователя
-
-      security:
-        - jwt-token-auth: []
-
-      parameters:
-        - in: query
-          name: token
-          schema:
-            type: string
-          description: Auth token from reset URL
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                password:
-                  format: password
-                  type: string
-                  description: New password for user
-
-      responses:
-        200:
-          description: Запрос на смену пароля выполнен успешно
-        400:
-          description: Запрос не выполнен. Пароль не соответствует требованиям.
-          content:
-            application/json:
-              schema:
-                $ref: '../error_response.yaml#/components/responses/BadRequest'
-        403:
-          description: Запрос не выполнен. Авториазционный токен недействителен.
-          content:
-            application/json:
-              schema:
-                $ref: '../error_response.yaml#/components/responses/Forbidden'
-
 components:
   securitySchemes:
     jwt-token-auth:

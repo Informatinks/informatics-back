@@ -1,0 +1,59 @@
+openapi: 3.0.0
+
+info:
+  title: Informatics auth
+  version: 1.0.0
+  description: Informatics auth API
+
+servers:
+  - url: http://85.93.88.189:12347
+    description: Dev-сервер
+
+tags:
+  - name: Actions
+    description: Специальные URL для выполнения авторизованных действий. Требуют авторизирующего токена в query-параметре
+
+paths:
+
+  /actions/change-password:
+    post:
+      tags:
+        - Actions
+
+      summary: Установить новый пароль для пользователя
+
+      security:
+        - jwt-token-auth: []
+
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+          description: Auth token from reset URL
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  format: password
+                  type: string
+                  description: New password for user
+
+      responses:
+        200:
+          description: Запрос на смену пароля выполнен успешно
+        400:
+          description: Запрос не выполнен. Пароль не соответствует требованиям.
+          content:
+            application/json:
+              schema:
+                $ref: '../error_response.yaml#/components/responses/BadRequest'
+        403:
+          description: Запрос не выполнен. Авториазционный токен недействителен.
+          content:
+            application/json:
+              schema:
+                $ref: '../error_response.yaml#/components/responses/Forbidden'

@@ -12,7 +12,7 @@ from informatics_front.utils.tokenizer.handlers import map_action_routes
 from informatics_front.view.auth.authorization import PasswordChangeApi
 
 NEW_PASSWORD = 'new-password'
-ACTIONS_URL_MOUNTPOINT = 'foo'
+ACTIONS_BLUEPRINT_URL_PREFIX = '/api/v1/actions'
 CHANGE_ACTION_ROUTE_NAME = 'bar'
 SECRET_KEY = 'foo'
 USER_EMAIL = 'user@example.com'
@@ -209,7 +209,7 @@ def test_password_change(local_app, local_client, users):
     # register password change action to app
     map_action_routes(local_app, (
         (CHANGE_ACTION_ROUTE_NAME, PasswordChangeApi.as_view(CHANGE_ACTION_ROUTE_NAME), 86000),
-    ), ACTIONS_URL_MOUNTPOINT)
+    ), ACTIONS_BLUEPRINT_URL_PREFIX)
 
     # generate valid reset token
     payload = {
@@ -221,7 +221,7 @@ def test_password_change(local_app, local_client, users):
     new_password_hash = User.hash_password(NEW_PASSWORD)
 
     # request password change
-    url = url_for(f'{ACTIONS_URL_MOUNTPOINT}.{CHANGE_ACTION_ROUTE_NAME}', token=token)
+    url = f'{ACTIONS_BLUEPRINT_URL_PREFIX}/{CHANGE_ACTION_ROUTE_NAME}?token={token}'
     resp = local_client.post(url, data={
         'password': NEW_PASSWORD,
     })
