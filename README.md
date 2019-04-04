@@ -20,7 +20,7 @@ Create databases as described in `docker/create-databases.sql`. This DB schema i
 
 ### Docker
 
-Build and ru tests container with provided docker-compose file:
+Build and run tests container with provided docker-compose file:
 
 ```
 docker-compose --file docker/docker-compose.yml up --force-recreate --abort-on-container-exit --build
