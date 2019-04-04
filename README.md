@@ -20,18 +20,10 @@ Create databases as described in `docker/create-databases.sql`. This DB schema i
 
 ### Docker
 
-Build a tests container with provided docker-compose file:
+Build and ru tests container with provided docker-compose file:
 
 ```
-docker-compose -f docker/docker-compose.yml -f docker/docker-compose.test.yml build pytest
+docker-compose --file docker/docker-compose.yml up --force-recreate --abort-on-container-exit --build
 ```
-
-Run test container:
-
-```
-docker-compose -f docker/docker-compose.yml -f docker/docker-compose.test.yml up pytest
-```
-
-Or this can be done simultaneously.
 
 If all tests are passed, the Docker process will exit with code 0.
