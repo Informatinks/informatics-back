@@ -12,7 +12,7 @@ from informatics_front.utils.tokenizer.handlers import map_action_routes
 from informatics_front.view.auth.authorization import PasswordChangeApi
 
 NEW_PASSWORD = 'new-password'
-ACTIONS_BLUEPRINT_URL_PREFIX = '/api/v1/actions'
+ACTIONS_BLUEPRINT_URL_PREFIX = '/api/v1/foo'
 CHANGE_ACTION_ROUTE_NAME = 'bar'
 SECRET_KEY = 'foo'
 USER_EMAIL = 'user@example.com'
