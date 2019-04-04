@@ -15,8 +15,8 @@ from informatics_front.view.auth.authorization import PasswordChangeApi
 from informatics_front.view.auth.routes import auth_blueprint
 from informatics_front.view.course.contest.route import contest_blueprint
 
-ACTIONS_URL_MOUNTPOINT = 'actions'
-CHANGE_PASSWORD_ACTION_ROUTENAME = 'change_password'
+ACTIONS_URL_MOUNTPOINT = '/api/v1/actions'
+CHANGE_PASSWORD_ACTION_ROUTENAME = 'change-password'
 
 
 def create_app(config):
