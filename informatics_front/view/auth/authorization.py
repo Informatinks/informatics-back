@@ -153,7 +153,7 @@ class PasswordResetApi(MethodView):
         }
         token = tokenizer.pack(payload)
 
-        text = f"Ссылка для сброса пароля: {current_app.config.get('APP_URL')}/actions/change_password?token={token}"
+        text = f"Ссылка для сброса пароля: {current_app.config.get('APP_URL')}/auth/change-password?token={token}"
         msg = Message('Сброс пароля', to=user.email, text=text)
         try:
             gmail.send(msg)

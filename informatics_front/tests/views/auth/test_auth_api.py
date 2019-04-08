@@ -17,6 +17,7 @@ CHANGE_ACTION_ROUTE_NAME = 'bar'
 SECRET_KEY = 'foo'
 USER_EMAIL = 'user@example.com'
 RESET_TOKEN = 'baz'
+PASSWORD_CHANGE_FRONTEND_URL = '/auth/change-password'
 
 
 @pytest.mark.auth
@@ -183,6 +184,7 @@ def test_password_reset_valid_payload(client, users):
 
         message_text = Message.call_args[1]['text']
         assert RESET_TOKEN in message_text
+        assert PASSWORD_CHANGE_FRONTEND_URL in message_text
         gmail.send.assert_called()
 
         gmail.reset_mock()
@@ -197,6 +199,7 @@ def test_password_reset_valid_payload(client, users):
 
         message_text = Message.call_args[1]['text']
         assert RESET_TOKEN in message_text
+        assert PASSWORD_CHANGE_FRONTEND_URL in message_text
         gmail.send.assert_called()
 
 
