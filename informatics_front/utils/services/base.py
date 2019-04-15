@@ -12,12 +12,10 @@ class ApiClient(requests.Session):
 
     def __init__(self,
                  timeout=60,
-                 tracer=None,
                  logger: logging.Logger = None):
 
         super().__init__()
 
-        self.tracer = tracer
         self.timeout = timeout
         self.logger = logger
 
@@ -44,10 +42,6 @@ class ApiClient(requests.Session):
                 kwargs['data'] = json
             else:
                 kwargs['json'] = json
-
-        if self.tracer:
-            # Creates tracing header
-            headers.update(self.tracer.headers)
 
         clean_kwargs = {
             key: value for key, value in kwargs.items()
@@ -137,12 +131,14 @@ class BaseService:
     default_timeout: int = 5 * 60
     service_url_param: str
 
-    def __init__(self, app=None, timeout=None, tracer=None, logger=None):
-        self.client = ApiClient(timeout or self.default_timeout, tracer, logger)
+    def __init__(self, app=None, timeout=None):
+        self.timeout = timeout
+        self.client = None
         if app:
             self.init_app(app)
 
     def init_app(self, app):
         """Configure service settings based on flask app config."""
+        self.client = ApiClient(self.timeout or self.default_timeout, app.logger)
         self.service_url = app.config.get(self.service_url_param)
         app.extensions[self.service_url] = self

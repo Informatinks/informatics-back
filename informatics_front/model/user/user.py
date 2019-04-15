@@ -1,9 +1,6 @@
 import hashlib
 
-from sqlalchemy.ext.associationproxy import association_proxy
-
 from informatics_front.model.base import db
-from informatics_front.model.statement import StatementUser
 from informatics_front.utils.auth.make_jwt import generate_auth_token
 
 
@@ -21,14 +18,6 @@ class SimpleUser(db.Model):
     deleted = db.Column('deleted', db.Boolean)
     problems_solved = db.Column(db.Integer)
     password_md5 = db.Column('password', db.Unicode(32))
-
-    statement = db.relationship(
-        'Statement',
-        secondary=StatementUser.__table__,
-        backref='StatementUsers1',
-        lazy='dynamic',
-    )
-    statements = association_proxy('StatementUsers2', 'statement')
 
 
 class User(SimpleUser):
