@@ -1,8 +1,13 @@
 import pytest
 from typing import List
 
-from informatics_front.model import StatementProblem, Problem, CourseModule, Statement, Comment, db
+from flask import g
+
+from informatics_front.model import StatementProblem, Problem, Statement, Comment, db
+from informatics_front.model.contest.contest_instance import ContestInstance
 from informatics_front.model.problem import EjudgeProblem
+from informatics_front.model.workshop.workshop import WorkShop, WorkshopStatus
+from informatics_front.model.workshop.workshop_connection import WorkshopConnection
 
 VALID_TIME = 100500
 COURSE_VISIBLE = 1
@@ -29,7 +34,30 @@ def problem(app) -> dict:
 
 
 @pytest.yield_fixture
-def course_module(app) -> dict:
+def workshop(app, statement, authorized_user):
+    w = WorkShop(status=WorkshopStatus.ONGOING)
+    db.session.add(w)
+    db.session.flush()
+
+    ci = ContestInstance(workshop_id=w.id, contest_id=statement.id)
+    db.session.add(ci)
+    db.session.flush()
+
+    wc = WorkshopConnection(workshop_id=w.id, user_id=g.user['id'])
+    db.session.add(wc)
+
+    db.session.commit()
+
+    yield {'workshop': workshop, 'contest_instance': ci}
+
+    db.session.delete(wc)
+    db.session.delete(ci)
+    db.session.delete(w)
+    db.session.commit()
+
+
+@pytest.yield_fixture
+def statement(app) -> dict:
     ejudge_problems = [
         EjudgeProblem.create(
             ejudge_prid=1,
@@ -75,21 +103,17 @@ def course_module(app) -> dict:
                          rank=3),
     ]
     db.session.add_all(statement_problems)
-    db.session.flush()
-
-    course_module = CourseModule(instance_id=statement.id, module=Statement.MODULE, visible=COURSE_VISIBLE, )
-    db.session.add(course_module)
     db.session.commit()
 
-    yield course_module
+    yield statement
 
     for sp in statement_problems:
         db.session.delete(sp)
     db.session.commit()
 
-    db.session.delete(course_module)
     db.session.delete(statement)
     db.session.commit()
+
 
 
 @pytest.yield_fixture

@@ -13,7 +13,7 @@ class JoinWorkshopApi(MethodView):
     @login_required
     def post(self, workshop_id: int):
         workshop = db.session.query(WorkShop).get(workshop_id)
-        self._reject_if_wrong_permisisons(workshop)
+        self._reject_if_wrong_permissions(workshop)
 
         user_id = g.user['id']
         workshop_connection = db.session.query(WorkshopConnection)\
