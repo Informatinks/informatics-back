@@ -24,7 +24,7 @@ class BaseConfig:
     URL_ENCODER_ALPHABET = os.getenv('URL_ENCODER_ALPHABET', 'abcdefghijkl')
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI',
-                                             'mysql+pymysql://root:pass123@localhost:33066/informatics')
+                                             'mysql+pymysql://user:12345@localhost/informatics')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True
 

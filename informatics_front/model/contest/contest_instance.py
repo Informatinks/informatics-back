@@ -1,4 +1,7 @@
+import datetime
+
 from informatics_front.model.base import db
+from informatics_front.model.workshop.contest_connection import ContestConnection
 
 
 class ContestInstance(db.Model):
@@ -14,7 +17,30 @@ class ContestInstance(db.Model):
     is_virtual = db.Column(db.Boolean, default=False)
     time_start = db.Column(db.DateTime)
     time_stop = db.Column(db.DateTime)
-    virtual_duration = db.Column(db.Integer)
+    virtual_duration = db.Column(db.Interval, default=datetime.timedelta(seconds=0))
+
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     contest = db.relationship('Statement')
     workshop = db.relationship('WorkShop')
+
+    def is_available_by_duration(self) -> bool:
+        """ Checks date time restrictions """
+        current_time = datetime.datetime.utcnow()
+        if self.time_start is not None and self.time_start > current_time:
+            return False
+        if self.time_stop is not None and self.time_stop < current_time:
+            return False
+        return True
+
+    def is_available_for_connection(self, cc: ContestConnection) -> bool:
+        """ Checks if virtual contest is not expired for ContestConnection """
+        if not self.is_virtual:
+            return True
+
+        current_time = datetime.datetime.utcnow()
+        if cc.created_at + self.virtual_duration < current_time:
+            return False
+
+        return True
+

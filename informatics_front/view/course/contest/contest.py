@@ -1,10 +1,10 @@
-from typing import Optional
+from typing import Optional, List
 
 from flask import g
 from flask.views import MethodView
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Load, joinedload
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, Forbidden
 
 from informatics_front.model import Problem, StatementProblem
 from informatics_front.model.base import db
@@ -13,13 +13,13 @@ from informatics_front.model.workshop.contest_connection import ContestConnectio
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection, WorkshopConnectionStatus
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.response import jsonify
-from informatics_front.view.course.contest.serializers.contest import ContestSchema
+from informatics_front.view.course.contest.serializers.contest import ContestSchema, ContestConnectionSchema
 
 
 class ContestApi(MethodView):
     @login_required
     def get(self, contest_instance_id):
-        contest_instance = db.session.query(ContestInstance) \
+        contest_instance: ContestInstance = db.session.query(ContestInstance) \
                             .options(joinedload(ContestInstance.contest)) \
                             .options(joinedload(ContestInstance.workshop)) \
                             .get(contest_instance_id)
@@ -31,19 +31,33 @@ class ContestApi(MethodView):
         self._check_workshop_permissions(user_id,
                                          contest_instance.workshop)
 
-        cc = self._get_contest_connection(user_id, contest_instance.id)
-        if cc is None:
-            # TODO: check contest_instance permissions
+        cc = self._get_contest_connection(user_id, contest_instance.id) or \
             self._create_contest_connection(user_id, contest_instance.id)
 
+        if not contest_instance.is_available_by_duration():
+            raise Forbidden('Contest is not started or already finished')
+
+        if not contest_instance.is_available_for_connection(cc):
+            raise Forbidden('You already out of contest time limit')
+
+        contest_instance.contest.problems = self._load_problems(contest_instance.contest_id)
+        cc.contest_instance = contest_instance
+
+        cc_schema = ContestConnectionSchema()
+
+        response = cc_schema.dump(cc)
+
+        return jsonify(response.data)
+
+    @staticmethod
+    def _load_problems(statement_id) -> List[Problem]:
+        """ Load Problems from Statement """
         problems_statement_problems = db.session.query(Problem, StatementProblem) \
             .join(StatementProblem, StatementProblem.problem_id == Problem.id) \
-            .filter(StatementProblem.statement_id == contest_instance.contest_id) \
+            .filter(StatementProblem.statement_id == statement_id) \
             .filter(StatementProblem.hidden == 0) \
             .options(Load(Problem).load_only('id', 'name')) \
             .options(Load(StatementProblem).load_only('rank'))
-
-        contest = contest_instance.contest
 
         problems = []
         # Yes it is ugly but I think its better than rewrite query
@@ -51,13 +65,7 @@ class ContestApi(MethodView):
             problem.rank = sp.rank
             problems.append(problem)
 
-        contest.problems = problems
-
-        contest_schema = ContestSchema()
-
-        response = contest_schema.dump(contest)
-
-        return jsonify(response.data)
+        return problems
 
     @classmethod
     def _check_workshop_permissions(cls, user_id, workshop) -> Optional[WorkshopConnection]:
@@ -72,20 +80,24 @@ class ContestApi(MethodView):
         return workshop_connection
 
     @classmethod
-    def _get_contest_connection(cls, user_id: int, contest_instance_id: int) -> ContestConnection:
+    def _get_contest_connection(cls, user_id: int, contest_instance_id: int) \
+            -> Optional[ContestConnection]:
+        """ Returns user connection on contest instance"""
         cc = db.session.query(ContestConnection) \
             .filter_by(user_id=user_id, contest_instance_id=contest_instance_id) \
             .one_or_none()
         return cc
 
     @classmethod
-    def _create_contest_connection(cls, user_id, contest_instance_id: int):
+    def _create_contest_connection(cls, user_id, contest_instance_id: int) -> ContestConnection:
+        """ Beware: we use COMMIT and ROLLBACK in this function! """
         cc = ContestConnection(user_id=user_id, contest_instance_id=contest_instance_id)
         db.session.begin_nested()
         try:
             db.session.add(cc)
             db.session.commit()
+            db.session.refresh(cc)
         except IntegrityError:
             db.session.rollback()
-            cc = cls._get_contest_connection(user_id, contest_instance_id)  # 7)
+            cc = cls._get_contest_connection(user_id, contest_instance_id)
         return cc

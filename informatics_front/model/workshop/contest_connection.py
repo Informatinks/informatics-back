@@ -4,7 +4,10 @@ from informatics_front.model.base import db
 
 
 class ContestConnection(db.Model):
-    __table_args__ = {'schema': 'pynformatics'}
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'contest_instance_id', name='_contest_user_uc'),
+        {'schema': 'pynformatics'},
+    )
     __tablename__ = 'contest_connection'
 
     id = db.Column(db.Integer, primary_key=True)
