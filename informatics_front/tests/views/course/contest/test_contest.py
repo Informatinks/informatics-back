@@ -2,11 +2,12 @@ import pytest
 
 from flask import url_for
 
+
 NON_EXISTING_ID = -1
 
 
 @pytest.mark.contest_problem
-def test_contest(client, authorized_user, workshop):
+def test_contest(client, authorized_user, workshop, workshop_connection):
 
     contest = workshop['contest_instance']
 
@@ -33,3 +34,12 @@ def test_contest(client, authorized_user, workshop):
 
     assert problem_content['rank'] == 1
     assert problem_content['name'].startswith('Problem')
+
+
+@pytest.fixture
+def test_contest_if_workshop_connection_not_exist(client, authorized_user, workshop):
+    contest = workshop['contest_instance']
+
+    url = url_for('contest.contest', contest_instance_id=contest.id)
+    resp = client.get(url)
+    assert resp.status_code == 404

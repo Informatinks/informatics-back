@@ -34,7 +34,7 @@ def problem(app) -> dict:
 
 
 @pytest.yield_fixture
-def workshop(app, statement, authorized_user):
+def workshop(app, statement):
     w = WorkShop(status=WorkshopStatus.ONGOING)
     db.session.add(w)
     db.session.flush()
@@ -43,17 +43,27 @@ def workshop(app, statement, authorized_user):
     db.session.add(ci)
     db.session.flush()
 
-    wc = WorkshopConnection(workshop_id=w.id, user_id=g.user['id'])
-    db.session.add(wc)
-
     db.session.commit()
 
-    yield {'workshop': workshop, 'contest_instance': ci}
+    yield {'workshop': w, 'contest_instance': ci}
 
-    db.session.delete(wc)
     db.session.delete(ci)
     db.session.delete(w)
     db.session.commit()
+
+
+@pytest.yield_fixture
+def workshop_connection(authorized_user, workshop):
+    w = workshop['workshop']
+
+    wc = WorkshopConnection(workshop_id=w.id, user_id=g.user['id'])
+    db.session.add(wc)
+    db.session.commit()
+
+    yield
+
+    db.session.delete(wc)
+
 
 
 @pytest.yield_fixture
