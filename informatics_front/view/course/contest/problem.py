@@ -13,17 +13,22 @@ from informatics_front.utils.response import jsonify
 from informatics_front.view.course.contest.serializers.problem import ProblemSchema
 
 
+def check_contest_connection(contest_id, error_obj: Exception) -> ContestConnection:
+    user_id = g.user['id']
+    cc = db.session.query(ContestConnection) \
+        .filter_by(user_id=user_id, contest_id=contest_id) \
+        .one_or_none()
+    if cc is None:
+        raise error_obj
+    return cc
+
+
 class ProblemApi(MethodView):
     @login_required
     def get(self, contest_id, problem_id):
-        user_id = g.user['id']
-        cc = db.session.query(ContestConnection) \
-                       .filter_by(user_id=user_id, contest_id=contest_id) \
-                       .one_or_none()
-
-        if cc is None:
-            raise NotFound(f'Problem with id #{problem_id} is not found or '
-                           f'you don\'t have permissions to participate')
+        check_contest_connection(contest_id,
+                                 NotFound(f'Problem with id #{problem_id} is not found or '
+                                          f'you don\'t have permissions to participate'))
 
         problem = db.session.query(Problem) \
             .options(joinedload(Problem.ejudge_problem)) \
@@ -57,14 +62,19 @@ class ProblemSubmissionApi(MethodView):
     }
 
     @login_required
-    def post(self, problem_id):
+    def post(self, contest_id, problem_id):
+        # TODO: Выпилить statement (NFRMTCS-192)
+
+        check_contest_connection(contest_id,
+                                 NotFound(f'Problem with id #{problem_id} is not found or '
+                                          f'you don\'t have permissions to participate'))
         user_id = g.user['id']
         args = parser.parse(self.post_args, request)
-
         file = request.files.get('file')
-
         if file is None:
             raise BadRequest('Parameter \'file\' is not fulfilled')
+
+        # TODO: Приделать контекст посылки (NFRMTCS-192)
 
         content, status = internal_rmatics.send_submit(file,
                                                        user_id,
@@ -74,11 +84,17 @@ class ProblemSubmissionApi(MethodView):
         return jsonify(content, status_code=status)
 
     @login_required
-    def get(self, problem_id):
+    def get(self, contest_id, problem_id):
+        check_contest_connection(contest_id,
+                                 NotFound(f'Problem with id #{problem_id} is not found or '
+                                          f'you don\'t have permissions to participate'))
+
         args = parser.parse(self.get_args, request, error_status_code=400)
 
         # set current authorized user to args
         args['user_id'] = g.user['id']
+
+        # TODO: Приделать контекст посылки (NFRMTCS-192)
 
         content, status = internal_rmatics.get_runs_filter(problem_id, args, is_admin=False)
         return jsonify(content, status_code=status)
