@@ -8,16 +8,16 @@ def test_is_available_by_duration():
     current_time = datetime.datetime.utcnow()
     available_contest = Contest(time_start=current_time - datetime.timedelta(seconds=1),
                                 time_stop=current_time + datetime.timedelta(days=2))
-    assert available_contest.is_available_by_duration()
+    assert available_contest._is_available_by_duration()
 
     not_started_contest = Contest(time_start=current_time + datetime.timedelta(days=1),
                                   time_stop=current_time + datetime.timedelta(days=2))
-    assert not not_started_contest.is_available_by_duration()
+    assert not not_started_contest._is_available_by_duration()
 
     finished_contest = Contest(time_start=current_time - datetime.timedelta(days=2),
                                time_stop=current_time - datetime.timedelta(days=1))
 
-    assert not finished_contest.is_available_by_duration()
+    assert not finished_contest._is_available_by_duration()
 
 
 def test_is_available_for_connection():
@@ -27,8 +27,8 @@ def test_is_available_for_connection():
     current_time = datetime.datetime.utcnow()
     allowed_cc = ContestConnection(created_at=current_time)
 
-    assert contest.is_available_for_connection(allowed_cc)
+    assert contest._is_available_for_connection(allowed_cc)
 
     finished_cc = ContestConnection(created_at=current_time - datetime.timedelta(hours=2))
 
-    assert not contest.is_available_for_connection(finished_cc)
+    assert not contest._is_available_for_connection(finished_cc)

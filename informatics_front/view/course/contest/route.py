@@ -9,7 +9,7 @@ contest_blueprint = Blueprint('contest', __name__, url_prefix='/api/v1/contest')
 contest_blueprint.add_url_rule('/<int:contest_id>', methods=('GET',),
                                view_func=ContestApi.as_view('contest'))
 
-contest_blueprint.add_url_rule('/problem/<int:problem_id>', methods=('GET',),
+contest_blueprint.add_url_rule('<int:contest_id>/problem/<int:problem_id>', methods=('GET',),
                                view_func=ProblemApi.as_view('problem'))
 
 contest_blueprint.add_url_rule('/problem/<int:problem_id>/submission', methods=('GET', 'POST'),

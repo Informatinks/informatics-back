@@ -5,6 +5,7 @@ from sqlalchemy.orm import joinedload
 from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound, BadRequest
 
+from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.plugins import internal_rmatics
 from informatics_front.model import db, Problem
 from informatics_front.utils.auth import login_required
@@ -14,12 +15,22 @@ from informatics_front.view.course.contest.serializers.problem import ProblemSch
 
 class ProblemApi(MethodView):
     @login_required
-    def get(self, problem_id):
+    def get(self, contest_id, problem_id):
+        user_id = g.user['id']
+        cc = db.session.query(ContestConnection) \
+                       .filter_by(user_id=user_id, contest_id=contest_id) \
+                       .one_or_none()
+
+        if cc is None:
+            raise NotFound(f'Problem with id #{problem_id} is not found or '
+                           f'you don\'t have permissions to participate')
+
         problem = db.session.query(Problem) \
             .options(joinedload(Problem.ejudge_problem)) \
             .get(problem_id)
         if problem is None:
-            raise NotFound(f'Problem with id #{problem_id} is not found')
+            raise NotFound(f'Problem with id #{problem_id} is not found or '
+                           f'you don\'t have permissions to participate')
 
         problem_serializer = ProblemSchema()
 

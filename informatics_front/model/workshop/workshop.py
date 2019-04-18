@@ -26,3 +26,4 @@ class WorkShop(db.Model):
                            default=WorkshopVisibility.PRIVATE)
 
 
+

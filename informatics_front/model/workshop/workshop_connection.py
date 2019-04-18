@@ -36,6 +36,9 @@ class WorkshopConnection(db.Model):
         backref=db.backref('connections', cascade='all, delete-orphan')
     )
 
+    def is_accepted(self):
+        return self.status == WorkshopConnectionStatus.ACCEPTED
+
     def __repr__(self):
         return (
             f'<WorkshopConnection '

@@ -24,7 +24,7 @@ class Contest(db.Model):
     statement = db.relationship('Statement')
     workshop = db.relationship('WorkShop')
 
-    def is_available_by_duration(self) -> bool:
+    def _is_available_by_duration(self) -> bool:
         """ Checks date time restrictions """
         current_time = datetime.datetime.utcnow()
         if self.time_start is not None and self.time_start > current_time:
@@ -33,7 +33,7 @@ class Contest(db.Model):
             return False
         return True
 
-    def is_available_for_connection(self, cc: ContestConnection) -> bool:
+    def _is_available_for_connection(self, cc: ContestConnection) -> bool:
         """ Checks if virtual contest is not expired for ContestConnection """
         if not self.is_virtual:
             return True
@@ -43,4 +43,8 @@ class Contest(db.Model):
             return False
 
         return True
+
+    def is_available(self, cc):
+        return self._is_available_by_duration() and \
+               self._is_available_for_connection(cc)
 

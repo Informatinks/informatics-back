@@ -1,6 +1,5 @@
 import io
-from unittest.mock import patch
-
+from unittest.mock import patch, MagicMock
 import pytest
 from flask import url_for
 
@@ -9,8 +8,11 @@ DEFAULT_COUNT = 10
 
 
 @pytest.mark.problem
-def test_problem(client, problem, authorized_user):
-    url = url_for('contest.problem', problem_id=problem.id)
+@pytest.mark.usefixtures('authorized_user')
+def test_problem(client, problem, contest_connection):
+    url = url_for('contest.problem',
+                  contest_id=contest_connection.contest_id,
+                  problem_id=problem.id)
     resp = client.get(url)
     assert resp.status_code == 200
 
@@ -23,8 +25,18 @@ def test_problem(client, problem, authorized_user):
     for field in ('content', 'description', 'memorylimit', 'name', 'output_only', 'timelimit',):
         assert getattr(problem, field) == content.get(field, -1)  # avoid None is None comparison
 
-
 #     Добавить ассерт на сэмплы
+
+
+@pytest.mark.problem
+@pytest.mark.usefixtures('authorized_user')
+def test_problem_without_connection(client, problem, ongoing_workshop):
+    contest = ongoing_workshop['contest']
+    url = url_for('contest.problem',
+                  contest_id=contest.id,
+                  problem_id=problem.id)
+    resp = client.get(url)
+    assert resp.status_code == 404
 
 
 @pytest.mark.problem
