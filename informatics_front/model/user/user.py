@@ -14,7 +14,7 @@ class SimpleUser(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.Unicode(100))
-    lastname = db.Column(db.Unicode(200))
+    lastname = db.Column(db.Unicode(100))
     deleted = db.Column('deleted', db.Boolean)
     problems_solved = db.Column(db.Integer)
     password_md5 = db.Column('password', db.Unicode(32))
@@ -25,7 +25,7 @@ class User(SimpleUser):
     username = db.Column(db.Unicode(100))
     email = db.Column(db.Unicode(100))
     city = db.Column(db.Unicode(20))
-    school = db.Column(db.Unicode(256))
+    school = db.Column(db.Unicode(255))
     problems_week_solved = db.Column(db.Integer)
 
     roles = db.relationship('Role',
