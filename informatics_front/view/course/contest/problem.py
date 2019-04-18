@@ -1,10 +1,11 @@
-from flask import request, g
+from flask import request
 from flask.views import MethodView
 from marshmallow import fields
 from sqlalchemy.orm import joinedload
 from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound, BadRequest
 
+from informatics_front import current_user
 from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.plugins import internal_rmatics
 from informatics_front.model import db, Problem
@@ -14,9 +15,8 @@ from informatics_front.view.course.contest.serializers.problem import ProblemSch
 
 
 def check_contest_connection(contest_id, error_obj: Exception) -> ContestConnection:
-    user_id = g.user['id']
     cc = db.session.query(ContestConnection) \
-        .filter_by(user_id=user_id, contest_id=contest_id) \
+        .filter_by(user_id=current_user.id, contest_id=contest_id) \
         .one_or_none()
     if cc is None:
         raise error_obj
@@ -68,7 +68,6 @@ class ProblemSubmissionApi(MethodView):
         check_contest_connection(contest_id,
                                  NotFound(f'Problem with id #{problem_id} is not found or '
                                           f'you don\'t have permissions to participate'))
-        user_id = g.user['id']
         args = parser.parse(self.post_args, request)
         file = request.files.get('file')
         if file is None:
@@ -77,7 +76,7 @@ class ProblemSubmissionApi(MethodView):
         # TODO: Приделать контекст посылки (NFRMTCS-192)
 
         content, status = internal_rmatics.send_submit(file,
-                                                       user_id,
+                                                       current_user.id,
                                                        problem_id,
                                                        args['statement_id'],
                                                        args['lang_id'])
@@ -92,7 +91,7 @@ class ProblemSubmissionApi(MethodView):
         args = parser.parse(self.get_args, request, error_status_code=400)
 
         # set current authorized user to args
-        args['user_id'] = g.user['id']
+        args['user_id'] = current_user.id
 
         # TODO: Приделать контекст посылки (NFRMTCS-192)
 

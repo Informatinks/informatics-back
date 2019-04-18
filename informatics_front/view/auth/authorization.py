@@ -9,6 +9,7 @@ from webargs.flaskparser import parser
 from werkzeug import exceptions as exc
 from werkzeug.exceptions import BadRequest
 
+from informatics_front import current_user
 from informatics_front.model import db
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.model.user.user import User
@@ -52,11 +53,12 @@ class LoginApi(MethodView):
         token = generate_refresh_token(user)
         refresh_token = RefreshToken(token=token, user_id=user.id)
         db.session.add(refresh_token)
-        db.session.commit()
 
         user_serializer = UserAuthSerializer()
         user.refresh_token = token
         user_data = user_serializer.dump(user)
+
+        db.session.commit()
 
         return jsonify(user_data.data)
 
@@ -68,14 +70,13 @@ class LogoutApi(MethodView):
 
     @login_required
     def post(self):
-        user = g.user
         args = parser.parse(self.post_args, request)
 
-        db.session.query(RefreshToken).filter_by(user_id=user['id'],
+        db.session.query(RefreshToken).filter_by(user_id=current_user.id,
                                                  token=args.get('refresh_token')).delete()
         db.session.commit()
 
-        current_app.logger.debug(f'user_id={user["id"]} has logged out')
+        current_app.logger.debug(f'user_id={current_user.id} has logged out')
 
         return jsonify({}, 200)
 

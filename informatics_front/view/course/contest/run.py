@@ -1,7 +1,7 @@
-from flask import g
 from flask.views import MethodView
 from sqlalchemy.orm import joinedload
 
+from informatics_front import current_user
 from informatics_front.plugins import internal_rmatics
 from informatics_front.model import Comment
 from informatics_front.model.base import db
@@ -20,8 +20,7 @@ PROTOCOL_EXCLUDE_TEST_FIELDS = [
 class RunSourceApi(MethodView):
     @login_required
     def get(self, run_id):
-        user_id = g.user['id']
-        context, status = internal_rmatics.get_run_source(run_id, user_id)
+        context, status = internal_rmatics.get_run_source(run_id, current_user.id)
 
         return jsonify(context, status_code=status)
 
@@ -29,8 +28,7 @@ class RunSourceApi(MethodView):
 class RunProtocolApi(MethodView):
     @login_required
     def get(self, run_id: int):
-        user_id = g.user['id']
-        context, status = internal_rmatics.get_full_run_protocol(run_id, user_id)
+        context, status = internal_rmatics.get_full_run_protocol(run_id, current_user.id)
 
         if status > 299:
             return jsonify(context, status_code=status)
@@ -63,12 +61,11 @@ class RunCommentsApi(MethodView):
         """
         Returns List[Comment] for current authorized user for requested run_id
         """
-        user = g.user
 
         # if provided run_id not not found, return []
         comments = db.session.query(Comment) \
             .filter(Comment.py_run_id == run_id,
-                    Comment.user_id == user.get('id')) \
+                    Comment.user_id == current_user.id) \
             .options(joinedload(Comment.author_user)) \
             .order_by(Comment.date.desc()) \
             .all()

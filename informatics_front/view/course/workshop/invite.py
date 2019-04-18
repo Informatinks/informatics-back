@@ -1,7 +1,7 @@
-from flask import g
 from flask.views import MethodView
 from werkzeug.exceptions import NotFound, BadRequest
 
+from informatics_front import current_user
 from informatics_front.model import db
 from informatics_front.model.workshop.workshop import WorkShop, WorkshopStatus
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection
@@ -15,7 +15,7 @@ class JoinWorkshopApi(MethodView):
         workshop = db.session.query(WorkShop).get(workshop_id)
         self._reject_if_wrong_permissions(workshop)
 
-        user_id = g.user['id']
+        user_id = current_user.id
         workshop_connection = db.session.query(WorkshopConnection)\
             .filter(WorkshopConnection.user_id == user_id) \
             .filter(WorkshopConnection.workshop_id == workshop_id) \

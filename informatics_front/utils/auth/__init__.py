@@ -5,6 +5,7 @@ from flask import current_app, request, g
 from jwt import ExpiredSignatureError
 from werkzeug.exceptions import Unauthorized
 
+from informatics_front import RequestUser
 from informatics_front.utils.decorators import deprecated
 
 
@@ -33,7 +34,7 @@ def authenticate():
     if 'id' not in user:
         raise Unauthorized('Invalid token')
 
-    g.user = user
+    g.user = RequestUser(user)
 
 
 def login_required(f):
