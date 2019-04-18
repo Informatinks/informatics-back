@@ -1,0 +1,104 @@
+openapi: 3.0.0
+
+info:
+  title: Informatics contest
+  version: 1.0.0
+  description: Informatics contest
+
+servers:
+  - url: http://85.93.88.189:12347
+    description: Dev-сервер
+
+tags:
+  - name: Contest
+    description: Контест
+  - name: Submissions
+    descriprion: Посылки
+
+paths:
+  /contest/run/{run_id}/source:
+    get:
+      tags:
+        - Run
+      summary: Получить исходник посылки
+      parameters:
+        - in: path
+          name: run_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the run to get source
+
+      security:
+        - jwt-token-auth: []
+
+      responses:
+        200:
+          description: Исходник посылки
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  language_id:
+                    type: integer
+                    description: Язык программирования посылкии
+                  source:
+                    type: string
+                    descroption: Исходник посылки
+        404:
+          description: Посылка не найдена
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+  /contest/run/{run_id}/protocol:
+    get:
+      tags:
+        - Run
+      summary: Получить протокол тестирования посылки
+      parameters:
+        - in: path
+          name: run_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the run to get source
+
+      security:
+        - jwt-token-auth: []
+
+      responses:
+        200:
+          description: Протокол тестирования посылки
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/RunProtocolSchema'
+        404:
+          description: Посылка не найдена
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+  /contest/run/{run_id}/comments:
+    get:
+      tags:
+        - Run
+      summary: Получить комментарии для посылки (Run), отсортированные по дате создания по убыванию
+      parameters:
+        - in: path
+          name: run_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the run to get source
+
+      security:
+        - jwt-token-auth: []
+
+      responses:
+        200:
+          description: Комментарии учителя для посылки
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/CommentSchema'
