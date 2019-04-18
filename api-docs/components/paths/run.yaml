@@ -6,7 +6,7 @@ info:
   description: Informatics contest
 
 servers:
-  - url: http://85.93.88.189:12347
+  - url: http://rmatics.tcsbank.info:12347
     description: Dev-сервер
 
 tags:
@@ -16,7 +16,7 @@ tags:
     descriprion: Посылки
 
 paths:
-  /contest/run/{run_id}/source:
+  /run/{run_id}/source:
     get:
       tags:
         - Run
@@ -27,7 +27,7 @@ paths:
           schema:
             type: integer
           required: true
-          description: Numeric ID of the run to get source
+          description: Numeric ID of the run
 
       security:
         - jwt-token-auth: []
@@ -51,7 +51,7 @@ paths:
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
-  /contest/run/{run_id}/protocol:
+  /run/{run_id}/protocol:
     get:
       tags:
         - Run
@@ -62,7 +62,7 @@ paths:
           schema:
             type: integer
           required: true
-          description: Numeric ID of the run to get source
+          description: Numeric ID of the run
 
       security:
         - jwt-token-auth: []
@@ -79,7 +79,7 @@ paths:
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
-  /contest/run/{run_id}/comments:
+  /run/{run_id}/comments:
     get:
       tags:
         - Run
@@ -90,7 +90,7 @@ paths:
           schema:
             type: integer
           required: true
-          description: Numeric ID of the run to get source
+          description: Numeric ID of the run
 
       security:
         - jwt-token-auth: []

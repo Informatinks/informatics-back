@@ -6,7 +6,7 @@ info:
   description: Informatics contest
 
 servers:
-  - url: http://85.93.88.189:12347
+  - url: http://rmatics.tcsbank.info:12347
     description: Dev-сервер
 
 tags:
@@ -16,7 +16,7 @@ tags:
     descriprion: Посылки
 
 paths:
-  /contest/problem/{problem_id}:
+  /contest/{contest_id}/problem/{problem_id}:
     get:
       tags:
         - Problem
@@ -24,6 +24,12 @@ paths:
       summary: Задача
 
       parameters:
+        - in: path
+          name: contest_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the contest with problem to get
         - in: path
           name: problem_id
           schema:
@@ -46,7 +52,7 @@ paths:
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
-  /contest/problem/{problem_id}/submission:
+  /contest/{contest_id}/problem/{problem_id}/submission:
     get:
       tags:
         - Submissions
@@ -57,6 +63,12 @@ paths:
         - jwt-token-auth: []
 
       parameters:
+        - in: path
+          name: contest_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the contest with problem to get submissions
         - in: path
           name: problem_id
           schema:
@@ -120,6 +132,20 @@ paths:
 
       security:
         - jwt-token-auth: []
+
+      parameters:
+        - in: path
+          name: contest_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the contest with problem to send submission
+        - in: path
+          name: problem_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the problem to get
 
       requestBody:
         content:
