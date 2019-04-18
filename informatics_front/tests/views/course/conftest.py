@@ -6,7 +6,7 @@ from typing import List
 from flask import g
 
 from informatics_front.model import StatementProblem, Problem, Statement, Comment, db
-from informatics_front.model.contest.contest_instance import ContestInstance
+from informatics_front.model.contest.contest import Contest
 from informatics_front.model.problem import EjudgeProblem
 from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.model.workshop.workshop import WorkShop, WorkshopStatus
@@ -45,13 +45,13 @@ def create_workshop(statement, status: WorkshopStatus):
     db.session.add(w)
     db.session.flush()
 
-    ci = ContestInstance(workshop_id=w.id, contest_id=statement.id)
+    ci = Contest(workshop_id=w.id, statement_id=statement.id)
     db.session.add(ci)
     db.session.flush()
 
     db.session.commit()
 
-    yield {'workshop': w, 'contest_instance': ci}
+    yield {'workshop': w, 'contest': ci}
 
     db.session.delete(ci)
     db.session.delete(w)
@@ -101,9 +101,9 @@ def applied_workshop_connection(authorized_user, ongoing_workshop):
 @pytest.yield_fixture
 def contest_connection(authorized_user, ongoing_workshop):
     user_id = g.user['id']
-    contest = ongoing_workshop['contest_instance']
+    contest = ongoing_workshop['contest']
 
-    cc = ContestConnection(user_id=user_id, contest_instance_id=contest.id)
+    cc = ContestConnection(user_id=user_id, contest_id=contest.id)
     db.session.add(cc)
     db.session.commit()
 

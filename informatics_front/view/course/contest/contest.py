@@ -8,40 +8,40 @@ from werkzeug.exceptions import NotFound, Forbidden
 
 from informatics_front.model import Problem, StatementProblem
 from informatics_front.model.base import db
-from informatics_front.model.contest.contest_instance import ContestInstance
+from informatics_front.model.contest.contest import Contest
 from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection, WorkshopConnectionStatus
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.response import jsonify
-from informatics_front.view.course.contest.serializers.contest import ContestSchema, ContestConnectionSchema
+from informatics_front.view.course.contest.serializers.contest import ContestConnectionSchema
 
 
 class ContestApi(MethodView):
     @login_required
-    def get(self, contest_instance_id):
-        contest_instance: ContestInstance = db.session.query(ContestInstance) \
-                            .options(joinedload(ContestInstance.contest)) \
-                            .options(joinedload(ContestInstance.workshop)) \
-                            .get(contest_instance_id)
+    def get(self, contest_id):
+        contest: Contest = db.session.query(Contest) \
+                            .options(joinedload(Contest.statement)) \
+                            .options(joinedload(Contest.workshop)) \
+                            .get(contest_id)
 
-        if contest_instance is None:
-            raise NotFound(f'Cannot find contest module id #{contest_instance_id}')
+        if contest is None:
+            raise NotFound(f'Cannot find contest module id #{contest_id}')
 
         user_id = g.user['id']
         self._check_workshop_permissions(user_id,
-                                         contest_instance.workshop)
+                                         contest.workshop)
 
-        cc = self._get_contest_connection(user_id, contest_instance.id) or \
-            self._create_contest_connection(user_id, contest_instance.id)
+        cc = self._get_contest_connection(user_id, contest.id) or \
+            self._create_contest_connection(user_id, contest.id)
 
-        if not contest_instance.is_available_by_duration():
+        if not contest.is_available_by_duration():
             raise Forbidden('Contest is not started or already finished')
 
-        if not contest_instance.is_available_for_connection(cc):
+        if not contest.is_available_for_connection(cc):
             raise Forbidden('You already out of contest time limit')
 
-        contest_instance.contest.problems = self._load_problems(contest_instance.contest_id)
-        cc.contest_instance = contest_instance
+        contest.statement.problems = self._load_problems(contest.statement_id)
+        cc.contest = contest
 
         cc_schema = ContestConnectionSchema()
 
@@ -80,18 +80,18 @@ class ContestApi(MethodView):
         return workshop_connection
 
     @classmethod
-    def _get_contest_connection(cls, user_id: int, contest_instance_id: int) \
+    def _get_contest_connection(cls, user_id: int, contest_id: int) \
             -> Optional[ContestConnection]:
         """ Returns user connection on contest instance"""
         cc = db.session.query(ContestConnection) \
-            .filter_by(user_id=user_id, contest_instance_id=contest_instance_id) \
+            .filter_by(user_id=user_id, contest_id=contest_id) \
             .one_or_none()
         return cc
 
     @classmethod
-    def _create_contest_connection(cls, user_id, contest_instance_id: int) -> ContestConnection:
+    def _create_contest_connection(cls, user_id, contest_id: int) -> ContestConnection:
         """ Beware: we use COMMIT and ROLLBACK in this function! """
-        cc = ContestConnection(user_id=user_id, contest_instance_id=contest_instance_id)
+        cc = ContestConnection(user_id=user_id, contest_id=contest_id)
         db.session.begin_nested()
         try:
             db.session.add(cc)
@@ -99,5 +99,5 @@ class ContestApi(MethodView):
             db.session.refresh(cc)
         except IntegrityError:
             db.session.rollback()
-            cc = cls._get_contest_connection(user_id, contest_instance_id)
+            cc = cls._get_contest_connection(user_id, contest_id)
         return cc

@@ -4,13 +4,13 @@ from informatics_front.model.base import db
 from informatics_front.model.workshop.contest_connection import ContestConnection
 
 
-class ContestInstance(db.Model):
+class Contest(db.Model):
     __table_args__ = {'schema': 'pynformatics'}
-    __tablename__ = 'contest_instance'
+    __tablename__ = 'contest'
 
     id = db.Column(db.Integer, primary_key=True)
     workshop_id = db.Column(db.Integer, db.ForeignKey('pynformatics.workshop.id'))
-    contest_id = db.Column(db.Integer, db.ForeignKey('moodle.mdl_statements.id'))
+    statement_id = db.Column(db.Integer, db.ForeignKey('moodle.mdl_statements.id'))
     author_id = db.Column(db.Integer)
     position = db.Column(db.Integer, default=1)
 
@@ -21,7 +21,7 @@ class ContestInstance(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
-    contest = db.relationship('Statement')
+    statement = db.relationship('Statement')
     workshop = db.relationship('WorkShop')
 
     def is_available_by_duration(self) -> bool:
