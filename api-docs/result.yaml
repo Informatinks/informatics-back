@@ -152,7 +152,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContestSchema'
+                $ref: '#/components/schemas/StatementSchema'
         '404':
           description: Контест не найден
           allOf:

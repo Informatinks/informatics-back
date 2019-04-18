@@ -1,15 +1,77 @@
 components:
   schemas:
-    SampleTest:
+
+    ContestConnectionSchema:
       type: object
-      description: Пример входных и выходных данных в задаче
+      description: Связь контеста и пользователя
       properties:
-        input:
+        id:
+          type: integer
+          description: ID Связи контеста и пользователя
+
+        created_at:
           type: string
-          description: Входные данные
-        correct:
+          format: date-time
+          description: Время начала прохождение контеста пользователем
+
+        contest:
+          $ref: '#/components/schemas/ContestSchema'
+
+    ContestSchema:
+      type: object
+      description: Контест с настройками
+      properties:
+        id:
+          type: integer
+          description: ID Контеста с настройками
+        workshop_id:
+          type: integer
+          description: ID Сбора
+
+        position:
+          type: integer
+          description: Позиция контеста в сборах
+
+        time_start:
           type: string
-          description: Выходные данные
+          format: date-time
+          description: Время открытия Контеста (если null, то сразу открыт)
+
+        time_stop:
+          type: string
+          format: date-time
+          description: Время закрытия Контеста (если null, то не закрывается)
+
+        is_virtual:
+          type: boolean
+          description: Виртуальный ли контест, "можно начать в любое время, но доступен не более 3 часов"
+
+        virtual_duration:
+          type: integer
+          description: Время на прохождение виртуального контеста в секундах
+
+        statement:
+          $ref: '#/components/schemas/StatementSchema'
+
+    StatementSchema:
+      type: object
+      description: Контест с задачами
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          description: ID Контеста
+
+        name:
+          type: string
+          description: Название контеста
+
+        summary:
+          type: string
+          description: Полное название контеста
+
+        problems:
+          $ref: '#/components/schemas/ContestProblemSchema'
 
     ContestProblemSchema:
       type: object
@@ -27,26 +89,6 @@ components:
         rank:
           type: integer
           description: Порядковый номер в Контесте
-
-    ContestSchema:
-      type: object
-      description: Контест
-      properties:
-        id:
-          type: integer
-          minimum: 1
-          description: ID Контеста
-
-        name:
-          type: string
-          description: Название контеста
-
-        summary:
-          type: string
-          description: Полное название контеста
-
-        problems:
-          - $ref: '#/components/schemas/ContestProblemSchema'
 
     ProblemSchema:
       type: object
@@ -78,11 +120,22 @@ components:
           description: ???
 
         sample_tests_json:
-          - $ref: '#/components/schemas/SampleTest'
+          $ref: '#/components/schemas/SampleTest'
 
         output_only:
           type: boolean
           description: Только output
+
+    SampleTest:
+      type: object
+      description: Пример входных и выходных данных в задаче
+      properties:
+        input:
+          type: string
+          description: Входные данные
+        correct:
+          type: string
+          description: Выходные данные
 
     UserAuthSchema:
       type: object

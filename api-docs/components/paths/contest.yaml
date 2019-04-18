@@ -41,9 +41,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../models.yaml#/components/schemas/ContestSchema'
+                $ref: '../models.yaml#/components/schemas/ContestConnectionSchema'
         404:
-          description: Контест не найден
+          description: Контест не найден или не открыт
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
