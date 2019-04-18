@@ -23,8 +23,8 @@ class BaseConfig:
     MONGO_URI = os.getenv('MONGO_URI', 'mongodb://user:12345@localhost/test')
     URL_ENCODER_ALPHABET = os.getenv('URL_ENCODER_ALPHABET', 'abcdefghijkl')
 
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI',
-                                        'mysql+pymysql://root:pass123@localhost:33066/informatics')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI',
+                                             'mysql+pymysql://user:12345@localhost/informatics')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True
 
@@ -38,7 +38,6 @@ class BaseConfig:
 
     # ejudge
     JUDGES_PATH = '/home/judges/'
-
 
 
 class DevConfig(BaseConfig):

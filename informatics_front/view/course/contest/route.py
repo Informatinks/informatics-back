@@ -6,7 +6,7 @@ from informatics_front.view.course.contest.run import RunSourceApi, RunProtocolA
 
 contest_blueprint = Blueprint('contest', __name__, url_prefix='/api/v1/contest')
 
-contest_blueprint.add_url_rule('/<int:course_module_id>', methods=('GET',),
+contest_blueprint.add_url_rule('/<int:contest_id>', methods=('GET',),
                                view_func=ContestApi.as_view('contest'))
 
 contest_blueprint.add_url_rule('/problem/<int:problem_id>', methods=('GET',),

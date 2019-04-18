@@ -67,7 +67,6 @@ class EjudgeProblem(Problem):
     """
 
     __table_args__ = (
-        db.Index('ejudge_contest_id_problem_id', 'ejudge_contest_id', 'problem_id'),
         {'schema':'moodle', 'extend_existing': True}
     )
     __tablename__ = 'mdl_ejudge_problem'

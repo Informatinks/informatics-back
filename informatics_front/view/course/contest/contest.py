@@ -1,34 +1,60 @@
-from flask.views import MethodView
-from sqlalchemy.orm import Load
-from werkzeug.exceptions import NotFound, BadRequest
+from typing import Optional, List
 
-from informatics_front.model import CourseModule
-from informatics_front.model import Problem, StatementProblem, Statement
+from flask import g
+from flask.views import MethodView
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Load, joinedload
+from werkzeug.exceptions import NotFound, Forbidden
+
+from informatics_front.model import Problem, StatementProblem
 from informatics_front.model.base import db
+from informatics_front.model.contest.contest import Contest
+from informatics_front.model.workshop.contest_connection import ContestConnection
+from informatics_front.model.workshop.workshop_connection import WorkshopConnection, WorkshopConnectionStatus
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.response import jsonify
-from informatics_front.view.course.contest.serializers.contest import ContestSchema
+from informatics_front.view.course.contest.serializers.contest import ContestConnectionSchema
 
 
 class ContestApi(MethodView):
     @login_required
-    def get(self, course_module_id):
-        course_module = db.session.query(CourseModule) \
-            .filter(CourseModule.id == course_module_id) \
-            .filter(CourseModule.visible == 1) \
-            .one_or_none()
+    def get(self, contest_id):
+        contest: Contest = db.session.query(Contest) \
+                            .options(joinedload(Contest.statement)) \
+                            .options(joinedload(Contest.workshop)) \
+                            .get(contest_id)
 
-        if course_module is None:
-            raise NotFound(f'Cannot find course module id #{course_module_id}')
+        if contest is None:
+            raise NotFound(f'Cannot find contest module id #{contest_id}')
 
-        contest = course_module.instance
+        user_id = g.user['id']
+        self._check_workshop_permissions(user_id,
+                                         contest.workshop)
 
-        if not isinstance(contest, Statement):
-            raise BadRequest('This resource is not implemented yet')
+        cc = self._get_contest_connection(user_id, contest.id) or \
+            self._create_contest_connection(user_id, contest.id)
 
+        if not contest.is_available_by_duration():
+            raise Forbidden('Contest is not started or already finished')
+
+        if not contest.is_available_for_connection(cc):
+            raise Forbidden('You already out of contest time limit')
+
+        contest.statement.problems = self._load_problems(contest.statement_id)
+        cc.contest = contest
+
+        cc_schema = ContestConnectionSchema()
+
+        response = cc_schema.dump(cc)
+
+        return jsonify(response.data)
+
+    @staticmethod
+    def _load_problems(statement_id) -> List[Problem]:
+        """ Load Problems from Statement """
         problems_statement_problems = db.session.query(Problem, StatementProblem) \
             .join(StatementProblem, StatementProblem.problem_id == Problem.id) \
-            .filter(StatementProblem.statement_id == contest.id) \
+            .filter(StatementProblem.statement_id == statement_id) \
             .filter(StatementProblem.hidden == 0) \
             .options(Load(Problem).load_only('id', 'name')) \
             .options(Load(StatementProblem).load_only('rank'))
@@ -39,11 +65,39 @@ class ContestApi(MethodView):
             problem.rank = sp.rank
             problems.append(problem)
 
-        contest.problems = problems
+        return problems
 
-        contest_schema = ContestSchema()
+    @classmethod
+    def _check_workshop_permissions(cls, user_id, workshop) -> Optional[WorkshopConnection]:
+        workshop_connection = db.session.query(WorkshopConnection) \
+                                        .filter_by(user_id=user_id,
+                                                   workshop_id=workshop.id) \
+                                        .one_or_none()
+        if workshop_connection is None or \
+                workshop_connection.status != WorkshopConnectionStatus.ACCEPTED:
+            raise NotFound('Contest is not found')
 
-        response = contest_schema.dump(contest)
+        return workshop_connection
 
-        return jsonify(response.data)
+    @classmethod
+    def _get_contest_connection(cls, user_id: int, contest_id: int) \
+            -> Optional[ContestConnection]:
+        """ Returns user connection on contest instance"""
+        cc = db.session.query(ContestConnection) \
+            .filter_by(user_id=user_id, contest_id=contest_id) \
+            .one_or_none()
+        return cc
 
+    @classmethod
+    def _create_contest_connection(cls, user_id, contest_id: int) -> ContestConnection:
+        """ Beware: we use COMMIT and ROLLBACK in this function! """
+        cc = ContestConnection(user_id=user_id, contest_id=contest_id)
+        db.session.begin_nested()
+        try:
+            db.session.add(cc)
+            db.session.commit()
+            db.session.refresh(cc)
+        except IntegrityError:
+            db.session.rollback()
+            cc = cls._get_contest_connection(user_id, contest_id)
+        return cc
