@@ -9,7 +9,7 @@ INVALID_RUN = -1
 
 @pytest.mark.run
 def test_get_run_source(client, authorized_user):
-    with patch('informatics_front.internal_rmatics.get_run_source') as get_run_source:
+    with patch('informatics_front.plugins.internal_rmatics.get_run_source') as get_run_source:
         get_run_source.return_value = ({}, 200)
         run_id = 3
         url = url_for('run.source', run_id=run_id)
@@ -22,7 +22,7 @@ def test_get_run_source(client, authorized_user):
 
 @pytest.mark.run
 def test_get_run_protocol(client, authorized_user):
-    with patch('informatics_front.internal_rmatics.get_full_run_protocol') \
+    with patch('informatics_front.plugins.internal_rmatics.get_full_run_protocol') \
             as get_full_run_protocol:
         run_id = 3
         full_protocol = {

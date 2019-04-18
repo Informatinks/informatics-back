@@ -2,7 +2,7 @@ from flask import g
 from flask.views import MethodView
 from sqlalchemy.orm import joinedload
 
-from informatics_front import internal_rmatics
+from informatics_front.plugins import internal_rmatics
 from informatics_front.model import Comment
 from informatics_front.model.base import db
 from informatics_front.utils.auth import login_required

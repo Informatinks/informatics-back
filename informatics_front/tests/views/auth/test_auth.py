@@ -5,7 +5,7 @@ from unittest import mock
 from flask import g
 from werkzeug.exceptions import Unauthorized
 
-from informatics_front import authenticate
+from informatics_front.utils.auth import authenticate
 from informatics_front.utils.auth.make_jwt import decode_jwt_token
 
 

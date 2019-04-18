@@ -1,7 +1,8 @@
 import pytest
 
-from informatics_front import create_app, authenticate
-from informatics_front import db
+from informatics_front.utils.auth import authenticate
+from informatics_front.app_factory import create_app
+from informatics_front.model import db
 from informatics_front.model import Role
 
 VALID_TIME = 100500

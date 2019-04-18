@@ -9,7 +9,7 @@ from webargs.flaskparser import parser
 from werkzeug import exceptions as exc
 from werkzeug.exceptions import BadRequest
 
-from informatics_front import db
+from informatics_front.model import db
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.model.user.user import User
 from informatics_front.plugins import gmail

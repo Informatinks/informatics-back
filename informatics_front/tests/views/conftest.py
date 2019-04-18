@@ -5,7 +5,7 @@ import pytest
 from flask import g
 from werkzeug.local import LocalProxy
 
-from informatics_front import db
+from informatics_front.model import db
 from informatics_front.model import User
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.utils.auth.make_jwt import generate_refresh_token

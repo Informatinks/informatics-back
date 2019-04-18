@@ -60,7 +60,7 @@ def test_get_problem_submission(client, problem):
     user_id = g.user['id']
     url = url_for('contest.submissions', contest_id=12345,
                   problem_id=problem.id, page=DEFAULT_PAGE, )
-    with patch('informatics_front.internal_rmatics.get_runs_filter') as get_runs_filter:
+    with patch('informatics_front.plugins.internal_rmatics.get_runs_filter') as get_runs_filter:
         get_runs_filter.return_value = ({}, 200)
         with patch('informatics_front.view.course.contest.problem.check_contest_connection') as mock_check_conn:
             resp = client.get(url)
@@ -79,7 +79,7 @@ def test_send_submission(client, problem, contest_connection):
         'file': (io.BytesIO(b'sample data'), 'test.cpp', )
     }
     url = url_for('contest.submissions', problem_id=problem.id, contest_id=contest_connection.contest_id)
-    with patch('informatics_front.internal_rmatics.send_submit') as send_submit:
+    with patch('informatics_front.plugins.internal_rmatics.send_submit') as send_submit:
         send_submit.return_value = ({}, 200)
         with patch('informatics_front.view.course.contest.problem.check_contest_connection') as mock_check_conn:
             resp = client.post(url, data=data, content_type='multipart/form-data')

@@ -1,6 +1,6 @@
 import pytest
 
-from informatics_front import db
+from informatics_front.model import db
 from informatics_front.model.workshop.workshop import WorkShop, WorkshopStatus
 
 
