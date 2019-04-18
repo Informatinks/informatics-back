@@ -26,7 +26,7 @@ class BaseConfig:
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI',
                                              'mysql+pymysql://user:12345@localhost/informatics')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = False
 
     # services
     INTERNAL_RMATICS_URL = os.getenv('INTERNAL_RMATICS_URL')
@@ -38,14 +38,13 @@ class BaseConfig:
 
 
 class DevConfig(BaseConfig):
-    ...
+    SQLALCHEMY_ECHO = True
 
 
 class TestConfig(BaseConfig):
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_ECHO = False
 
 
 class ProdConfig(BaseConfig):
-    SQLALCHEMY_ECHO = False
+    ...
