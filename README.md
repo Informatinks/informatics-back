@@ -12,39 +12,33 @@ Global environment should be passed in different ways depending on boot method:
 
 App-specific settings should be provided as env vars along with `FLASK_ENV` and `FLASK_APP`. A complete list of supported ones can be found in `informatics_front/config.py`. 
 
-### Database population 
+### Database schemas
 
-Create databases as described in `docker/create-databases.sql`. This DB schema is valid for all environments.
+* `ejudge`;
+* `moodle`;
+* `pynformatics` — primary;
+* `informatics`.
 
 ### Database migration
 
-1. Ensure DB connection string points to primary migration DB:
-    ```
-    SQLALCHEMY_DATABASE_URI=mysql+pymysql://root:@localhost/pynformatics
-    ```
-    Note `/pynformatics` at the end.
-2. Refrenced tables should be the same engine type (InnoDB) as parent;
-3. FKey types should be the same type as PKeys e.g. (`bigint(10) unsigned`);
-4. Any previously manually created tables should be deleted.
+Ensure DB connection string points to primary migration DB. Note `/pynformatics` at the end.
 
-To switch to migration-based workdlow:
+```
+SQLALCHEMY_DATABASE_URI=mysql+pymysql://root:@localhost/pynformatics
+```
 
-1. Convert `moodle.mdl_statements` to InnoDB (refrenced by `contest_instance`):
-    ```
-    ALTER TABLE moodle.mdl_statements ENGINE = InnoDB;
-    ```
-2. Ensure all FKey refs are described with correspnding types in migrations:
-    ```
-    from sqlalchemy.dialects.mysql import BIGINT
-    ...
-    sa.Column('contest_id', BIGINT(display_width=10, unsigned=True), nullable=True), # <-> for
-    ```
-    or similar.
-3. Remove any pre-existing tables:
-   ```
-   drop database refresh_token;
-   ```
-   
+Remove any pre-existing tables:
+
+```
+drop database refresh_token;
+```
+
+We use utf8 character set. Any previously created DB with different charset should be converted:
+
+```
+ALTER DATABASE pynformatics CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+```
+
 Then update to current schema:
 
 ```
@@ -62,6 +56,22 @@ flask db migrate
 flask db upgrade
 ```
 
+#### Deprecated
+
+1. Convert `moodle.mdl_statements` to InnoDB (refrenced by `contest_instance`):
+    ```
+    ALTER TABLE moodle.mdl_statements ENGINE = InnoDB;
+    ```
+    
+    Refrenced tables should be the same engine type (InnoDB) as parent;
+2. Ensure all FKey refs are described with correspnding types in migrations:
+    ```
+    from sqlalchemy.dialects.mysql import BIGINT
+    ...
+    sa.Column('contest_id', BIGINT(display_width=10, unsigned=True), nullable=True), # <-> for
+    ```
+    or similar. FKey types should be the same type as PKeys e.g. (`bigint(10) unsigned`);
+ 
 ## Running tests
 
 ### Docker

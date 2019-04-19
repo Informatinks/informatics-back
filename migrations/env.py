@@ -14,7 +14,7 @@ WHITELISTED_SCHEMAS = (
 )
 WHITELISTED_TABLES = (
     'contest_connection',
-    'contest_instance',
+    'contest',
     'refresh_token',
     'workshop',
     'workshop_connection',
@@ -43,7 +43,17 @@ target_metadata = current_app.extensions['migrate'].db.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-def include_object(object, name, type_, reflected, compare_to) -> bool:
+def allow_migrate(table: Table) -> bool:
+    """Check if provided Table instance is whitelisted for migrations
+
+    :param table: SQLAlchemy Table instance, for which check
+           if it's applied for migrations
+    :return:
+    """
+    return table.schema in WHITELISTED_SCHEMAS and table.name in WHITELISTED_TABLES
+
+
+def include_object(target, name, type_, reflected, compare_to) -> bool:
     """ Check if provided migration object authorized for applying migration operation on.
 
     Operations can be applied on:
@@ -55,24 +65,13 @@ def include_object(object, name, type_, reflected, compare_to) -> bool:
     :return: Boolean, corresponding if current object is appliable for migrations
     """
 
-    def authorize_table(table: Table) -> bool:
-        """Check if provided Table instance is whitelisted for migrations
-
-        :param table: SQLAlchemy Table instance, for which check
-               if it's applied for migrations
-        :return:
-        """
-        if table.schema in WHITELISTED_SCHEMAS and table.name in WHITELISTED_TABLES:
-            return True
-        return False
-
     # authorize table operations
-    if isinstance(object, Table):
-        return authorize_table(object)
+    if isinstance(target, Table):
+        return allow_migrate(target)
 
     # authorize column operations by table it belongs to
-    if isinstance(object, Column):
-        return authorize_table(object.table)
+    if isinstance(target, Column):
+        return allow_migrate(target.table)
 
     return False
 
