@@ -50,8 +50,7 @@ class BaseConfig:
 
 
 class DevConfig(BaseConfig):
-    SQLALCHEMY_ECHO = True
-
+    DEBUG = True
 
 class TestConfig(BaseConfig):
     DEBUG = True
