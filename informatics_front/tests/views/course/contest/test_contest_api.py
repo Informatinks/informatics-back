@@ -3,7 +3,7 @@ import pytest
 from flask import url_for, g
 from werkzeug.exceptions import NotFound
 
-from informatics_front import db
+from informatics_front.model import db
 from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.view.course.contest.contest import ContestApi
 

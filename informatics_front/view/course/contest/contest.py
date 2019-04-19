@@ -1,11 +1,11 @@
 from typing import Optional, List
 
-from flask import g
 from flask.views import MethodView
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Load, joinedload
 from werkzeug.exceptions import NotFound, Forbidden
 
+from informatics_front import current_user
 from informatics_front.model import Problem, StatementProblem
 from informatics_front.model.base import db
 from informatics_front.model.contest.contest import Contest
@@ -27,18 +27,15 @@ class ContestApi(MethodView):
         if contest is None:
             raise NotFound(f'Cannot find contest module id #{contest_id}')
 
-        user_id = g.user['id']
+        user_id = current_user.id
         self._check_workshop_permissions(user_id,
                                          contest.workshop)
 
         cc = self._get_contest_connection(user_id, contest.id) or \
             self._create_contest_connection(user_id, contest.id)
 
-        if not contest.is_available_by_duration():
+        if not contest.is_available(cc):
             raise Forbidden('Contest is not started or already finished')
-
-        if not contest.is_available_for_connection(cc):
-            raise Forbidden('You already out of contest time limit')
 
         contest.statement.problems = self._load_problems(contest.statement_id)
         cc.contest = contest
@@ -73,11 +70,9 @@ class ContestApi(MethodView):
                                         .filter_by(user_id=user_id,
                                                    workshop_id=workshop.id) \
                                         .one_or_none()
-        if workshop_connection is None or \
-                workshop_connection.status != WorkshopConnectionStatus.ACCEPTED:
-            raise NotFound('Contest is not found')
-
-        return workshop_connection
+        if workshop_connection is not None and workshop_connection.is_accepted():
+            return workshop_connection
+        raise NotFound('Contest is not found')
 
     @classmethod
     def _get_contest_connection(cls, user_id: int, contest_id: int) \

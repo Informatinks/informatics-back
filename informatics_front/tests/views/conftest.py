@@ -5,7 +5,8 @@ import pytest
 from flask import g
 from werkzeug.local import LocalProxy
 
-from informatics_front import db
+from informatics_front import RequestUser
+from informatics_front.model import db
 from informatics_front.model import User
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.utils.auth.make_jwt import generate_refresh_token
@@ -59,12 +60,8 @@ def user_with_token(users) -> dict:
 def authorized_user(app, user_with_token) -> LocalProxy:
     roles_serializer = RoleAuthSerializer(many=True)
     roles = roles_serializer.dumps(user_with_token['user'].roles)
-    user_data = {
-        'id': user_with_token['user'].id,
-        'roles': roles.data,
-    }
 
-    g.user = user_data
+    g.user = RequestUser(id=user_with_token['user'].id, roles=roles.data)
 
     yield g
 

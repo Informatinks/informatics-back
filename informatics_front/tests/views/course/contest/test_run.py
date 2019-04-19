@@ -9,10 +9,10 @@ INVALID_RUN = -1
 
 @pytest.mark.run
 def test_get_run_source(client, authorized_user):
-    with patch('informatics_front.internal_rmatics.get_run_source') as get_run_source:
+    with patch('informatics_front.plugins.internal_rmatics.get_run_source') as get_run_source:
         get_run_source.return_value = ({}, 200)
         run_id = 3
-        url = url_for('contest.run_source', run_id=run_id)
+        url = url_for('run.source', run_id=run_id)
         resp = client.get(url)
 
         assert resp.status_code == 200
@@ -22,7 +22,7 @@ def test_get_run_source(client, authorized_user):
 
 @pytest.mark.run
 def test_get_run_protocol(client, authorized_user):
-    with patch('informatics_front.internal_rmatics.get_full_run_protocol') \
+    with patch('informatics_front.plugins.internal_rmatics.get_full_run_protocol') \
             as get_full_run_protocol:
         run_id = 3
         full_protocol = {
@@ -38,7 +38,7 @@ def test_get_run_protocol(client, authorized_user):
 
         get_full_run_protocol.return_value = (full_protocol, 200,)
 
-        url = url_for('contest.run_protocol', run_id=run_id)
+        url = url_for('run.protocol', run_id=run_id)
         resp = client.get(url)
 
         assert resp.status_code == 200
@@ -54,7 +54,7 @@ def test_get_run_comments(client, users, authorized_user, comments):
        we've got exactly one particular comment"""
     for comment in comments:
         py_run_id = comment.py_run_id
-        url = url_for('contest.run_comments', run_id=py_run_id)
+        url = url_for('run.comments', run_id=py_run_id)
 
         resp = client.get(url)
         assert resp.status_code == 200
@@ -81,7 +81,7 @@ def test_get_run_comments(client, users, authorized_user, comments):
 def test_get_run_comments_for_invalid_user(client, authorized_user, comment):
     """Ensure invalid user in context returns 0 comments"""
     g.user['id'] = NON_EXISTING_USER
-    url = url_for('contest.run_comments', run_id=comment.py_run_id)
+    url = url_for('run.comments', run_id=comment.py_run_id)
 
     resp = client.get(url)
     assert resp.status_code == 200
@@ -96,7 +96,7 @@ def test_get_run_comments_for_invalid_user(client, authorized_user, comment):
 @pytest.mark.comment
 def test_get_run_comments_for_invalid_run_id(client, authorized_user):
     """Ensure invalid run_id returns 0 comments"""
-    url = url_for('contest.run_comments', run_id=NON_EXISTING_RUN)
+    url = url_for('run.comments', run_id=NON_EXISTING_RUN)
 
     resp = client.get(url)
     assert resp.status_code == 200
@@ -108,7 +108,7 @@ def test_get_run_comments_for_invalid_run_id(client, authorized_user):
     assert len(content) == 0
 
     # for non-integer run should return 404, defined by URL parameter parser
-    url = url_for('contest.run_comments', run_id=INVALID_RUN)
+    url = url_for('run.comments', run_id=INVALID_RUN)
 
     resp = client.get(url)
     assert resp.status_code == 404

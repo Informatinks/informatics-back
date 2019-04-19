@@ -1,6 +1,6 @@
 from flask import url_for, g
 
-from informatics_front import db
+from informatics_front.model import db
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection
 
 

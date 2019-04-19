@@ -1,6 +1,6 @@
 import os
 
-from informatics_front import create_app
+from informatics_front.app_factory import create_app
 
 # avialable cofig modules
 DEV_CONFIG_MODULE = 'informatics_front.config.DevConfig'
