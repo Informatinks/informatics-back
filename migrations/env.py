@@ -1,8 +1,27 @@
 from __future__ import with_statement
-from alembic import context
-from sqlalchemy import engine_from_config, pool
+
+import logging
 from logging.config import fileConfig
 
+from alembic import context
+from sqlalchemy import Column, Table
+from sqlalchemy import engine_from_config, pool
+from werkzeug.utils import import_string
+
+from informatics_front.config import CONFIG_MODULE
+
+# Use main app config to match the same DB connection options
+app_config = import_string(CONFIG_MODULE)
+WHITELISTED_SCHEMAS = (
+    'pynformatics',
+)
+WHITELISTED_TABLES = (
+    'contest_connection',
+    'contest',
+    'refresh_token',
+    'workshop',
+    'workshop_connection',
+)
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -10,18 +29,54 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
+logger = logging.getLogger('alembic.env')
 
-from flask import current_app
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
+from flask import current_app
+
+config.set_main_option('sqlalchemy.url', app_config.SQLALCHEMY_DATABASE_URI)
 target_metadata = current_app.extensions['migrate'].db.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
+def allow_migrate(table: Table) -> bool:
+    """Check if provided Table instance is whitelisted for migrations.
+
+    :param table: SQLAlchemy Table instance, for which check
+           if it's applied for migrations
+    :return: Boolean, corresponding if Table is appliable for migrations
+    """
+    return table.schema in WHITELISTED_SCHEMAS and table.name in WHITELISTED_TABLES
+
+
+def include_object(target, name, type_, reflected, compare_to) -> bool:
+    """ Check if provided migration object authorized for applying migration operation on.
+
+    Operations can be applied on:
+
+    * Table
+    * Column
+    * Index
+
+    :return: Boolean, corresponding if current object is appliable for migrations
+    """
+
+    # authorize table operations
+    if isinstance(target, Table):
+        return allow_migrate(target)
+
+    # authorize column operations by table it belongs to
+    if isinstance(target, Column):
+        return allow_migrate(target.table)
+
+    return False
 
 
 def run_migrations_offline():
@@ -37,8 +92,7 @@ def run_migrations_offline():
 
     """
     url = config.get_main_option("sqlalchemy.url")
-    context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True)
+    context.configure(url=url, include_object=include_object)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -51,19 +105,39 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
-        prefix='sqlalchemy.',
-        poolclass=pool.NullPool)
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata
-        )
+    # this callback is used to prevent an auto-migration from being generated
+    # when there are no changes to the schema
+    # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
+    def process_revision_directives(context, revision, directives):
+        if getattr(config.cmd_opts, 'autogenerate', False):
+            script = directives[0]
+            if script.upgrade_ops.is_empty():
+                directives[:] = []
+                logger.info('No changes in schema detected.')
 
+    engine = engine_from_config(config.get_section(config.config_ini_section),
+                                prefix='sqlalchemy.',
+                                poolclass=pool.NullPool)
+
+    connection = engine.connect()
+    context.configure(connection=connection,
+                      target_metadata=target_metadata,
+                      process_revision_directives=process_revision_directives,
+                      include_schemas=True,
+                      keep_existing=True,
+                      include_object=include_object,
+                      **current_app.extensions['migrate'].configure_args)
+
+    try:
         with context.begin_transaction():
             context.run_migrations()
+    except Exception as exception:
+        logger.error(exception)
+        raise exception
+    finally:
+        connection.close()
+
 
 if context.is_offline_mode():
     run_migrations_offline()
