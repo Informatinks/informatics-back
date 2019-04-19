@@ -1,5 +1,17 @@
 import os
 
+# avialable cofig modules
+DEV_CONFIG_MODULE = 'informatics_front.config.DevConfig'
+TEST_CONFIG_MODULE = 'informatics_front.TestConfig'
+PROD_CONFIG_MODULE = 'informatics_front.config.ProdConfig'
+
+# env-config mapping
+CONFIG_ENV_MODULES = {
+    'development': DEV_CONFIG_MODULE,
+    'testing': TEST_CONFIG_MODULE,
+    'production': PROD_CONFIG_MODULE,
+}
+
 
 class BaseConfig:
     # global
@@ -24,7 +36,7 @@ class BaseConfig:
     URL_ENCODER_ALPHABET = os.getenv('URL_ENCODER_ALPHABET', 'abcdefghijkl')
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI',
-                                             'mysql+pymysql://user:12345@localhost/informatics')
+                                             'mysql+pymysql://user:12345@localhost/pynformatics')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
 
@@ -48,3 +60,9 @@ class TestConfig(BaseConfig):
 
 class ProdConfig(BaseConfig):
     ...
+
+
+# Determine appropriate config class based on provided env var,
+# failback to dev, if `FLASK_ENV` has invalid value.
+ENV = os.getenv('FLASK_ENV', 'development')
+CONFIG_MODULE = CONFIG_ENV_MODULES.get(ENV, DEV_CONFIG_MODULE)

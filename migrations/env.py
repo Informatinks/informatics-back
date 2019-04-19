@@ -6,9 +6,12 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import Column, Table
 from sqlalchemy import engine_from_config, pool
+from werkzeug.utils import import_string
 
-from informatics_front.config import DevConfig
+from informatics_front.config import CONFIG_MODULE
 
+# Use main app config to match the same DB connection options
+app_config = import_string(CONFIG_MODULE)
 WHITELISTED_SCHEMAS = (
     'pynformatics',
 )
@@ -34,7 +37,7 @@ logger = logging.getLogger('alembic.env')
 # target_metadata = mymodel.Base.metadata
 from flask import current_app
 
-config.set_main_option('sqlalchemy.url', DevConfig.SQLALCHEMY_DATABASE_URI)
+config.set_main_option('sqlalchemy.url', app_config.SQLALCHEMY_DATABASE_URI)
 target_metadata = current_app.extensions['migrate'].db.metadata
 
 
@@ -44,11 +47,11 @@ target_metadata = current_app.extensions['migrate'].db.metadata
 # ... etc.
 
 def allow_migrate(table: Table) -> bool:
-    """Check if provided Table instance is whitelisted for migrations
+    """Check if provided Table instance is whitelisted for migrations.
 
     :param table: SQLAlchemy Table instance, for which check
            if it's applied for migrations
-    :return:
+    :return: Boolean, corresponding if Table is appliable for migrations
     """
     return table.schema in WHITELISTED_SCHEMAS and table.name in WHITELISTED_TABLES
 
