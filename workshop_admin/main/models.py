@@ -11,6 +11,7 @@ class Contest(models.Model):
     is_virtual = models.BooleanField(blank=True, null=True, default=False)
     time_start = models.DateTimeField(blank=True, null=True)
     time_stop = models.DateTimeField(blank=True, null=True)
+    # Datetime?
     virtual_duration = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 

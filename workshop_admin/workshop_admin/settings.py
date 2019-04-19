@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'moodle',
 ]
 
 MIDDLEWARE = [
@@ -78,34 +79,23 @@ WSGI_APPLICATION = 'workshop_admin.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'moodle',
+        'USER': 'user',
+        'PASSWORD': '12345',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+
+    },
+    'pynformatics': {
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'pynformatics',
         'USER': 'user',
         'PASSWORD': '12345',
         'HOST': '127.0.0.1',
         'PORT': '3306',
 
-    }
+    },
 }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -125,3 +115,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+AUTH_USER_MODEL = 'moodle.MoodleUser'
+
+AUTHENTICATION_BACKENDS = (
+    'main.middleware.MoodleAccountAuthorization',
+)
+
+DATABASE_ROUTERS = (
+    'main.db_router.PynformaticsRouter',
+    'moodle.db_router.MoodleRouter',
+)
