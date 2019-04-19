@@ -1,5 +1,7 @@
 import pytest
+from flask import g
 
+from informatics_front import RequestUser
 from informatics_front.utils.auth import authenticate
 from informatics_front.app_factory import create_app
 from informatics_front.model import db
@@ -13,6 +15,11 @@ COURSE_VISIBLE = 1
 def app():
     flask_app = create_app(config='informatics_front.config.TestConfig')
     flask_app.before_request_funcs[None].remove(authenticate)
+
+    def fix_current_user():
+        g.user = getattr(g, 'user', RequestUser({}))
+
+    flask_app.before_request(fix_current_user)
 
     with flask_app.app_context():
         # Prevent tests from failing due to existing test database

@@ -5,6 +5,7 @@ from unittest import mock
 import pytest
 from flask import url_for, g
 
+from informatics_front import RequestUser
 from informatics_front.model import User, db
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.plugins import tokenizer
@@ -107,7 +108,7 @@ def test_signout(client, users):
     assert token_containers[0].refresh_token != token_containers[1].refresh_token
 
     # mock: set user id into session,
-    g.user = {'id': user.get('id')}
+    g.user = RequestUser({'id': user.get('id')})
 
     # 422 if no refesh_token provided
     resp = client.post(logout_url)

@@ -10,9 +10,13 @@ class RequestUser:
     id: int
     roles: List[str]
 
-    def __init__(self, user_dict):
-        self.id = user_dict['id']
-        self.roles = user_dict['roles']
+    def __init__(self, *args, **kwargs):
+        if args:
+            user_dict = args[0]
+            self.id = user_dict.get('id')
+            self.roles = user_dict.get('roles')
+        else:
+            self.__dict__.update(kwargs)
 
     def __set__(self, instance, value):
         for k, v in value.items():

@@ -41,7 +41,7 @@ def login_required(f):
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
         user = getattr(g, 'user', None)
-        if user:
+        if user and getattr(user, 'id', False):
             return f(*args, **kwargs)
         raise Unauthorized()
     return decorated_function
