@@ -71,6 +71,9 @@ class MoodleUser(models.Model):
     def has_module_perms(self, *__):
         return True
 
+    def __str__(self):
+        return f'#{self.pk} {self.firstname} {self.lastname} ({self.username})'
+
     class Meta:
         managed = False
         db_table = 'mdl_user'
