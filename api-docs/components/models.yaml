@@ -281,6 +281,28 @@ components:
           $ref: '#/components/schemas/CommentAuthorSchema'
           description: объект с данными пользователя — автора комментария (подгружается на основе author_user_id)
 
+    WorkshopSchema:
+      type: object
+      description: Сбор (воркшоп). Может включать список своих контестов.
+      properties:
+        id:
+          type: integer
+          description: id сбора
+
+        name:
+          type: string
+          description: Название сбора
+
+        visibility:
+          type: string
+          enum: [PRIVATE, PUBLIC]
+          description: Строка-индиктора уровня видимости сбора
+
+        contests:
+          description: массив со списком контекстов собра
+          type: array
+          items:
+            $ref: '#/components/schemas/ContestSchema'
     Error:
       type: object
       properties:

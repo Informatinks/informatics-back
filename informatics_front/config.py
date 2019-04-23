@@ -13,6 +13,19 @@ CONFIG_ENV_MODULES = {
 }
 
 
+def bool_(v: str = None) -> bool:
+    """Cast bool string representation into actual Bool type
+
+    :param v: String, representing bool, e.g. 'True', 'yes'
+    :return: Boolean cast result
+    """
+    if type(v) is bool:
+        return v
+    if isinstance(v, str) is False:
+        return False
+    return v.lower() in ('yes', 'true', 't', '1')
+
+
 class BaseConfig:
     # global
     DEBUG = False
@@ -38,7 +51,7 @@ class BaseConfig:
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI',
                                              'mysql+pymysql://user:12345@localhost/pynformatics')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ECHO = False
+    SQLALCHEMY_ECHO = bool_(os.environ.get('SQLALCHEMY_ECHO', False))
 
     # services
     INTERNAL_RMATICS_URL = os.getenv('INTERNAL_RMATICS_URL')
@@ -54,6 +67,7 @@ class BaseConfig:
 
 class DevConfig(BaseConfig):
     DEBUG = True
+
 
 class TestConfig(BaseConfig):
     DEBUG = True

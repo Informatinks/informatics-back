@@ -25,5 +25,4 @@ class WorkShop(db.Model):
     visibility = db.Column(IntEnum(WorkshopVisibility), nullable=False,
                            default=WorkshopVisibility.PRIVATE)
 
-
-
+    contests = db.relationship('Contest', back_populates='workshop')

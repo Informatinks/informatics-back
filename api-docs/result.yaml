@@ -7,11 +7,50 @@ servers:
   - url: 'http://85.93.88.189:12347/api/v1'
     description: Dev-сервер
 tags:
-  - name: Contest
+  - name: Workshop
     description: Контест
+    descriprion: Сборы
   - name: Submissions
     descriprion: Посылки
 paths:
+  /actions/change-password:
+    post:
+      tags:
+        - Actions
+      summary: Установить новый пароль для пользователя
+      security:
+        - jwt-token-auth: []
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+          description: Auth token from reset URL
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  format: password
+                  type: string
+                  description: New password for user
+      responses:
+        '200':
+          description: Запрос на смену пароля выполнен успешно
+        '400':
+          description: Запрос не выполнен. Пароль не соответствует требованиям.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequest'
+        '403':
+          description: Запрос не выполнен. Авториазционный токен недействителен.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/Forbidden'
   /auth/signin/:
     post:
       tags:
@@ -48,6 +87,17 @@ paths:
     post:
       tags:
         - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: >-
+                    Токен для обновления авторизационного токена. По нему будет
+                    найдена и удалена текущая сессия
       summary: Разлогиниться
       security:
         - jwt-token-auth: []
@@ -91,47 +141,11 @@ paths:
                   description: 'User username, who we request password change for'
       responses:
         '200':
-          description: >-
-            Запрос выполнен. Если email или username не найден, будет вернут код
-            200 для предотвращения enumeration attack.
-  /actions/change_password:
-    post:
-      tags:
-        - Auth
-      summary: Установить новый пароль для пользователя
-      security:
-        - jwt-token-auth: []
-      parameters:
-        - in: query
-          name: token
-          schema:
-            type: string
-          description: Auth token from reset URL
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                password:
-                  format: password
-                  type: string
-                  description: 'User email, who we request password change for'
-      responses:
-        '200':
-          description: Запрос на смену пароля выполнен успешно
+          description: Запрос выполнен.
         '400':
-          description: Запрос не выполнен. Пароль не соответствует требованиям.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/responses/BadRequest'
-        '403':
-          description: Запрос не выполнен. Авториазционный токен недействителен.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/responses/Forbidden'
+          description: >-
+            Запрос не выполнен. Или пользователь с такими данными не найден, или
+            у найденого пользователя нет email
   '/contest/{contest_id}':
     get:
       tags:
@@ -152,17 +166,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StatementSchema'
+                $ref: '#/components/schemas/ContestConnectionSchema'
         '404':
-          description: Контест не найден
+          description: Контест не найден или не открыт
           allOf:
             - $ref: '#/components/responses/NotFound'
-  '/contest/problem/{problem_id}':
+  '/contest/{contest_id}/problem/{problem_id}':
     get:
       tags:
-        - Contest
+        - Problem
       summary: Задача
       parameters:
+        - in: path
+          name: contest_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the contest with problem to get
         - in: path
           name: problem_id
           schema:
@@ -182,7 +202,7 @@ paths:
           description: Задача не найдена
           allOf:
             - $ref: '#/components/responses/NotFound'
-  '/contest/problem/{problem_id}/submission':
+  '/contest/{contest_id}/problem/{problem_id}/submission':
     get:
       tags:
         - Submissions
@@ -190,6 +210,12 @@ paths:
       security:
         - jwt-token-auth: []
       parameters:
+        - in: path
+          name: contest_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the contest with problem to get submissions
         - in: path
           name: problem_id
           schema:
@@ -250,6 +276,19 @@ paths:
       summary: Отправить посылку
       security:
         - jwt-token-auth: []
+      parameters:
+        - in: path
+          name: contest_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the contest with problem to send submission
+        - in: path
+          name: problem_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the problem to get
       requestBody:
         content:
           multipart/json:
@@ -276,7 +315,7 @@ paths:
           description: Задача не найдена
           allOf:
             - $ref: '#/components/responses/NotFound'
-  '/contest/run/{run_id}/source':
+  '/run/{run_id}/source':
     get:
       tags:
         - Run
@@ -287,7 +326,7 @@ paths:
           schema:
             type: integer
           required: true
-          description: Numeric ID of the run to get source
+          description: Numeric ID of the run
       security:
         - jwt-token-auth: []
       responses:
@@ -308,7 +347,7 @@ paths:
           description: Посылка не найдена
           allOf:
             - $ref: '#/components/responses/NotFound'
-  '/contest/run/{run_id}/protocol':
+  '/run/{run_id}/protocol':
     get:
       tags:
         - Run
@@ -319,7 +358,7 @@ paths:
           schema:
             type: integer
           required: true
-          description: Numeric ID of the run to get source
+          description: Numeric ID of the run
       security:
         - jwt-token-auth: []
       responses:
@@ -333,7 +372,7 @@ paths:
           description: Посылка не найдена
           allOf:
             - $ref: '#/components/responses/NotFound'
-  '/contest/run/{run_id}/comments':
+  '/run/{run_id}/comments':
     get:
       tags:
         - Run
@@ -346,7 +385,7 @@ paths:
           schema:
             type: integer
           required: true
-          description: Numeric ID of the run to get source
+          description: Numeric ID of the run
       security:
         - jwt-token-auth: []
       responses:
@@ -356,6 +395,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentSchema'
+  '/workshop/{contest_id}':
+    get:
+      tags:
+        - Workshop
+      summary: >-
+        Воркшоп (сбор) со списком контестов, взодяшим в него. Каждый контекст
+        имеет в себе statement, который его описывает.
+      parameters:
+        - in: path
+          name: workshop_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the workshop to get
+      security:
+        - jwt-token-auth: []
+      responses:
+        '200':
+          description: >-
+            Воркшоп со списком контестов. Контест содержит описание, но не
+            включает список своих проблем.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkshopSchema'
+        '404':
+          description: Воркошп не найден или у пользователя нет приглашения в него
+          allOf:
+            - $ref: '#/components/responses/NotFound'
 components:
   securitySchemes:
     jwt-token-auth:
@@ -462,16 +530,66 @@ components:
                       - token
                       - refresh_token
   schemas:
-    SampleTest:
+    ContestConnectionSchema:
       type: object
-      description: Пример входных и выходных данных в задаче
+      description: Связь контеста и пользователя
       properties:
-        input:
+        id:
+          type: integer
+          description: ID Связи контеста и пользователя
+        created_at:
           type: string
-          description: Входные данные
-        correct:
+          format: date-time
+          description: Время начала прохождение контеста пользователем
+        contest:
+          $ref: '#/components/schemas/ContestSchema'
+    ContestSchema:
+      type: object
+      description: Контест с настройками
+      properties:
+        id:
+          type: integer
+          description: ID Контеста с настройками
+        workshop_id:
+          type: integer
+          description: ID Сбора
+        position:
+          type: integer
+          description: Позиция контеста в сборах
+        time_start:
           type: string
-          description: Выходные данные
+          format: date-time
+          description: 'Время открытия Контеста (если null, то сразу открыт)'
+        time_stop:
+          type: string
+          format: date-time
+          description: 'Время закрытия Контеста (если null, то не закрывается)'
+        is_virtual:
+          type: boolean
+          description: >-
+            Виртуальный ли контест, "можно начать в любое время, но доступен не
+            более 3 часов"
+        virtual_duration:
+          type: integer
+          description: Время на прохождение виртуального контеста в секундах
+        statement:
+          $ref: '#/components/schemas/StatementSchema'
+    StatementSchema:
+      type: object
+      description: Контест с задачами
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          description: ID Контеста
+        name:
+          type: string
+          description: Название контеста
+        summary:
+          type: string
+          description: Полное название контеста
+        problems:
+          $ref: '#/components/schemas/ContestProblemSchema'
     ContestProblemSchema:
       type: object
       description: Проблема в контесте
@@ -486,22 +604,6 @@ components:
         rank:
           type: integer
           description: Порядковый номер в Контесте
-    ContestSchema:
-      type: object
-      description: Контест
-      properties:
-        id:
-          type: integer
-          minimum: 1
-          description: ID Контеста
-        name:
-          type: string
-          description: Название контеста
-        summary:
-          type: string
-          description: Полное название контеста
-        problems:
-          - $ref: '#/components/schemas/ContestProblemSchema'
     ProblemSchema:
       type: object
       description: Задача
@@ -526,10 +628,20 @@ components:
           type: string
           description: '???'
         sample_tests_json:
-          - $ref: '#/components/schemas/SampleTest'
+          $ref: '#/components/schemas/SampleTest'
         output_only:
           type: boolean
           description: Только output
+    SampleTest:
+      type: object
+      description: Пример входных и выходных данных в задаче
+      properties:
+        input:
+          type: string
+          description: Входные данные
+        correct:
+          type: string
+          description: Выходные данные
     UserAuthSchema:
       type: object
       properties:
@@ -670,6 +782,24 @@ components:
           description: >-
             объект с данными пользователя — автора комментария (подгружается на
             основе author_user_id)
+    WorkshopSchema:
+      type: object
+      description: Сбор (воркшоп). Может включать список своих контестов.
+      properties:
+        id:
+          type: integer
+          description: id сбора
+        name:
+          type: string
+          description: Название сбора
+        is_visible:
+          type: boolean
+          description: Открыт ли сбор
+        contests:
+          description: массив со списком контекстов собра
+          type: array
+          items:
+            $ref: '#/components/schemas/ContestSchema'
     Error:
       type: object
       properties:
