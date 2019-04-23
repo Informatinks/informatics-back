@@ -293,9 +293,10 @@ components:
           type: string
           description: Название сбора
 
-        is_visible:
-          type: boolean
-          description: Открыт ли сбор
+        visibility:
+          type: string
+          enum: [PRIVATE, PUBLIC]
+          description: Строка-индиктора уровня видимости сбора
 
         contests:
           description: массив со списком контекстов собра
