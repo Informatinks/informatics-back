@@ -12,6 +12,12 @@ Global environment should be passed in different ways depending on boot method:
 
 App-specific settings should be provided as env vars along with `FLASK_ENV` and `FLASK_APP`. A complete list of supported ones can be found in `informatics_front/config.py`. 
 
+App should set as pointer to factory method with appropriate config:
+
+```
+FLASK_APP=informatics_front.app_factory:create_app('informatics_front.config.DevConfig')
+```
+
 ### Database schemas
 
 * `ejudge`;

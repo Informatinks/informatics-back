@@ -24,6 +24,3 @@ class WorkShop(db.Model):
                        default=WorkshopStatus.DRAFT)
     visibility = db.Column(IntEnum(WorkshopVisibility), nullable=False,
                            default=WorkshopVisibility.PRIVATE)
-
-
-
