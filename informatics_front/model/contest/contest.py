@@ -22,7 +22,7 @@ class Contest(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     statement = db.relationship('Statement')
-    workshop = db.relationship('WorkShop', backref='contests')
+    workshop = db.relationship('WorkShop', back_populates='contests')
 
     def _is_available_by_duration(self) -> bool:
         """ Checks date time restrictions """

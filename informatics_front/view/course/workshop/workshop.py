@@ -18,7 +18,7 @@ class WorkshopApi(MethodView):
         workshop_connection: WorkshopConnection = db.session.query(WorkshopConnection) \
             .filter(WorkshopConnection.workshop_id == workshop_id,
                     WorkshopConnection.user_id == current_user.id,
-                    # only applied connections can be seen or participated at by students
+                    # only accepted connections can be seen or participated at by students
                     WorkshopConnection.status == WorkshopConnectionStatus.ACCEPTED,
                     # Workshop should be active and visible
                     WorkShop.status == WorkshopStatus.ONGOING) \

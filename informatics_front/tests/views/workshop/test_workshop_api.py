@@ -79,9 +79,8 @@ def test_workshop_has_contests(client, accepted_workshop_connection):
 
     assert 'data' in content
     data = content['data']
+    assert all(k in data for k in ('id', 'name', 'visibility', 'contests'))
     assert data['id'] == workshop.id
-
-    assert 'contests' in data
     assert len(data['contests']) == 1
 
 
