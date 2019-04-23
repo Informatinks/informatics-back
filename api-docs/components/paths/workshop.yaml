@@ -1,0 +1,48 @@
+openapi: 3.0.0
+
+info:
+  title: Informatics workshop
+  version: 1.0.0
+  description: Informatics workshop
+
+servers:
+  - url: http://rmatics.tcsbank.info:12347
+    description: Dev-сервер
+
+tags:
+  - name: Workshop
+    descriprion: Сборы
+
+
+paths:
+  /workshop/{contest_id}:
+    get:
+      tags:
+        - Workshop
+
+      summary: Воркшоп (сбор) со списком контестов, взодяшим в него. Каждый контекст имеет в себе statement, который его описывает.
+
+      parameters:
+        - in: path
+          name: workshop_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the workshop to get
+
+      security:
+        - jwt-token-auth: []
+
+      responses:
+        200:
+          description: Воркшоп со списком контестов. Контест содержит описание, но не включает список своих проблем.
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/WorkshopSchema'
+        404:
+          description: Воркошп не найден или у пользователя нет приглашения в него
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
+
