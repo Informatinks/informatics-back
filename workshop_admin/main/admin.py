@@ -11,6 +11,8 @@ admin.site.register(WorkshopConnection)
 
 class ContestAdmin(admin.ModelAdmin):
 
+    readonly_fields = ('author', 'created_at', )
+
     @classmethod
     def add_default_fields(cls, request, obj: Contest):
         obj.author_id = request.user.pk
@@ -27,9 +29,7 @@ class ContestAdmin(admin.ModelAdmin):
 class ContestAdminInline(admin.TabularInline):
     model = Contest
     ordering = ('position', )
-
-    def get_readonly_fields(self, request, obj=None):
-        return ['author', 'created_at']
+    readonly_fields = ('author', 'created_at',)
 
 
 class WorkshopAdmin(admin.ModelAdmin):
