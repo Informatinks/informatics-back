@@ -81,10 +81,9 @@ class ContestApi(MethodView):
     def _get_contest_connection(cls, user_id: int, contest_id: int) \
             -> Optional[ContestConnection]:
         """ Returns user connection on contest instance"""
-        cc = db.session.query(ContestConnection) \
+        return db.session.query(ContestConnection) \
             .filter_by(user_id=user_id, contest_id=contest_id) \
             .one_or_none()
-        return cc
 
     @classmethod
     def _create_contest_connection(cls, user_id, contest_id: int) -> ContestConnection:

@@ -6,7 +6,7 @@ NON_EXISTING_WORKSHOP_ID = -1
 
 @pytest.mark.workshop
 @pytest.mark.usefixtures('authorized_user')
-def test_read_non_existing_workshop(client, ):
+def test_read_non_existing_workshop(client):
     url = url_for('workshop.read', workshop_id=NON_EXISTING_WORKSHOP_ID)
     resp = client.get(url)
     assert resp.status_code == 404
@@ -79,7 +79,7 @@ def test_workshop_has_contests(client, accepted_workshop_connection):
 
     assert 'data' in content
     data = content['data']
-    assert all(k in data for k in ('id', 'name', 'visibility', 'contests'))
+    assert all(k in data for k in ('id', 'name', 'is_visible', 'contests'))
     assert data['id'] == workshop.id
     assert len(data['contests']) == 1
 
