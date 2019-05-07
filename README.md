@@ -1,5 +1,13 @@
 # rmatics-back
 
+## Deploying via Ansible
+
+```
+ansible-playbook -i 'ansible/hosts' \
+--extra-vars "target_server=stage" \
+ansible/main.yml
+```
+
 ## Configuring app
 
 ### Settings
