@@ -1,0 +1,3 @@
+localhost ansible_connection=local
+stage ansible_connection=ssh ansible_host=rmatics.tcsbank.info ansible_port=22 ansible_user=root
+prod ansible_connection=ssh ansible_host=informatics.msk.ru ansible_user=root ansible_port=2204
