@@ -299,10 +299,86 @@ components:
           description: Строка-индиктора уровня видимости сбора
 
         contests:
-          description: массив со списком контекстов собра
+          description: массив со списком контестов собра
           type: array
           items:
             $ref: '#/components/schemas/ContestSchema'
+
+    MonitorUserSchema:
+      type: object
+      description: Ученик в результатах учеников
+      properties:
+        id:
+          type: integer
+          description: id ученика
+
+        firstname:
+          type: string
+          description: Имя
+
+        lastname:
+          type: string
+          description: Фамилия
+
+    MonitorResultsSchema:
+      type: object
+      description: Результат ученика в мониторе
+      properties:
+        on_testing:
+          type: boolean
+          description: Тестируется ли какая-то из посылок
+
+        is_ignored:
+          type: boolean
+          description: Проигнорировано ли последнее решение
+
+        mark:
+          type: string
+          description: Результат ('100' или 'OK' или другой статус)
+
+        time:
+          type: integer
+          description: Время прохождения тестов
+
+        success:
+          type: boolean
+          description: Есть ли успешное решение
+
+        wrong_tries:
+          type: integer
+          description: Количество неуспешных попыток
+
+    MonitorSchema:
+      type: object
+      description: Результаты учеников
+      properties:
+        contests:
+          description: массив со списком контестов и задач собра
+          type: array
+          items:
+            $ref: '#/components/schemas/ContestSchema'
+
+        users:
+          description: массив учеников в результатах
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitorUserSchema'
+
+        results:
+          description: Результаты в формате user_id -> [problem_id -> result]
+          type: object
+          properties:
+            user_id:
+              type: integer
+          additionalProperties:
+            type: object
+            properties:
+              problem_id:
+                type: integer
+            additionalProperties:
+              $ref: '#/components/schemas/MonitorResultsSchema'
+
+
     Error:
       type: object
       properties:
