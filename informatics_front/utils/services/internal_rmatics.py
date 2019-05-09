@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional, List
 
 from werkzeug.datastructures import FileStorage
 
@@ -54,3 +54,16 @@ class InternalRmatics(BaseService):
         }
 
         return self.client.get_data(url, params=user_args, silent=True)
+
+    def get_monitor(self, problems: List[int], users: List[int], time_before: Optional[int]):
+        # TODO: Приделать контекст посылки (NFRMTCS-192)
+        url = f'{self.service_url}/problem_monitor'
+
+        monitor_args = {
+            'user_id': users,
+            'problem_id': problems
+        }
+        if time_before:
+            monitor_args['time_before'] = time_before
+
+        return self.client.get_data(url, params=monitor_args, silent=True)

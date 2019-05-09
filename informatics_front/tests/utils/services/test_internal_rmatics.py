@@ -67,3 +67,32 @@ def test_get_full_run_protocol(client):
         params={'user_id': USER_ID, 'is_admin': True},
         silent=True
     )
+
+
+@pytest.mark.internal_rmatics
+def test_get_monitor(client):
+    problems = [1, 2, 3]
+    users = [4, 5, 6]
+    client.get_monitor(problems, users, None)
+    client.client.get_data.assert_called_with(
+        f'{client.service_url}/problem_monitor',
+        params={'user_id': users,
+                'problem_id': problems},
+        silent=True
+    )
+
+
+@pytest.mark.internal_rmatics
+def test_get_monitor_with_time_before(client):
+    problems = [1, 2, 3]
+    users = [4, 5, 6]
+    time_before = 123456789
+    client.get_monitor(problems, users, time_before)
+    client.client.get_data.assert_called_with(
+        f'{client.service_url}/problem_monitor',
+        params={'user_id': users,
+                'problem_id': problems,
+                'time_before': time_before},
+        silent=True
+    )
+
