@@ -66,4 +66,4 @@ class InternalRmatics(BaseService):
         if time_before:
             monitor_args['time_before'] = time_before
 
-        return self.client.get_data(url, params=monitor_args, silent=True)
+        return self.client.get_data(url, params=monitor_args, silent=True, default=[])

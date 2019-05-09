@@ -78,7 +78,8 @@ def test_get_monitor(client):
         f'{client.service_url}/problem_monitor',
         params={'user_id': users,
                 'problem_id': problems},
-        silent=True
+        silent=True,
+        default=[]
     )
 
 
@@ -93,6 +94,7 @@ def test_get_monitor_with_time_before(client):
         params={'user_id': users,
                 'problem_id': problems,
                 'time_before': time_before},
-        silent=True
+        silent=True,
+        default=[]
     )
 

@@ -4,7 +4,7 @@ from informatics_front.model.base import db
 from informatics_front.utils.sqla.types import IntEnum
 
 
-class ContestMonitorType(enum.Enum):
+class WorkshopMonitorType(enum.Enum):
     """
     Тип монитора:
         IOI - по очкам (количество баллов в задаче)
@@ -14,7 +14,7 @@ class ContestMonitorType(enum.Enum):
     ACM = 2  # принят на курс
 
 
-class ContestMonitorUserVisibility(enum.Enum):
+class WorkshopMonitorUserVisibility(enum.Enum):
     """ Чьи результаты может видеть ученик, свои или общие"""
     FOR_USER_ONLY = 1
     FULL = 2
@@ -28,14 +28,14 @@ class WorkshopMonitor(db.Model):
 
     workshop_id = db.Column(db.Integer, db.ForeignKey('pynformatics.workshop.id'))
     type = db.Column(
-        IntEnum(ContestMonitorType),
-        default=ContestMonitorType.IOI,
+        IntEnum(WorkshopMonitorType),
+        default=WorkshopMonitorType.IOI,
         nullable=False
     )
 
     user_visibility = db.Column(
-        IntEnum(ContestMonitorUserVisibility),
-        default=ContestMonitorUserVisibility.FULL,
+        IntEnum(WorkshopMonitorUserVisibility),
+        default=WorkshopMonitorUserVisibility.FULL,
         nullable=False
     )
 
@@ -48,4 +48,4 @@ class WorkshopMonitor(db.Model):
     )
 
     def is_for_user_only(self):
-        return self.type == ContestMonitorUserVisibility.FOR_USER_ONLY
+        return self.type == WorkshopMonitorUserVisibility.FOR_USER_ONLY

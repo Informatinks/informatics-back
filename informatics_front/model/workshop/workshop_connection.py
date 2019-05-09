@@ -18,7 +18,7 @@ class WorkshopConnection(db.Model):
     )
     __tablename__ = 'workshop_connection'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False, index=True)
+    user_id = db.Column(db.ForeignKey('moodle.mdl_user.id'), index=True)
     workshop_id = db.Column(
         db.Integer,
         db.ForeignKey('pynformatics.workshop.id', ondelete='CASCADE', name='fk_course_id'),
@@ -30,6 +30,8 @@ class WorkshopConnection(db.Model):
         default=WorkshopConnectionStatus.ACCEPTED,  # TODO: возможно, поменять на APPLIED
         nullable=False
     )
+
+    user = db.relationship('User')
 
     workshop = db.relationship(
         'WorkShop',

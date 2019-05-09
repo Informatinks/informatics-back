@@ -16,6 +16,8 @@ class RequestUser:
         if args:
             user_dict = args[0]
             self.id = user_dict.get('id')
+            self.firstname = user_dict.get('firstname')
+            self.lastname = user_dict.get('lastname')
             self.roles = user_dict.get('roles')
         else:
             self.__dict__.update(kwargs)
