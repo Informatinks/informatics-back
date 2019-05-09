@@ -1,6 +1,6 @@
 FROM python:3.7.2-alpine3.9
 
-ENV FLASK_APP=informatics_front
+ENV FLASK_APP=informatics_front.wsgi.py:application
 
 RUN apk update
 RUN apk add gcc libressl-dev musl-dev libffi-dev
