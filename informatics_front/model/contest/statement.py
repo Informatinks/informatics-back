@@ -30,6 +30,9 @@ class Statement(db.Model):
     virtual_duration = db.Column(db.Integer)
     settings = db.Column(JsonType)
 
+    problems = db.relationship('Problem',
+                               secondary='moodle.mdl_statements_problems_correlation')
+
 
 class StatementProblem(db.Model):
     __table_args__ = {'schema': 'moodle'}

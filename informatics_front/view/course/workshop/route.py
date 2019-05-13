@@ -10,3 +10,4 @@ workshop_blueprint.add_url_rule('/<int:workshop_id>', methods=('POST',),
 
 workshop_blueprint.add_url_rule('/<int:workshop_id>', methods=('GET',),
                                 view_func=WorkshopApi.as_view('read'))
+

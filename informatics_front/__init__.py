@@ -10,10 +10,14 @@ class RequestUser:
     id: int
     roles: List[str]
 
+    teacher_roles = ('teacher', )
+
     def __init__(self, *args, **kwargs):
         if args:
             user_dict = args[0]
             self.id = user_dict.get('id')
+            self.firstname = user_dict.get('firstname')
+            self.lastname = user_dict.get('lastname')
             self.roles = user_dict.get('roles')
         else:
             self.__dict__.update(kwargs)
@@ -33,6 +37,14 @@ class RequestUser:
     @deprecated('dict replaced by RequestUser')
     def __contains__(self, item):
         return item in self.__dict__
+
+    @property
+    def is_teacher(self):
+        return self.is_admin or any(r in self.roles for r in self.teacher_roles)
+
+    @property
+    def is_admin(self):
+        return 'admin' in self.roles
 
 
 def get_current_user() -> RequestUser:

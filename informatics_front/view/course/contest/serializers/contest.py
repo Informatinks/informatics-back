@@ -22,7 +22,7 @@ class ContestSchema(Schema):
 
     time_start = fields.DateTime()
     time_stop = fields.DateTime()
-    is_virtual = fields.DateTime()
+    is_virtual = fields.Boolean()
     virtual_duration = fields.TimeDelta(precision='seconds')
     statement = fields.Nested(StatementSchema)
 

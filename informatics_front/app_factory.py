@@ -11,6 +11,7 @@ from informatics_front.utils.tokenizer.handlers import map_action_routes
 from informatics_front.view.auth.authorization import PasswordChangeApi
 from informatics_front.view.auth.routes import auth_blueprint
 from informatics_front.view.course.contest.route import contest_blueprint, run_blueprint
+from informatics_front.view.course.monitor.route import monitor_blueprint
 from informatics_front.view.course.workshop.route import workshop_blueprint
 
 
@@ -59,6 +60,7 @@ def create_app(config):
     app.register_blueprint(run_blueprint)
     app.register_blueprint(contest_blueprint)
     app.register_blueprint(workshop_blueprint)
+    app.register_blueprint(monitor_blueprint)
 
     app.cli.add_command(cli.test)
 

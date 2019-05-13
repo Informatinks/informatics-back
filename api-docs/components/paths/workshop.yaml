@@ -15,7 +15,7 @@ tags:
 
 
 paths:
-  /workshop/{contest_id}:
+  /workshop/{workshop_id}:
     get:
       tags:
         - Workshop
@@ -45,4 +45,33 @@ paths:
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
+  /workshop/{workshop_id}/monitor:
+    get:
+      tags:
+        - Workshop
+
+      summary: Результаты сборов
+
+      parameters:
+        - in: path
+          name: workshop_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the workshop to get
+
+      security:
+        - jwt-token-auth: []
+
+      responses:
+        200:
+          description: Результаты сборов, с пользователями и задачами, входящими в него
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/MonitorSchema'
+        404:
+          description: Результат не найден или у пользователя нет приглашения в него
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
 

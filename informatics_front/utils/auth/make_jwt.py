@@ -16,6 +16,8 @@ def generate_auth_token(user: 'User') -> str:
 
     d = {
         'id': user.id,
+        'firstname': user.firstname,
+        'lastname': user.lastname,
         'roles': roles.data,
         'exp': expiration,
     }
