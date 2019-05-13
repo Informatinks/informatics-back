@@ -1,8 +1,16 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from informatics_front.utils.run import EjudgeStatuses
 from informatics_front.view.course.monitor.monitor_preprocessor import IOIResultMaker, BaseResultMaker, \
     MonitorPreprocessor
+
+
+class FakeResultMaker:
+    render_result = {'abc': 123}
+
+    def __init__(self):
+        self.render = MagicMock()
+        self.render.return_value = self.render_result
 
 
 class TestBaseResultMaker:
@@ -161,4 +169,36 @@ class TestMonitorPreprocessor:
 
         assert dict(resp) == expects
 
-    # TODO: test MonitorPreprocessor.render
+    def test_render(self):
+        result_maker = FakeResultMaker()
+        m = MonitorPreprocessor()
+
+        data = [
+            {'problem': {'id': 1}, 'runs': []},
+            {'problem': {'id': 2}, 'runs': []},
+            {'problem': {'id': 3}, 'runs': []},
+        ]
+
+        with patch('informatics_front'
+                   '.view.'
+                   'course'
+                   '.monitor'
+                   '.monitor_preprocessor'
+                   '.MonitorPreprocessor'
+                   '._group_by_users') as mock_group_by_users:
+            mock_group_by_users.return_value = {1: [{'user': {'id': 1}}, {'user': {'id': 1}}],
+                                                2: [{'user': {'id': 1}}, {'user': {'id': 1}}]}
+
+            response = m.render(data, result_maker)
+
+        assert result_maker.render.call_count == 6
+        assert mock_group_by_users.call_count == 3
+        expected = {
+            1: {1: result_maker.render_result,
+                2: result_maker.render_result,
+                3: result_maker.render_result},
+            2: {1: result_maker.render_result,
+                2: result_maker.render_result,
+                3: result_maker.render_result},
+        }
+        assert dict(response) == expected

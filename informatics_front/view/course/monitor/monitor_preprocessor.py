@@ -176,12 +176,12 @@ class MonitorPreprocessor:
                 'user_id2': ...
             }
         """
-        result = defaultdict(list)
+        result = defaultdict(dict)
         problem_ids_runs = {d['problem']['id']: d['runs'] for d in data}
         for problem_id, runs in problem_ids_runs.items():
             user_ids_runs = self._group_by_users(runs)
             for user_id, user_runs in user_ids_runs.items():
-                result[user_id].append(result_maker.render(user_runs))
+                result[user_id][problem_id] = result_maker.render(user_runs)
 
         return result
 
