@@ -39,8 +39,6 @@ class DBStatementCounter(object):
         return self.count
 
     def callback(self, *_):
-        print(str(_[1]) + '\n')
-
         if self.do_count:
             self.count += 1
 
@@ -152,6 +150,4 @@ def test_workshop_not_produce_n1(client, accepted_workshop_connection):
         resp = client.get(url)
 
     assert resp.status_code == 200
-
-    # only one request should be at once
-    assert ctr.get_count() == 1
+    assert ctr.get_count() == 1 , 'should produce only one SQL request to prevent N+1'
