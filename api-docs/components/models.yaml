@@ -352,6 +352,11 @@ components:
       type: object
       description: Результаты учеников
       properties:
+        type:
+          type: string
+          description: Тип монитора (ACM/IOI)
+          enum: [ACM, IOI]
+
         contests:
           description: массив со списком контестов и задач собра
           type: array

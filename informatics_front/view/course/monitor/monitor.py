@@ -18,7 +18,7 @@ from informatics_front.view.course.monitor.monitor_preprocessor import BaseResul
     MonitorPreprocessor
 from informatics_front.view.course.monitor.serializers.monitor import monitor_schema
 
-MonitorData = namedtuple('MonitorData', 'contests users results')
+MonitorData = namedtuple('MonitorData', 'contests users results type')
 
 
 class WorkshopMonitorApi(MethodView):
@@ -115,7 +115,7 @@ class WorkshopMonitorApi(MethodView):
         processor = MonitorPreprocessor()
         results = processor.render(raw_data, result_maker_cls())
 
-        monitor_data = MonitorData(contests, users, results)
+        monitor_data = MonitorData(contests, users, results, monitor.type.name)
 
         data = monitor_schema.dump(monitor_data)
 
