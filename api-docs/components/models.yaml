@@ -370,18 +370,26 @@ components:
             $ref: '#/components/schemas/MonitorUserSchema'
 
         results:
-          description: Результаты в формате user_id -> [problem_id -> result]
-          type: object
-          properties:
-            user_id:
-              type: integer
-          additionalProperties:
+          type: array
+          items:
             type: object
             properties:
-              problem_id:
-                type: integer
-            additionalProperties:
-              $ref: '#/components/schemas/MonitorResultsSchema'
+              contest_id:
+                type: int
+                description: Id контеста к которому относятся результаты
+              results:
+                description: Результаты в формате user_id -> [problem_id -> result]
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                additionalProperties:
+                  type: object
+                  properties:
+                    problem_id:
+                      type: integer
+                  additionalProperties:
+                    $ref: '#/components/schemas/MonitorResultsSchema'
 
 
     Error:
