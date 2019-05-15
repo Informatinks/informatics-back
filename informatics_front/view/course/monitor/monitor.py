@@ -1,5 +1,6 @@
+import datetime
 from collections import namedtuple
-from typing import List, Type
+from typing import List, Type, Callable
 
 from flask.views import MethodView
 from sqlalchemy.orm import joinedload, load_only
@@ -8,14 +9,15 @@ from werkzeug.exceptions import NotFound
 from informatics_front import current_user
 from informatics_front.model import db, Statement, User
 from informatics_front.model.contest.contest import Contest
-from informatics_front.model.contest.monitor import WorkshopMonitor
+from informatics_front.model.contest.monitor import WorkshopMonitor, WorkshopMonitorType
+from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.model.workshop.workshop import WorkShop, WorkshopStatus
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection, WorkshopConnectionStatus
 from informatics_front.plugins import internal_rmatics
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.response import jsonify
 from informatics_front.view.course.monitor.monitor_preprocessor import BaseResultMaker, IOIResultMaker, \
-    MonitorPreprocessor
+    MonitorPreprocessor, ACMResultMaker
 from informatics_front.view.course.monitor.serializers.monitor import monitor_schema
 
 MonitorData = namedtuple('MonitorData', 'contests users results type')
@@ -78,7 +80,8 @@ class WorkshopMonitorApi(MethodView):
             .one_or_none()
 
     @classmethod
-    def _get_raw_monitor_data(cls, monitor: WorkshopMonitor, user_ids: List[int], problem_ids: List[int]) -> List[dict]:
+    def _get_raw_data_by_contest(cls, monitor: WorkshopMonitor, user_ids: List[int], contest: Contest):
+        problem_ids = cls._extract_problem_ids([contest])
 
         runs_until = monitor.freeze_time
         runs_until = runs_until and runs_until.utctimestamp()
@@ -89,9 +92,57 @@ class WorkshopMonitorApi(MethodView):
         return data
 
     @classmethod
-    def _get_result_maker_cls(cls, _monitor: WorkshopMonitor) -> Type[BaseResultMaker]:
-        # TODO: ACM & lightACM
-        return IOIResultMaker
+    def _make_function_getting_user_start_time(cls, contest, user_ids: List[int]) -> Callable:
+        """
+        Returns function for getting contest start time by user_id
+        """
+        if not contest.is_virtual:
+            start_time = contest.time_start or contest.created_at
+
+            def const_time(*__, **___):
+                return start_time
+
+            return const_time
+
+        user_id_time = {}
+        created_time_user_id_q = db.session.query(ContestConnection.created_at,
+                                                  ContestConnection.user_id) \
+            .filter(ContestConnection.user_id.in_(user_ids))
+        for created_time, user_id in created_time_user_id_q:
+            user_id_time[user_id] = created_time
+
+        def time_by_cc(user_id: int):
+            time = user_id_time.get(user_id)
+            return time or datetime.datetime.utcfromtimestamp(0)
+
+        return time_by_cc
+
+    @classmethod
+    def _prepare_data(cls, monitor: WorkshopMonitor, contest: Contest, raw_data: List[dict]) -> dict:
+        monitor_processor = MonitorPreprocessor(raw_data)
+
+        result_maker_cls = cls._get_result_maker_cls(monitor)
+        if result_maker_cls.is_need_time:
+            problem_ids = cls._extract_problem_ids([contest])
+            user_ids = monitor_processor.get_user_ids(problem_ids)
+            get_user_start_time = cls._make_function_getting_user_start_time(contest, user_ids)
+            result_maker = result_maker_cls(get_user_start_time)
+        else:
+            result_maker = result_maker_cls()
+
+        data = monitor_processor.render(result_maker)
+
+        return data
+
+    @classmethod
+    def _get_result_maker_cls(cls, monitor: WorkshopMonitor) -> Type[BaseResultMaker]:
+        result_maker_map = {
+            WorkshopMonitorType.ACM: ACMResultMaker,
+            WorkshopMonitorType.IOI: IOIResultMaker,
+            WorkshopMonitorType.LightACM: ACMResultMaker
+        }
+
+        return result_maker_map[monitor.type]
 
     @login_required
     def get(self, workshop_id):
@@ -103,17 +154,22 @@ class WorkshopMonitorApi(MethodView):
             .filter(WorkshopMonitor.workshop_id == workshop_id) \
             .first_or_404()
 
+        if not current_user.is_teacher and monitor.is_disabled_for_students():
+            raise NotFound(f'Monitor for workshop #{workshop_id} is not found')
+
         contests = self._get_contests(workshop_id)
-        problem_ids = self._extract_problem_ids(contests)
 
         users = self._get_users(monitor)
         user_ids = [user.id for user in users]
 
-        raw_data = self._get_raw_monitor_data(monitor, user_ids, problem_ids)
-
-        result_maker_cls = self._get_result_maker_cls(monitor)
-        processor = MonitorPreprocessor()
-        results = processor.render(raw_data, result_maker_cls())
+        results = []
+        for contest in contests:
+            raw_data = self._get_raw_data_by_contest(monitor, user_ids, contest)
+            data = self._prepare_data(monitor, contest, raw_data)
+            results.append({
+                'contest_id': contest.id,
+                'results': data
+            })
 
         monitor_data = MonitorData(contests, users, results, monitor.type.name)
 

@@ -10,14 +10,16 @@ class WorkshopMonitorType(enum.Enum):
         IOI - по очкам (количество баллов в задаче)
         ACM - по плюсикам (количество решенных задач)
     """
-    IOI = 1  # подана заявка, еще не одобрена
-    ACM = 2  # принят на курс
+    IOI = 1
+    ACM = 2
+    LightACM = 3
 
 
 class WorkshopMonitorUserVisibility(enum.Enum):
     """ Чьи результаты может видеть ученик, свои или общие"""
     FOR_USER_ONLY = 1
     FULL = 2
+    DISABLED_FOR_STUDENT = 3
 
 
 class WorkshopMonitor(db.Model):
@@ -49,3 +51,6 @@ class WorkshopMonitor(db.Model):
 
     def is_for_user_only(self):
         return self.type == WorkshopMonitorUserVisibility.FOR_USER_ONLY
+
+    def is_disabled_for_students(self):
+        return self.type == WorkshopMonitorUserVisibility.DISABLED_FOR_STUDENT

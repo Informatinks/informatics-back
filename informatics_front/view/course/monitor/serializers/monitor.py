@@ -13,6 +13,7 @@ class MonitorSchema(Schema):
     contests = fields.Nested(ContestSchema, many=True)
     users = fields.Nested(UserSchema, many=True)
     results = fields.Raw()
+    type = fields.String()
 
 
 monitor_schema = MonitorSchema()
