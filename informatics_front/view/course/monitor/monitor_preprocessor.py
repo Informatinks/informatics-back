@@ -1,7 +1,7 @@
 import datetime
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import List, Iterable, Callable
+from typing import List, Callable
 
 from informatics_front.utils.run import EjudgeStatuses
 
@@ -172,8 +172,6 @@ class ACMResultMaker(BaseResultMaker):
         EjudgeStatuses.PARTIAL.value,
     }
 
-    right_statuses = {'OK', 'AC'}
-
     def is_wrong_status(self, status: int):
         return status in self.wrong_statuses
 
@@ -205,10 +203,9 @@ class ACMResultMaker(BaseResultMaker):
 
     @classmethod
     def is_success(cls, mark: str):
-        return mark in cls.right_statuses
+        return mark in {'OK', 'AC'}
 
     def get_time(self, user_id, runs) -> int:
-        start_time = self.get_user_start_time(user_id)
         reversed_runs = reversed(runs)
         first_right_run = None
         for run in reversed_runs:
@@ -225,6 +222,7 @@ class ACMResultMaker(BaseResultMaker):
             .strptime(first_right_run['create_time'],
                       '%Y-%m-%dT%H:%M:%S%z')
 
+        start_time = self.get_user_start_time(user_id)
         return int((delivery_time - start_time).total_seconds())
 
 

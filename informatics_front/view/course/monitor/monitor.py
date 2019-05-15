@@ -113,7 +113,8 @@ class WorkshopMonitorApi(MethodView):
 
         def time_by_cc(user_id: int):
             time = user_id_time.get(user_id)
-            return time or datetime.datetime.utcfromtimestamp(0)
+            time = time or datetime.datetime.utcfromtimestamp(0)
+            return time.astimezone()
 
         return time_by_cc
 
