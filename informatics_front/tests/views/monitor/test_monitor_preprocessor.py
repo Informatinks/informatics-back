@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 
 from informatics_front.utils.run import EjudgeStatuses
 from informatics_front.view.course.monitor.monitor_preprocessor import IOIResultMaker, BaseResultMaker, \
-    MonitorPreprocessor, ACMResultMaker
+    MonitorPreprocessor, ACMResultMaker, PENALTY_TIME_SEC, LightACMResultMaker
 
 
 class FakeResultMaker:
@@ -215,6 +215,22 @@ class TestACMResultMaker:
         ]
         assert result_maker.get_time(123, runs) + 1 \
             == int(datetime.timedelta(days=1).total_seconds())
+
+
+class TestLightACMResultMaker:
+    def test_get_time(self):
+        result_maker = LightACMResultMaker(lambda: None)
+        wrong_tries = 3
+
+        patch_pref = 'informatics_front.view.course.monitor.monitor_preprocessor'
+        with patch(f'{patch_pref}.ACMResultMaker.get_time') as mock_super_get_time, \
+                patch(f'{patch_pref}.ACMResultMaker.get_wrong_tries_count') as mock_wrong_tries:
+            mock_super_get_time.return_value = 0
+            mock_wrong_tries.return_value = wrong_tries
+            time = result_maker.get_time(123, [])
+
+        mock_super_get_time.assert_called_once()
+        assert time == PENALTY_TIME_SEC * wrong_tries
 
 
 class TestMonitorPreprocessor:

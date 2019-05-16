@@ -6,6 +6,9 @@ from typing import List, Callable
 from informatics_front.utils.run import EjudgeStatuses
 
 
+PENALTY_TIME_SEC = 20 * 60
+
+
 class BaseResultMaker(ABC):
     """ Базовый класс для того, что отображается в ячейке монитора """
 
@@ -224,6 +227,14 @@ class ACMResultMaker(BaseResultMaker):
 
         start_time = self.get_user_start_time(user_id)
         return int((delivery_time - start_time).total_seconds())
+
+
+class LightACMResultMaker(ACMResultMaker):
+
+    def get_time(self, user_id: int, runs: List[dict]) -> int:
+        wrong_tries = self.get_wrong_tries_count(runs)
+        return super().get_time(user_id, runs) + \
+            wrong_tries * PENALTY_TIME_SEC
 
 
 class MonitorPreprocessor:

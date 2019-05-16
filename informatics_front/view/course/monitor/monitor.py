@@ -20,7 +20,7 @@ from informatics_front.plugins import internal_rmatics
 from informatics_front.utils.auth import login_required
 from informatics_front.utils.response import jsonify
 from informatics_front.view.course.monitor.monitor_preprocessor import BaseResultMaker, IOIResultMaker, \
-    MonitorPreprocessor, ACMResultMaker
+    MonitorPreprocessor, ACMResultMaker, LightACMResultMaker
 from informatics_front.view.course.monitor.serializers.monitor import monitor_schema
 
 MonitorData = namedtuple('MonitorData', 'contests users results type')
@@ -190,7 +190,7 @@ class WorkshopMonitorApi(MethodView):
         result_maker_map = {
             WorkshopMonitorType.ACM: ACMResultMaker,
             WorkshopMonitorType.IOI: IOIResultMaker,
-            WorkshopMonitorType.LightACM: ACMResultMaker
+            WorkshopMonitorType.LightACM: LightACMResultMaker
         }
 
         return result_maker_map[monitor.type]
