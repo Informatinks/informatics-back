@@ -50,7 +50,7 @@ class WorkshopMonitor(db.Model):
     )
 
     def is_for_user_only(self):
-        return self.type == WorkshopMonitorUserVisibility.FOR_USER_ONLY
+        return self.user_visibility == WorkshopMonitorUserVisibility.FOR_USER_ONLY
 
     def is_disabled_for_students(self):
-        return self.type == WorkshopMonitorUserVisibility.DISABLED_FOR_STUDENT
+        return self.user_visibility == WorkshopMonitorUserVisibility.DISABLED_FOR_STUDENT

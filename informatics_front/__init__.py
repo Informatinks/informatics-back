@@ -20,6 +20,10 @@ class RequestUser:
             self.lastname = user_dict.get('lastname')
             self.roles = user_dict.get('roles')
         else:
+            self.id = None
+            self.firstname = None
+            self.lastname = None
+            self.roles = None
             self.__dict__.update(kwargs)
 
     def __set__(self, instance, value):
