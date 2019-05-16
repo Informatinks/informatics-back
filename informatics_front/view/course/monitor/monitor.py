@@ -1,13 +1,16 @@
 import datetime
 from collections import namedtuple
-from typing import List, Type, Callable
+from typing import List, Type, Callable, Optional
 
+from flask import request
 from flask.views import MethodView
+from marshmallow import fields
 from sqlalchemy.orm import joinedload, load_only
+from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound
 
 from informatics_front import current_user
-from informatics_front.model import db, Statement, User
+from informatics_front.model import db, Statement, User, Group, UserGroup
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.contest.monitor import WorkshopMonitor, WorkshopMonitorType
 from informatics_front.model.workshop.contest_connection import ContestConnection
@@ -25,6 +28,45 @@ MonitorData = namedtuple('MonitorData', 'contests users results type')
 
 class WorkshopMonitorApi(MethodView):
 
+    get_args = {
+        'group_id': fields.Integer(missing=None)
+    }
+
+    @login_required
+    def get(self, workshop_id):
+
+        args = parser.parse(self.get_args, request, error_status_code=400)
+
+        if not self._ensure_permissions(workshop_id):
+            raise NotFound(f'Monitor for workshop #{workshop_id} is not found')
+
+        monitor: WorkshopMonitor = db.session.query(WorkshopMonitor) \
+            .filter(WorkshopMonitor.workshop_id == workshop_id) \
+            .first_or_404()
+
+        if not current_user.is_teacher and monitor.is_disabled_for_students():
+            raise NotFound(f'Monitor for workshop #{workshop_id} is not found')
+
+        contests = self._get_contests(workshop_id)
+
+        users = self._get_users(monitor, args.get('group_id'))
+        user_ids = [user.id for user in users]
+
+        results = []
+        for contest in contests:
+            raw_data = self._get_raw_data_by_contest(monitor, user_ids, contest)
+            data = self._prepare_data(monitor, contest, raw_data)
+            results.append({
+                'contest_id': contest.id,
+                'results': data
+            })
+
+        monitor_data = MonitorData(contests, users, results, monitor.type.name)
+
+        data = monitor_schema.dump(monitor_data)
+
+        return jsonify(data.data)
+
     @classmethod
     def _find_users_on_workshop(cls, workshop_id: int) -> List[User]:
         """ Returns list of ids of users who has connection to workshop """
@@ -37,11 +79,20 @@ class WorkshopMonitorApi(MethodView):
         return users
 
     @classmethod
-    def _get_users(cls, monitor) -> List[User]:
+    def _find_users_by_group(cls, group_id: int) -> List[User]:
+        users = db.session.query(User).join(UserGroup).join(Group).filter(Group.id == group_id) \
+            .options(load_only('id', 'firstname', 'lastname')) \
+            .all()
+        return users
+
+    @classmethod
+    def _get_users(cls, monitor, group_id: Optional[int]) -> List[User]:
         if not current_user.is_teacher and monitor.is_for_user_only():
             users = [User(id=current_user.id,
                           firstname=current_user.firstname,
                           lastname=current_user.lastname)]
+        elif group_id is not None:
+            users = cls._find_users_by_group(group_id)
         else:
             users = cls._find_users_on_workshop(monitor.workshop_id)
 
@@ -143,37 +194,3 @@ class WorkshopMonitorApi(MethodView):
         }
 
         return result_maker_map[monitor.type]
-
-    @login_required
-    def get(self, workshop_id):
-
-        if not self._ensure_permissions(workshop_id):
-            raise NotFound(f'Monitor for workshop #{workshop_id} is not found')
-
-        monitor: WorkshopMonitor = db.session.query(WorkshopMonitor) \
-            .filter(WorkshopMonitor.workshop_id == workshop_id) \
-            .first_or_404()
-
-        if not current_user.is_teacher and monitor.is_disabled_for_students():
-            raise NotFound(f'Monitor for workshop #{workshop_id} is not found')
-
-        contests = self._get_contests(workshop_id)
-
-        users = self._get_users(monitor)
-        user_ids = [user.id for user in users]
-
-        results = []
-        for contest in contests:
-            raw_data = self._get_raw_data_by_contest(monitor, user_ids, contest)
-            data = self._prepare_data(monitor, contest, raw_data)
-            results.append({
-                'contest_id': contest.id,
-                'results': data
-            })
-
-        monitor_data = MonitorData(contests, users, results, monitor.type.name)
-
-        data = monitor_schema.dump(monitor_data)
-
-        return jsonify(data.data)
-

@@ -7,7 +7,7 @@ from flask import g
 from werkzeug.local import LocalProxy
 
 from informatics_front import RequestUser
-from informatics_front.model import StatementProblem, Problem, Statement, Comment, db
+from informatics_front.model import StatementProblem, Problem, Statement, Comment, db, Group, UserGroup
 from informatics_front.model import User
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.problem import EjudgeProblem
@@ -308,3 +308,27 @@ def comments(app, users, authorized_user) -> List[dict]:
 @pytest.yield_fixture
 def comment(comments) -> dict:
     yield comments[0]
+
+
+@pytest.yield_fixture
+def group(app, users):
+    group = Group(name='Групповые')
+    db.session.add(group)
+    db.session.flush()
+
+    user_ids = [user['id'] for user in users]
+
+    user_groups = [UserGroup(user_id=user_id, group_id=group.id)
+                   for user_id in user_ids]
+    db.session.add_all(user_groups)
+
+    db.session.commit()
+
+    yield group
+
+    for u_g in user_groups:
+        db.session.delete(u_g)
+
+    db.session.delete(group)
+
+    db.session.commit()
