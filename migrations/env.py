@@ -21,6 +21,7 @@ WHITELISTED_TABLES = (
     'refresh_token',
     'workshop',
     'workshop_connection',
+    'contest_monitor',
 )
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
