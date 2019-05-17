@@ -1,8 +1,11 @@
 from django.db import models
 
-from informatics_front.model.workshop.workshop import WorkshopStatus, WorkshopVisibility
-from informatics_front.model.workshop.workshop_connection import WorkshopConnectionStatus
+from informatics_front.utils.enums import WorkshopStatus, WorkshopVisibility, WorkshopConnectionStatus
 from utils.types import DateTimeBasedDuration
+
+WORKSHOP_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopStatus))
+WORKSHOP_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopVisibility))
+WORKSHOP_CONNECTION_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopConnectionStatus))
 
 
 class Contest(models.Model):
@@ -22,14 +25,14 @@ class Contest(models.Model):
 
 
 class ContestConnection(models.Model):
-    user_id = models.IntegerField(blank=True, null=True)
+    user = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE)
     contest = models.ForeignKey(Contest, models.DO_NOTHING, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'contest_connection'
-        unique_together = (('user_id', 'contest'),)
+        unique_together = (('user', 'contest'),)
 
 
 class RefreshToken(models.Model):
@@ -41,10 +44,6 @@ class RefreshToken(models.Model):
     class Meta:
         managed = False
         db_table = 'refresh_token'
-
-
-WORKSHOP_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopStatus))
-WORKSHOP_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopVisibility))
 
 
 class Workshop(models.Model):
@@ -59,9 +58,6 @@ class Workshop(models.Model):
     def __str__(self):
         status = WorkshopStatus(self.status).name if self.status else ''
         return f'#{self.pk} {self.name} ({status})'
-
-
-WORKSHOP_CONNECTION_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopConnectionStatus))
 
 
 class WorkshopConnection(models.Model):
