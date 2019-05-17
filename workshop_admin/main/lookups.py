@@ -7,8 +7,7 @@ class MoodleUserLookup(LookupChannel):
     model = MoodleUser
 
     def get_query(self, q, request):
-        mu = self.model.objects.filter(username=q).order_by('lastname')[:1]
-        return mu
+        return self.model.objects.filter(username=q).order_by('lastname')[:1]
 
     def format_match(self, item):
         # Force cast to str repr as object will be used directry as value of serializable dict,
