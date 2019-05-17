@@ -5,7 +5,7 @@ from flask import Flask
 from informatics_front import cli
 from informatics_front.model import db
 from informatics_front.plugins import gmail, migrate, internal_rmatics, tokenizer
-from informatics_front.utils.auth import authenticate
+from informatics_front.utils.auth.middleware import authenticate
 from informatics_front.utils.error_handlers import register_error_handlers
 from informatics_front.utils.tokenizer.handlers import map_action_routes
 from informatics_front.view.auth.authorization import PasswordChangeApi

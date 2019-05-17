@@ -1,11 +1,11 @@
 from flask.views import MethodView
 from sqlalchemy.orm import joinedload
 
-from informatics_front import current_user
+from informatics_front.utils.auth.request_user import current_user
 from informatics_front.plugins import internal_rmatics
 from informatics_front.model import Comment
 from informatics_front.model.base import db
-from informatics_front.utils.auth import login_required
+from informatics_front.utils.auth.middleware import login_required
 from informatics_front.utils.response import jsonify
 from informatics_front.view.course.contest.serializers.comment import CommentSchema
 

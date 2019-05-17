@@ -1,17 +1,27 @@
 import datetime
 
+from ajax_select import make_ajax_form
 from django.contrib import admin
 
 from .models import WorkshopConnection, Workshop, ContestConnection, Contest
 
 
-admin.site.register(ContestConnection)
-admin.site.register(WorkshopConnection)
+@admin.register(WorkshopConnection)
+class WorkshopConnectionAdmin(admin.ModelAdmin):
+    form = make_ajax_form(WorkshopConnection, {
+        'user': 'moodleuser_lookup'
+    })
+
+
+@admin.register(ContestConnection)
+class ContestConnectionAdmin(admin.ModelAdmin):
+    form = make_ajax_form(ContestConnection, {
+        'user': 'moodleuser_lookup'
+    })
 
 
 class ContestAdmin(admin.ModelAdmin):
-
-    readonly_fields = ('author', 'created_at', )
+    readonly_fields = ('author', 'created_at',)
 
     @classmethod
     def add_default_fields(cls, request, obj: Contest):
@@ -28,12 +38,12 @@ class ContestAdmin(admin.ModelAdmin):
 
 class ContestAdminInline(admin.TabularInline):
     model = Contest
-    ordering = ('position', )
+    ordering = ('position',)
     readonly_fields = ('author', 'created_at',)
 
 
 class WorkshopAdmin(admin.ModelAdmin):
-    inlines = (ContestAdminInline, )
+    inlines = (ContestAdminInline,)
 
     def is_new_object_in_form_creating(self, form):
         data = form.cleaned_data

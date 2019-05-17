@@ -1,8 +1,8 @@
 import pytest
 from flask import g
 
-from informatics_front import RequestUser
-from informatics_front.utils.auth import authenticate
+from informatics_front.utils.auth.request_user import RequestUser
+from informatics_front.utils.auth.middleware import authenticate
 from informatics_front.app_factory import create_app
 from informatics_front.model import db
 from informatics_front.model import Role
@@ -29,8 +29,8 @@ def app():
 
     yield flask_app
 
-    with flask_app.app_context():
-        db.drop_all()
+    # with flask_app.app_context():
+    #     db.drop_all()
 
 
 @pytest.yield_fixture(scope='function')

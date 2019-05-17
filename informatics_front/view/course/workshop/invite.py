@@ -1,11 +1,11 @@
 from flask.views import MethodView
 from werkzeug.exceptions import NotFound, BadRequest
 
-from informatics_front import current_user
+from informatics_front.utils.auth.request_user import current_user
 from informatics_front.model import db
 from informatics_front.model.workshop.workshop import WorkShop, WorkshopStatus
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection
-from informatics_front.utils.auth import login_required
+from informatics_front.utils.auth.middleware import login_required
 from informatics_front.utils.response import jsonify
 
 
