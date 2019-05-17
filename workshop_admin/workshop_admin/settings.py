@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'ajax_select',
     'main',
     'moodle',
 ]
@@ -80,8 +81,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'moodle',
-        'USER': 'user',
-        'PASSWORD': '12345',
+        'USER': 'root',
+        'PASSWORD': 'pass123',
         'HOST': '127.0.0.1',
         'PORT': '3306',
 
@@ -89,8 +90,8 @@ DATABASES = {
     'pynformatics': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'pynformatics',
-        'USER': 'user',
-        'PASSWORD': '12345',
+        'USER': 'root',
+        'PASSWORD': 'pass123',
         'HOST': '127.0.0.1',
         'PORT': '3306',
 
@@ -126,3 +127,6 @@ DATABASE_ROUTERS = (
     'main.db_router.PynformaticsRouter',
     'moodle.db_router.MoodleRouter',
 )
+
+
+AJAX_SELECT_JSON_ENCODER = 'django.core.serializers.json.DjangoJSONEncoder'

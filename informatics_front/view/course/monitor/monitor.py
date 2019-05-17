@@ -9,7 +9,8 @@ from sqlalchemy.orm import joinedload, load_only
 from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound
 
-from informatics_front import current_user
+from informatics_front.utils.auth.request_user import current_user
+from informatics_front.model import db, Statement, User
 from informatics_front.model import db, Statement, User, Group, UserGroup
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.contest.monitor import WorkshopMonitor, WorkshopMonitorType
@@ -17,7 +18,7 @@ from informatics_front.model.workshop.contest_connection import ContestConnectio
 from informatics_front.model.workshop.workshop import WorkShop, WorkshopStatus
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection, WorkshopConnectionStatus
 from informatics_front.plugins import internal_rmatics
-from informatics_front.utils.auth import login_required
+from informatics_front.utils.auth.middleware import login_required
 from informatics_front.utils.response import jsonify
 from informatics_front.view.course.monitor.monitor_preprocessor import BaseResultMaker, IOIResultMaker, \
     MonitorPreprocessor, ACMResultMaker, LightACMResultMaker

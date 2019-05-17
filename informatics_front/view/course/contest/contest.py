@@ -5,14 +5,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Load, joinedload
 from werkzeug.exceptions import NotFound, Forbidden
 
-from informatics_front import current_user
+from informatics_front.utils.auth.request_user import current_user
 from informatics_front.model import Problem, StatementProblem
 from informatics_front.model.base import db
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.model.workshop.workshop import WorkshopStatus
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection
-from informatics_front.utils.auth import login_required
+from informatics_front.utils.auth.middleware import login_required
 from informatics_front.utils.response import jsonify
 from informatics_front.view.course.contest.serializers.contest import ContestConnectionSchema
 

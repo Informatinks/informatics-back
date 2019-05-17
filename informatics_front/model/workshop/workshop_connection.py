@@ -1,14 +1,6 @@
-import enum
-
 from informatics_front.model.base import db
+from informatics_front.utils.enums import WorkshopConnectionStatus
 from informatics_front.utils.sqla.types import IntEnum
-
-
-class WorkshopConnectionStatus(enum.Enum):
-    APPLIED = 1  # подана заявка, еще не одобрена
-    ACCEPTED = 2  # принят на курс
-    DISQUALIFIED = 3  # отчислен с курса (после ACCEPTED)
-    REJECTED = 4  # заявка не одобрена (после APPLIED)
 
 
 class WorkshopConnection(db.Model):

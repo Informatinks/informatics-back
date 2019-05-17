@@ -5,11 +5,11 @@ from sqlalchemy.orm import joinedload
 from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound, BadRequest
 
-from informatics_front import current_user
+from informatics_front.utils.auth.request_user import current_user
 from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.plugins import internal_rmatics
 from informatics_front.model import db, Problem
-from informatics_front.utils.auth import login_required
+from informatics_front.utils.auth.middleware import login_required
 from informatics_front.utils.response import jsonify
 from informatics_front.view.course.contest.serializers.problem import ProblemSchema
 

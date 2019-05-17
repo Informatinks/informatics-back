@@ -1,0 +1,6 @@
+Django==2.2.1
+django-ajax-selects==1.7.1
+django-grappelli==2.12.3
+mysqlclient==1.4.2.post1
+pytz==2019.1
+sqlparse==0.3.0

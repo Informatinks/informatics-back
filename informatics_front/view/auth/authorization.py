@@ -9,13 +9,13 @@ from webargs.flaskparser import parser
 from werkzeug import exceptions as exc
 from werkzeug.exceptions import BadRequest
 
-from informatics_front import current_user
+from informatics_front.utils.auth.request_user import current_user
 from informatics_front.model import db
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.model.user.user import User
 from informatics_front.plugins import gmail
 from informatics_front.plugins import tokenizer
-from informatics_front.utils.auth import login_required
+from informatics_front.utils.auth.middleware import authenticate, login_required
 from informatics_front.utils.auth.make_jwt import decode_jwt_token, generate_refresh_token
 from informatics_front.utils.response import jsonify
 from informatics_front.view.auth.serializers.auth import UserAuthSerializer

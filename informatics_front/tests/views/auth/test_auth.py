@@ -5,7 +5,7 @@ from unittest import mock
 from flask import g
 from werkzeug.exceptions import Unauthorized
 
-from informatics_front.utils.auth import authenticate
+from informatics_front.utils.auth.middleware import authenticate
 from informatics_front.utils.auth.make_jwt import decode_jwt_token
 
 
@@ -27,7 +27,7 @@ def test_decode_expired_token(expired_token: str):
 
 @pytest.mark.auth
 def test_auth_by_token(token):
-    with mock.patch('informatics_front.utils.auth.request') as request:
+    with mock.patch('informatics_front.utils.auth.middleware.request') as request:
         request.headers = {
             'Authorization': f'JWT {token}'
         }
@@ -38,7 +38,7 @@ def test_auth_by_token(token):
 
 @pytest.mark.auth
 def test_auth_by_expired_token(expired_token: str):
-    with mock.patch('informatics_front.utils.auth.request') as request:
+    with mock.patch('informatics_front.utils.auth.middleware.request') as request:
         request.headers = {
             'Authorization': f'JWT {expired_token}'
         }
