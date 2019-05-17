@@ -6,7 +6,7 @@ import pytest
 from flask import g
 from werkzeug.local import LocalProxy
 
-from informatics_front import RequestUser
+from informatics_front.utils.auth.request_user import RequestUser
 from informatics_front.model import StatementProblem, Problem, Statement, Comment, db
 from informatics_front.model import User
 from informatics_front.model.contest.contest import Contest
