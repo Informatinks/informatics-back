@@ -157,7 +157,7 @@ class IOIResultMaker(BaseResultMaker):
         return 0
 
 
-class ACMResultMaker(BaseResultMaker):
+class LightACMResultMaker(BaseResultMaker):
     """ Presents ACM-system result of user's runs:
         displaying by success solution (by problem) """
 
@@ -229,8 +229,7 @@ class ACMResultMaker(BaseResultMaker):
         return int((delivery_time - start_time).total_seconds())
 
 
-class LightACMResultMaker(ACMResultMaker):
-
+class ACMResultMaker(LightACMResultMaker):
     def get_time(self, user_id: int, runs: List[dict]) -> int:
         wrong_tries = self.get_wrong_tries_count(runs)
         return super().get_time(user_id, runs) + \

@@ -150,7 +150,7 @@ class TestIOIResultMaker:
         assert runs[0]['ejudge_score'] == 0
 
 
-class TestACMResultMaker:
+class TestLightACMResultMaker:
     def test_get_current_mark(self):
         runs = [
             {'ejudge_status': EjudgeStatuses.PARTIAL.value},
@@ -158,7 +158,7 @@ class TestACMResultMaker:
             {'ejudge_status': EjudgeStatuses.REJECTED.value},
             {'ejudge_status': EjudgeStatuses.CE.value},
         ]
-        assert 'WA' == ACMResultMaker.get_current_mark(runs)
+        assert 'WA' == LightACMResultMaker.get_current_mark(runs)
 
         runs = [
             {'ejudge_status': EjudgeStatuses.PARTIAL.value},
@@ -166,7 +166,7 @@ class TestACMResultMaker:
             {'ejudge_status': EjudgeStatuses.OK.value},
             {'ejudge_status': EjudgeStatuses.CE.value},
         ]
-        assert 'OK' == ACMResultMaker.get_current_mark(runs)
+        assert 'OK' == LightACMResultMaker.get_current_mark(runs)
 
         runs = [
             {'ejudge_status': EjudgeStatuses.OK.value},
@@ -174,7 +174,7 @@ class TestACMResultMaker:
             {'ejudge_status': EjudgeStatuses.AC.value},
             {'ejudge_status': EjudgeStatuses.OK.value},
         ]
-        assert 'AC' == ACMResultMaker.get_current_mark(runs)
+        assert 'AC' == LightACMResultMaker.get_current_mark(runs)
 
     def test_get_time(self):
         time_now = datetime.datetime.utcnow()
@@ -182,7 +182,7 @@ class TestACMResultMaker:
         get_user_start_time = MagicMock()
         get_user_start_time.return_value = start_time.astimezone()
 
-        result_maker = ACMResultMaker(get_user_start_time)
+        result_maker = LightACMResultMaker(get_user_start_time)
 
         runs = [
             {'ejudge_status': EjudgeStatuses.PARTIAL.value},
@@ -217,14 +217,14 @@ class TestACMResultMaker:
             == int(datetime.timedelta(days=1).total_seconds())
 
 
-class TestLightACMResultMaker:
+class TestACMResultMaker:
     def test_get_time(self):
-        result_maker = LightACMResultMaker(lambda: None)
+        result_maker = ACMResultMaker(lambda: None)
         wrong_tries = 3
 
         patch_pref = 'informatics_front.view.course.monitor.monitor_preprocessor'
-        with patch(f'{patch_pref}.ACMResultMaker.get_time') as mock_super_get_time, \
-                patch(f'{patch_pref}.ACMResultMaker.get_wrong_tries_count') as mock_wrong_tries:
+        with patch(f'{patch_pref}.LightACMResultMaker.get_time') as mock_super_get_time, \
+                patch(f'{patch_pref}.LightACMResultMaker.get_wrong_tries_count') as mock_wrong_tries:
             mock_super_get_time.return_value = 0
             mock_wrong_tries.return_value = wrong_tries
             time = result_maker.get_time(123, [])
