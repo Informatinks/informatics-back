@@ -1,25 +1,6 @@
-import enum
-
 from informatics_front.model.base import db
+from informatics_front.utils.enums import WorkshopMonitorType, WorkshopMonitorUserVisibility
 from informatics_front.utils.sqla.types import IntEnum
-
-
-class WorkshopMonitorType(enum.Enum):
-    """
-    Тип монитора:
-        IOI - по очкам (количество баллов в задаче)
-        ACM - по плюсикам (количество решенных задач)
-    """
-    IOI = 1
-    ACM = 2
-    LightACM = 3
-
-
-class WorkshopMonitorUserVisibility(enum.Enum):
-    """ Чьи результаты может видеть ученик, свои или общие"""
-    FOR_USER_ONLY = 1
-    FULL = 2
-    DISABLED_FOR_STUDENT = 3
 
 
 class WorkshopMonitor(db.Model):

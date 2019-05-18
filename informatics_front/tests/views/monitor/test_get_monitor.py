@@ -5,7 +5,8 @@ from flask import url_for
 
 from informatics_front.model import db
 from informatics_front.model.contest.contest import Contest
-from informatics_front.model.contest.monitor import WorkshopMonitor, WorkshopMonitorUserVisibility
+from informatics_front.model.contest.monitor import WorkshopMonitor
+from informatics_front.utils.enums import WorkshopMonitorUserVisibility
 from informatics_front.model.user.user import SimpleUser
 from informatics_front.view.course.monitor.monitor import WorkshopMonitorApi
 

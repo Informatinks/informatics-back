@@ -10,10 +10,10 @@ from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound
 
 from informatics_front.utils.auth.request_user import current_user
-from informatics_front.model import db, Statement, User
 from informatics_front.model import db, Statement, User, Group, UserGroup
 from informatics_front.model.contest.contest import Contest
-from informatics_front.model.contest.monitor import WorkshopMonitor, WorkshopMonitorType
+from informatics_front.model.contest.monitor import WorkshopMonitor
+from informatics_front.utils.enums import WorkshopMonitorType
 from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.model.workshop.workshop import WorkShop, WorkshopStatus
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection, WorkshopConnectionStatus
