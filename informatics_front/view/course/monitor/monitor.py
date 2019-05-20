@@ -144,7 +144,7 @@ class WorkshopMonitorApi(MethodView):
         return data
 
     @classmethod
-    def _make_function_getting_user_start_time(cls, contest, user_ids: List[int]) -> Callable:
+    def _make_start_time_retriever(cls, contest, user_ids: List[int]) -> Callable:
         """
         Returns function for getting contest start time by user_id
         """
@@ -177,7 +177,7 @@ class WorkshopMonitorApi(MethodView):
         if result_maker_cls.is_need_time:
             problem_ids = cls._extract_problem_ids([contest])
             user_ids = monitor_processor.get_user_ids(problem_ids)
-            get_user_start_time = cls._make_function_getting_user_start_time(contest, user_ids)
+            get_user_start_time = cls._make_start_time_retriever(contest, user_ids)
             result_maker = result_maker_cls(get_user_start_time)
         else:
             result_maker = result_maker_cls()

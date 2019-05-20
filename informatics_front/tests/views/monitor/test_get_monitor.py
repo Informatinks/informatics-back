@@ -91,14 +91,14 @@ def test_get_raw_data_by_contest(ongoing_workshop):
 def test_make_function_user_start_time_when_not_virtual():
     time_start = '123'
     c = Contest(is_virtual=False, time_start=time_start)
-    func = WorkshopMonitorApi._make_function_getting_user_start_time(c, [1, 2, 3])
+    func = WorkshopMonitorApi._make_start_time_retriever(c, [1, 2, 3])
     assert func() == time_start
 
 
 def test_make_function_user_start_time_when_virtual(contest_connection):
     c = contest_connection.contest
     c.is_virtual = True
-    func = WorkshopMonitorApi._make_function_getting_user_start_time(c, [1, 2, contest_connection.user_id])
+    func = WorkshopMonitorApi._make_start_time_retriever(c, [1, 2, contest_connection.user_id])
 
     assert func(contest_connection.user_id) == contest_connection.created_at.astimezone()
     assert func(123) == datetime.datetime.utcfromtimestamp(0).astimezone()
