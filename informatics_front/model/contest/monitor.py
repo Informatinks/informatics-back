@@ -1,23 +1,6 @@
-import enum
-
 from informatics_front.model.base import db
+from informatics_front.utils.enums import WorkshopMonitorType, WorkshopMonitorUserVisibility
 from informatics_front.utils.sqla.types import IntEnum
-
-
-class WorkshopMonitorType(enum.Enum):
-    """
-    Тип монитора:
-        IOI - по очкам (количество баллов в задаче)
-        ACM - по плюсикам (количество решенных задач)
-    """
-    IOI = 1  # подана заявка, еще не одобрена
-    ACM = 2  # принят на курс
-
-
-class WorkshopMonitorUserVisibility(enum.Enum):
-    """ Чьи результаты может видеть ученик, свои или общие"""
-    FOR_USER_ONLY = 1
-    FULL = 2
 
 
 class WorkshopMonitor(db.Model):
@@ -48,4 +31,7 @@ class WorkshopMonitor(db.Model):
     )
 
     def is_for_user_only(self):
-        return self.type == WorkshopMonitorUserVisibility.FOR_USER_ONLY
+        return self.user_visibility == WorkshopMonitorUserVisibility.FOR_USER_ONLY
+
+    def is_disabled_for_students(self):
+        return self.user_visibility == WorkshopMonitorUserVisibility.DISABLED_FOR_STUDENT

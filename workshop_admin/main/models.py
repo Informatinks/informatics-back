@@ -1,17 +1,20 @@
 from django.db import models
 
-from informatics_front.utils.enums import WorkshopStatus, WorkshopVisibility, WorkshopConnectionStatus
+from informatics_front.utils.enums import WorkshopStatus, WorkshopVisibility, WorkshopConnectionStatus, \
+    WorkshopMonitorType, WorkshopMonitorUserVisibility
 from utils.types import DateTimeBasedDuration
 
 WORKSHOP_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopStatus))
 WORKSHOP_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopVisibility))
 WORKSHOP_CONNECTION_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopConnectionStatus))
+MONITOR_TYPE_CHOICES = tuple(((e.value, e.name) for e in WorkshopMonitorType))
+MONITOR_USER_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopMonitorUserVisibility))
 
 
 class Contest(models.Model):
     workshop = models.ForeignKey('Workshop', models.DO_NOTHING, blank=True, null=True)
     statement_id = models.IntegerField(blank=True, null=True)
-    author = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE)
+    author = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE, editable=False)
     position = models.IntegerField(blank=True, null=True)
     is_virtual = models.BooleanField(blank=True, null=True, default=False)
     time_start = models.DateTimeField(blank=True, null=True)
@@ -73,3 +76,21 @@ class WorkshopConnection(models.Model):
         managed = False
         db_table = 'workshop_connection'
         unique_together = (('user', 'workshop'),)
+
+
+class WorkshopMonitor(models.Model):
+    workshop = models.OneToOneField(Workshop, models.DO_NOTHING)
+    type = models.IntegerField(choices=MONITOR_TYPE_CHOICES,
+                               null=False, blank=False,
+                               default=WorkshopMonitorType.ACM.value)
+    user_visibility = models.IntegerField(choices=MONITOR_USER_VISIBILITY_CHOICES)
+    with_penalty_time = models.BooleanField(default=False)
+    freeze_time = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        type = WorkshopMonitorType(self.type).name if self.type else ''
+        return f'Монитор {type} ({self.workshop_id}# {self.workshop.name})'
+
+    class Meta:
+        managed = False
+        db_table = 'contest_monitor'

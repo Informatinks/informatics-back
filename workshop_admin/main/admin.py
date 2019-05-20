@@ -3,7 +3,7 @@ import datetime
 from ajax_select import make_ajax_form
 from django.contrib import admin
 
-from .models import WorkshopConnection, Workshop, ContestConnection, Contest
+from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor
 
 
 @admin.register(WorkshopConnection)
@@ -42,8 +42,13 @@ class ContestAdminInline(admin.TabularInline):
     readonly_fields = ('author', 'created_at',)
 
 
+class MonitorAdminInline(admin.TabularInline):
+    model = WorkshopMonitor
+
+
 class WorkshopAdmin(admin.ModelAdmin):
-    inlines = (ContestAdminInline,)
+    inlines = (ContestAdminInline,
+               MonitorAdminInline)
 
     def is_new_object_in_form_creating(self, form):
         data = form.cleaned_data
@@ -59,5 +64,10 @@ class WorkshopAdmin(admin.ModelAdmin):
             obj.save()
 
 
+class WorkshopMonitorAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(Contest, ContestAdmin)
 admin.site.register(Workshop, WorkshopAdmin)
+admin.site.register(WorkshopMonitor, WorkshopMonitorAdmin)

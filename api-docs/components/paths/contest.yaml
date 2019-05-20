@@ -31,6 +31,12 @@ paths:
             type: integer
           required: true
           description: Numeric ID of the contest to get
+        - in: patch
+          name: group_id
+          schema:
+            type: integer
+          required: false
+          description: Numeric ID of group of users
 
       security:
         - jwt-token-auth: []
