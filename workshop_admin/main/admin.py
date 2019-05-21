@@ -1,7 +1,9 @@
 import datetime
 
 from ajax_select import make_ajax_form
+from ajax_select.admin import AjaxSelectAdminTabularInline, AjaxSelectAdmin
 from django.contrib import admin
+from moodle.models import Statement
 
 from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor
 
@@ -20,8 +22,12 @@ class ContestConnectionAdmin(admin.ModelAdmin):
     })
 
 
-class ContestAdmin(admin.ModelAdmin):
+class ContestAdmin(AjaxSelectAdmin):
     readonly_fields = ('author', 'created_at',)
+
+    form = make_ajax_form(Contest, {
+        'statement': 'statement_lookup'
+    })
 
     @classmethod
     def add_default_fields(cls, request, obj: Contest):
@@ -36,10 +42,14 @@ class ContestAdmin(admin.ModelAdmin):
         return ['author', 'created_at']
 
 
-class ContestAdminInline(admin.TabularInline):
+class ContestAdminInline(AjaxSelectAdminTabularInline):
     model = Contest
     ordering = ('position',)
     readonly_fields = ('author', 'created_at',)
+
+    form = make_ajax_form(Contest, {
+        'statement': 'statement_lookup'
+    })
 
 
 class MonitorAdminInline(admin.TabularInline):
@@ -71,3 +81,4 @@ class WorkshopMonitorAdmin(admin.ModelAdmin):
 admin.site.register(Contest, ContestAdmin)
 admin.site.register(Workshop, WorkshopAdmin)
 admin.site.register(WorkshopMonitor, WorkshopMonitorAdmin)
+admin.site.register(Statement)
