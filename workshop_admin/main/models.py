@@ -1,8 +1,8 @@
 from django.db import models
+from utils.types import DateTimeBasedDuration
 
 from informatics_front.utils.enums import WorkshopStatus, WorkshopVisibility, WorkshopConnectionStatus, \
     WorkshopMonitorType, WorkshopMonitorUserVisibility
-from utils.types import DateTimeBasedDuration
 
 WORKSHOP_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopStatus))
 WORKSHOP_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopVisibility))
@@ -13,7 +13,7 @@ MONITOR_USER_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopMoni
 
 class Contest(models.Model):
     workshop = models.ForeignKey('Workshop', models.DO_NOTHING, blank=True, null=True)
-    statement_id = models.IntegerField(blank=True, null=True)
+    statement = models.ForeignKey('moodle.Statement', on_delete=models.DO_NOTHING, blank=True, null=True)
     author = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE, editable=False)
     position = models.IntegerField(blank=True, null=True)
     is_virtual = models.BooleanField(blank=True, null=True, default=False)

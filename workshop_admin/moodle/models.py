@@ -3,7 +3,6 @@ from django.db import models
 
 
 class Role(models.Model):
-
     shortname = models.CharField(max_length=100)
 
     super_user_roles = (
@@ -18,7 +17,6 @@ class Role(models.Model):
 
 
 class RoleAssignment(models.Model):
-
     role = models.ForeignKey('Role', models.DO_NOTHING, blank=True, null=True, db_column='roleid')
     user = models.ForeignKey('MoodleUser', models.DO_NOTHING, blank=True, null=True, db_column='userid')
 
@@ -28,7 +26,6 @@ class RoleAssignment(models.Model):
 
 
 class UserManager(BaseUserManager):
-
     use_in_migrations = True
 
     def _create_user(self, email, password, **extra_fields):
@@ -77,3 +74,12 @@ class MoodleUser(models.Model):
     class Meta:
         managed = False
         db_table = 'mdl_user'
+
+
+class Statement(models.Model):
+    name = models.CharField(max_length=256)
+    summary = models.TextField()
+
+    class Meta:
+        managed = False
+        db_table = 'mdl_statements'
