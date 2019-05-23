@@ -354,8 +354,8 @@ components:
       properties:
         type:
           type: string
-          description: Тип монитора (ACM/IOI)
-          enum: [ACM, IOI]
+          description: Тип монитора (ACM/IOI/LightACM)
+          enum: [ACM, IOI, LightACM]
 
         contests:
           description: массив со списком контестов и задач собра
