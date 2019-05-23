@@ -44,7 +44,7 @@ class StatementProblem(db.Model):
     rank = db.Column('rank', db.Integer)
     hidden = db.Column('hidden', db.Integer)
 
-    statement = db.relationship('Statement', backref=db.backref('StatementProblems', collection_class=attribute_mapped_collection("rank")))
+    statement = db.relationship('Statement', backref=db.backref('statement_problems'))
 
     # reference to the "Keyword" object
     problem = db.relationship('Problem', backref=db.backref('StatementProblems'))

@@ -85,11 +85,11 @@ def test_get_raw_data_by_contest(ongoing_workshop):
     problems = contest.statement.problems
     problem_ids = list(p.id for p in problems)
 
-    mock_get_monitor.assert_called_with(problem_ids, user_ids, time_freeze.utctimestamp.return_value)
+    mock_get_monitor.assert_called_with(problem_ids, user_ids, int(time_freeze.utctimestamp.return_value))
 
 
 def test_make_function_user_start_time_when_not_virtual():
-    time_start = '123'
+    time_start = datetime.datetime.utcnow().astimezone()
     c = Contest(is_virtual=False, time_start=time_start)
     func = WorkshopMonitorApi._make_start_time_retriever(c, [1, 2, 3])
     assert func() == time_start

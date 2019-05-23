@@ -246,11 +246,13 @@ class MonitorPreprocessor:
             user_ids_runs = self._group_by_users(runs)
             self.problem_ids_user_ids_runs[problem_id] = user_ids_runs
 
-    def get_user_ids(self, problem_id) -> List[int]:
+    def get_user_ids(self, problem_ids: List[int]) -> List[int]:
         """ Returns user ids who have at least one run for this problem """
-
-        users_runs = self.problem_ids_user_ids_runs.get(problem_id) or {}
-        user_ids = list(users_runs.keys())
+        acc = set()
+        for problem_id in problem_ids:
+            users_runs = self.problem_ids_user_ids_runs.get(problem_id) or {}
+            acc.update(users_runs.keys())
+        user_ids = list(acc)
 
         return user_ids
 
