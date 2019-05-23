@@ -1,9 +1,15 @@
+import random
+import string
+
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from utils.types import DateTimeBasedDuration
 
 from informatics_front.utils.enums import WorkshopStatus, WorkshopVisibility, WorkshopConnectionStatus, \
     WorkshopMonitorType, WorkshopMonitorUserVisibility
 
+ACCESS_TOKEN_LENGTH = 32
 WORKSHOP_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopStatus))
 WORKSHOP_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopVisibility))
 WORKSHOP_CONNECTION_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopConnectionStatus))
@@ -53,6 +59,8 @@ class Workshop(models.Model):
     name = models.CharField(max_length=255)
     status = models.IntegerField(choices=WORKSHOP_STATUS_CHOICES)
     visibility = models.IntegerField(choices=WORKSHOP_VISIBILITY_CHOICES)
+    access_token = models.CharField(max_length=ACCESS_TOKEN_LENGTH, blank=False, null=False,
+                                    help_text='Код доступа. Будет сгенерирован автоматически при сохранении вокршопа')
 
     class Meta:
         managed = False
@@ -61,6 +69,17 @@ class Workshop(models.Model):
     def __str__(self):
         status = WorkshopStatus(self.status).name if self.status else ''
         return f'#{self.pk} {self.name} ({status})'
+
+
+@receiver(pre_save, sender=Workshop)
+def generate_access_token(sender: models.Model, instance: Workshop, *args, **kwargs):
+    """Generate workshop access token when workshop is created from admin panel.
+
+    Access token is 32-length digit-letter string. We dont't use this function as plain default value
+    as initial new and update values may confuse users.
+    """
+    if not instance.access_token or instance.access_token == '':
+        instance.access_token = ''.join(random.choices(string.ascii_lowercase + string.digits, k=ACCESS_TOKEN_LENGTH))
 
 
 class WorkshopConnection(models.Model):
