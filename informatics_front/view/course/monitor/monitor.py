@@ -144,7 +144,7 @@ class WorkshopMonitorApi(MethodView):
         problem_ids = cls._extract_problem_ids([contest])
 
         runs_until = monitor.freeze_time
-        runs_until = runs_until and int(runs_until.utctimestamp())
+        runs_until = runs_until and int(runs_until.timestamp())
 
         data, _ = internal_rmatics.get_monitor(problem_ids,
                                                user_ids,
@@ -160,7 +160,7 @@ class WorkshopMonitorApi(MethodView):
             start_time = contest.time_start or contest.created_at
 
             def const_time(*__, **___):
-                return start_time
+                return start_time.astimezone()
 
             return const_time
 

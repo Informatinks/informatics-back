@@ -57,7 +57,7 @@ class InternalRmatics(BaseService):
 
     def get_monitor(self, problems: List[int], users: List[int], time_before: Optional[int]):
         # TODO: Приделать контекст посылки (NFRMTCS-192)
-        url = f'{self.service_url}/problem_monitor'
+        url = f'{self.service_url}/monitor/problem_monitor'
 
         monitor_args = {
             'user_id': users,
