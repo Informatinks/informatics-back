@@ -76,7 +76,7 @@ def generate_access_token(sender: models.Model, instance: Workshop, *args, **kwa
     """Generate workshop access token when workshop is created from admin panel.
 
     Access token is 32-length digit-letter string. We dont't use this function as plain default value
-    as initial new and update values may confuse users.
+    as different initial and updated values may confuse users.
     """
     if not instance.access_token or instance.access_token == '':
         instance.access_token = ''.join(random.choices(string.ascii_lowercase + string.digits, k=ACCESS_TOKEN_LENGTH))
