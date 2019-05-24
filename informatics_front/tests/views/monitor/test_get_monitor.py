@@ -67,7 +67,7 @@ def test_ensure_permissions(accepted_workshop_connection):
 
 def test_get_raw_data_by_contest(ongoing_workshop):
     time_freeze = MagicMock()
-    time_freeze.utctimestamp.return_value = '123'
+    time_freeze.timestamp.return_value = '123'
     monitor = WorkshopMonitor(freeze_time=time_freeze)
     runs = [{'my': 'data'}]
     user_ids = [1, 2, 3]
@@ -85,7 +85,7 @@ def test_get_raw_data_by_contest(ongoing_workshop):
     problems = contest.statement.problems
     problem_ids = list(p.id for p in problems)
 
-    mock_get_monitor.assert_called_with(problem_ids, user_ids, int(time_freeze.utctimestamp.return_value))
+    mock_get_monitor.assert_called_with(problem_ids, user_ids, int(time_freeze.timestamp.return_value))
 
 
 def test_make_function_user_start_time_when_not_virtual():
