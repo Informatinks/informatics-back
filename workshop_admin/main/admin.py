@@ -45,8 +45,7 @@ class ContestAdmin(AjaxSelectAdmin):
 class ContestAdminInline(AjaxSelectAdminTabularInline):
     model = Contest
     ordering = ('position',)
-    readonly_fields = ('author', 'created_at',)
-
+    exclude = ('author', 'created_at',)
     form = make_ajax_form(Contest, {
         'statement': 'statement_lookup'
     })

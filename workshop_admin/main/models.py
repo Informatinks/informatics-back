@@ -8,7 +8,18 @@ WORKSHOP_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopStatus))
 WORKSHOP_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopVisibility))
 WORKSHOP_CONNECTION_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopConnectionStatus))
 MONITOR_TYPE_CHOICES = tuple(((e.value, e.name) for e in WorkshopMonitorType))
-MONITOR_USER_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopMonitorUserVisibility))
+
+
+monitor_user_visibility_human = {
+    WorkshopMonitorUserVisibility.FOR_USER_ONLY: 'Ученик видит свои результаты',
+    WorkshopMonitorUserVisibility.FULL: 'Ученик видит все результаты',
+    WorkshopMonitorUserVisibility.DISABLED_FOR_STUDENT: 'Ученик не видит результаты'
+}
+
+
+MONITOR_USER_VISIBILITY_CHOICES = tuple(
+    (e.value, monitor_user_visibility_human.get(e, e.name)) for e in WorkshopMonitorUserVisibility
+)
 
 
 class Contest(models.Model):
@@ -16,9 +27,9 @@ class Contest(models.Model):
     statement = models.ForeignKey('moodle.Statement', on_delete=models.DO_NOTHING, blank=True, null=True)
     author = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE, editable=False)
     position = models.IntegerField(blank=True, null=True)
-    is_virtual = models.BooleanField(blank=True, null=True, default=False)
-    time_start = models.DateTimeField(blank=True, null=True)
-    time_stop = models.DateTimeField(blank=True, null=True)
+    is_virtual = models.BooleanField(default=False)
+    time_start = models.DateTimeField()
+    time_stop = models.DateTimeField()
     virtual_duration = DateTimeBasedDuration(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 

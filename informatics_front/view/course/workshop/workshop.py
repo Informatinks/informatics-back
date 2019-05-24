@@ -29,7 +29,6 @@ class WorkshopApi(MethodView):
                      .joinedload(Contest.statement)) \
             .one_or_none()
 
-
         if workshop_connection is None:
             raise NotFound(f'Cannot find workshop id #{workshop_id}')
 

@@ -5,12 +5,12 @@ from typing import List, Type, Callable, Optional
 from flask import request
 from flask.views import MethodView
 from marshmallow import fields
-from sqlalchemy.orm import joinedload, load_only
+from sqlalchemy.orm import joinedload, load_only, Load
 from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound
 
 from informatics_front.utils.auth.request_user import current_user
-from informatics_front.model import db, Statement, User, Group, UserGroup
+from informatics_front.model import db, Statement, User, Group, UserGroup, StatementProblem, Problem
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.contest.monitor import WorkshopMonitor
 from informatics_front.utils.enums import WorkshopMonitorType
@@ -114,8 +114,16 @@ class WorkshopMonitorApi(MethodView):
         contests: List[Contest] = db.session.query(Contest) \
             .filter(Contest.workshop_id == workshop_id) \
             .options(joinedload(Contest.statement)
-                     .joinedload(Statement.problems)) \
+                     .joinedload(Statement.statement_problems)
+                     .joinedload(StatementProblem.problem)) \
+                     .options(Load(Problem).load_only('id', 'name')) \
+                     .options(Load(StatementProblem).load_only('rank')) \
             .all()
+
+        for contest in contests:
+            for sp in contest.statement.statement_problems:
+                sp.problem.rank = sp.rank
+            contest.problems = [sp.problem for sp in contest.statement.statement_problems]
 
         return contests
 
@@ -136,7 +144,7 @@ class WorkshopMonitorApi(MethodView):
         problem_ids = cls._extract_problem_ids([contest])
 
         runs_until = monitor.freeze_time
-        runs_until = runs_until and runs_until.utctimestamp()
+        runs_until = runs_until and int(runs_until.utctimestamp())
 
         data, _ = internal_rmatics.get_monitor(problem_ids,
                                                user_ids,
