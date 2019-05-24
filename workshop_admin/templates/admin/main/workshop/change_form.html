@@ -1,0 +1,18 @@
+{% extends "admin/change_form.html" %}
+{% load workshop_extras %}
+{% block after_field_sets %}
+    {% if original.access_token %}
+        <style>
+            .workshop-public-link {
+                font-size: 1.2rem;
+                margin-top: 0.6rem;
+                margin-bottom: 1rem;
+                font-weight: bold;
+            }
+        </style>
+        <p class="workshop-public-link">
+            Ссылка на воркшоп для студентов:
+            <a href="{{ original|public_link }}">{{ original|public_link }}</a>
+        </p>
+    {% endif %}
+{% endblock %}

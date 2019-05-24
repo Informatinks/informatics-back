@@ -58,7 +58,6 @@ class MonitorAdminInline(admin.TabularInline):
 
 class WorkshopAdmin(admin.ModelAdmin):
     readonly_fields = ('access_token',)
-
     inlines = (ContestAdminInline,
                MonitorAdminInline)
 
