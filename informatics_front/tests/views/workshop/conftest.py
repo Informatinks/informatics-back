@@ -7,8 +7,8 @@ WORKSHOP_ACCESS_TOKEN = 'foo'
 
 
 @pytest.yield_fixture
-def empty_workshop(access_token: str = WORKSHOP_ACCESS_TOKEN):
-    w = WorkShop(status=WorkshopStatus.ONGOING, access_token=access_token)
+def empty_workshop():
+    w = WorkShop(status=WorkshopStatus.ONGOING, access_token=WORKSHOP_ACCESS_TOKEN)
     db.session.add(w)
     db.session.commit()
     db.session.refresh(w)

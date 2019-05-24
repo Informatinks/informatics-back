@@ -15,6 +15,7 @@ from informatics_front.model.workshop.workshop_connection import WorkshopConnect
 from informatics_front.utils.auth.middleware import login_required
 from informatics_front.utils.response import jsonify
 from informatics_front.view.course.contest.serializers.contest import ContestConnectionSchema
+from informatics_front.utils.sqla.race_handler import RaceHandler
 
 
 class ContestApi(MethodView):
@@ -32,8 +33,7 @@ class ContestApi(MethodView):
         self._check_workshop_permissions(user_id,
                                          contest.workshop)
 
-        cc = self._get_contest_connection(user_id, contest.id) or \
-             self._create_contest_connection(user_id, contest.id)
+        cc = RaceHandler.get_or_create(ContestConnection, user_id=user_id, contest_id=contest.id)
 
         if not contest.is_available(cc):
             raise Forbidden('Contest is not started or already finished')
@@ -76,25 +76,3 @@ class ContestApi(MethodView):
                 and workshop.status == WorkshopStatus.ONGOING:
             return workshop_connection
         raise NotFound('Contest is not found')
-
-    @classmethod
-    def _get_contest_connection(cls, user_id: int, contest_id: int) \
-            -> Optional[ContestConnection]:
-        """ Returns user connection on contest instance"""
-        return db.session.query(ContestConnection) \
-            .filter_by(user_id=user_id, contest_id=contest_id) \
-            .one_or_none()
-
-    @classmethod
-    def _create_contest_connection(cls, user_id, contest_id: int) -> ContestConnection:
-        """ Beware: we use COMMIT and ROLLBACK in this function! """
-        cc = ContestConnection(user_id=user_id, contest_id=contest_id)
-        db.session.begin_nested()
-        try:
-            db.session.add(cc)
-            db.session.commit()
-            db.session.refresh(cc)
-        except IntegrityError:
-            db.session.rollback()
-            cc = cls._get_contest_connection(user_id, contest_id)
-        return cc
