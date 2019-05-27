@@ -32,13 +32,16 @@ class ContestApi(MethodView):
         self._check_workshop_permissions(user_id,
                                          contest.workshop)
 
-        cc = get_or_create(ContestConnection, user_id=user_id, contest_id=contest.id)
+        cc, is_created = get_or_create(ContestConnection, user_id=user_id, contest_id=contest.id)
 
         if not contest.is_available(cc):
             raise Forbidden('Contest is not started or already finished')
 
         contest.statement.problems = self._load_problems(contest.statement_id)
         cc.contest = contest
+
+        if is_created is True:
+            db.session.commit()
 
         cc_schema = ContestConnectionSchema()
 

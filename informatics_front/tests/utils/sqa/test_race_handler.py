@@ -16,20 +16,24 @@ ws_kwargs = {
 
 
 @pytest.mark.race_handler
-def test_create_object(app, ):
-    assert db.session.query(WorkShop).filter_by(**ws_kwargs).one_or_none() is None, 'object should not exist'
+def test_raw_create_uncommited_object(app, ):
+    object_ = _create_object(WorkShop, **ws_kwargs)
+    db.session.rollback()
+
+    assert db.session.query(WorkShop).filter_by(**ws_kwargs).one_or_none() is None, 'object not should be created'
+
+
+@pytest.mark.race_handler
+def test_raw_create_commited_object(app, ):
+    assert db.session.query(WorkShop).filter_by(
+        **ws_kwargs).one_or_none() is None, 'object should not exist before test'
 
     try:
         object_ = _create_object(WorkShop, **ws_kwargs)
+        db.session.commit()
+        db.session.rollback()
 
-        assert db.session.query(WorkShop).filter_by(
-            **ws_kwargs).one_or_none() is not None, 'object should be created'
-
-        db.session.refresh(object_)
-        assert object_.id is not None, 'created object should have id'
-
-        for k in ws_kwargs:
-            assert getattr(object_, k) == ws_kwargs.get(k), 'created object should have correct passed atributes'
+        assert db.session.query(WorkShop).filter_by(**ws_kwargs).one_or_none() is not None, 'object should be created'
     finally:
         # unconditioned object deletion
         db.session.delete(object_)
@@ -38,31 +42,48 @@ def test_create_object(app, ):
 
 @pytest.mark.race_handler
 def test_get_object(app, ):
-    assert db.session.query(WorkShop).filter_by(**ws_kwargs).one_or_none() is None, 'object should not exist'
+    assert db.session.query(WorkShop).filter_by(
+        **ws_kwargs).one_or_none() is None, 'object should not exist before test'
+
+    ws: WorkShop = WorkShop(**ws_kwargs)
+    db.session.add(ws)
+    db.session.commit()
 
     try:
-        created_object = _create_object(WorkShop, **ws_kwargs)
         found_object = _get_object(WorkShop, **ws_kwargs)
-
-        assert created_object.id is found_object.id, 'proper object should be found'
+        assert ws.id is found_object.id, 'proper object should be found'
     finally:
         # unconditioned object deletion
-        db.session.delete(created_object)
+        db.session.delete(ws)
         db.session.commit()
 
 
 @pytest.mark.race_handler
-def test_get_or_create(app, ):
-    assert db.session.query(WorkShop).count() == 0, 'no object should exist'
+def test_get_or_create_create_uncommit(app, ):
+    assert db.session.query(WorkShop).filter_by(
+        **ws_kwargs).one_or_none() is None, 'object should not exist before test'
+
+    object_1, is_created = get_or_create(WorkShop, **ws_kwargs)
+    assert is_created is True
+
+    db.session.rollback()
+
+    assert db.session.query(WorkShop).count() == 0, 'object should not be created'
+
+
+@pytest.mark.race_handler
+def test_get_or_create_create_commit(app, ):
+    assert db.session.query(WorkShop).filter_by(
+        **ws_kwargs).one_or_none() is None, 'object should not exist before test'
 
     try:
-        object_1 = get_or_create(WorkShop, **ws_kwargs)
-        assert db.session.query(WorkShop).count() == 1, 'object should be created'
+        object_1, is_created = get_or_create(WorkShop, **ws_kwargs)
+        assert is_created is True
+        db.session.commit()
 
-        object_2 = get_or_create(WorkShop, **ws_kwargs)
-        assert db.session.query(WorkShop).count() == 1, 'no new objects should be created'
+        db.session.rollback()
 
-        assert object_1.id == object_2.id, 'returned object is the same as created'
+        assert db.session.query(WorkShop).count() == 1, 'object should exist after session rollback'
     finally:
         # unconditioned object deletion
         db.session.delete(object_1)
@@ -70,16 +91,20 @@ def test_get_or_create(app, ):
 
 
 @pytest.mark.race_handler
-def test_auto_rollback_transaction(app, ):
-    assert db.session.query(WorkShop).count() == 0, 'no object should exist'
+def test_get_or_create_get(app, ):
+    assert db.session.query(WorkShop).filter_by(
+        **ws_kwargs).one_or_none() is None, 'object should not exist before test'
+
+    ws: WorkShop = WorkShop(**ws_kwargs)
+    db.session.add(ws)
+    db.session.commit()
 
     try:
-        object_ = get_or_create(WorkShop, **ws_kwargs)
+        object_1, is_created = get_or_create(WorkShop, **ws_kwargs)
+        assert is_created is False
 
-        db.session.rollback()
-        assert db.session.query(
-            WorkShop).count() == 1, 'global auto-rollback session should not destroy created objects'
+        assert object_1 is not None, 'object should be got'
     finally:
         # unconditioned object deletion
-        db.session.delete(object_)
+        db.session.delete(object_1)
         db.session.commit()

@@ -40,7 +40,10 @@ class JoinWorkshopApi(MethodView):
         if workshop_connection is not None:
             raise BadRequest('You are already in this workshop')
 
-        wc: WorkshopConnection = get_or_create(WorkshopConnection, user_id=user_id, workshop_id=workshop_id)
+        wc, is_created = get_or_create(WorkshopConnection, user_id=user_id, workshop_id=workshop_id)
+
+        if is_created is True:
+            db.session.commit()
 
         # TODO: return connection object
         return jsonify({})

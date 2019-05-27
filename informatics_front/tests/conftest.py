@@ -29,8 +29,8 @@ def app():
 
     yield flask_app
 
-    # with flask_app.app_context():
-    #     db.drop_all()
+    with flask_app.app_context():
+        db.drop_all()
 
 
 @pytest.yield_fixture(scope='function')
