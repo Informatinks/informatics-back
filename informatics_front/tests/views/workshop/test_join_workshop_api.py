@@ -9,7 +9,7 @@ WORKSHOP_INVALID_ACCESS_TOKEN = 'invalid-token'
 
 def test_reject_join_workshop_if_token_invalid(client, authorized_user, empty_workshop):
     url = url_for('workshop.join', workshop_id=empty_workshop.id, token=WORKSHOP_INVALID_ACCESS_TOKEN)
-    resp = client.get(url)
+    resp = client.post(url)
     assert resp.status_code == 404, 'should return 404 if access token is invalid or not found'
 
     user_id = g.user['id']
@@ -23,7 +23,7 @@ def test_reject_join_workshop_if_token_invalid(client, authorized_user, empty_wo
 
 def test_apply_join_workshop_if_token_valid(client, authorized_user, empty_workshop):
     url = url_for('workshop.join', workshop_id=empty_workshop.id, token=WORKSHOP_ACCESS_TOKEN)
-    resp = client.get(url)
+    resp = client.post(url)
     assert resp.status_code == 200, 'should return 200 if access token is valid'
 
     user_id = g.user['id']

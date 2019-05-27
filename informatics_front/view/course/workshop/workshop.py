@@ -3,12 +3,12 @@ from marshmallow import MarshalResult
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import NotFound
 
-from informatics_front.utils.auth.request_user import current_user
 from informatics_front.model import db
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.workshop.workshop import WorkShop, WorkshopStatus
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection, WorkshopConnectionStatus
 from informatics_front.utils.auth.middleware import login_required
+from informatics_front.utils.auth.request_user import current_user
 from informatics_front.utils.response import jsonify
 from informatics_front.view.course.workshop.serializers.workshop import WorkshopSchema
 
@@ -28,7 +28,6 @@ class WorkshopApi(MethodView):
                      .joinedload(WorkShop.contests)
                      .joinedload(Contest.statement)) \
             .one_or_none()
-
 
         if workshop_connection is None:
             raise NotFound(f'Cannot find workshop id #{workshop_id}')

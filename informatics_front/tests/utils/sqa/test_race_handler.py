@@ -17,10 +17,12 @@ ws_kwargs = {
 
 @pytest.mark.race_handler
 def test_raw_create_uncommited_object(app, ):
-    object_ = _create_object(WorkShop, **ws_kwargs)
-    db.session.rollback()
+    object_, is_created = _create_object(WorkShop, **ws_kwargs)
+    assert object_ is not None, 'should return created object'
+    assert is_created is True, 'should mark object as create'
 
-    assert db.session.query(WorkShop).filter_by(**ws_kwargs).one_or_none() is None, 'object not should be created'
+    db.session.rollback()
+    assert db.session.query(WorkShop).filter_by(**ws_kwargs).one_or_none() is None, 'object not should be preserved'
 
 
 @pytest.mark.race_handler
@@ -29,11 +31,13 @@ def test_raw_create_commited_object(app, ):
         **ws_kwargs).one_or_none() is None, 'object should not exist before test'
 
     try:
-        object_ = _create_object(WorkShop, **ws_kwargs)
+        object_, is_created = _create_object(WorkShop, **ws_kwargs)
+        assert object_ is not None, 'should return created object'
+        assert is_created is True, 'should mark object as create'
+
         db.session.commit()
         db.session.rollback()
-
-        assert db.session.query(WorkShop).filter_by(**ws_kwargs).one_or_none() is not None, 'object should be created'
+        assert db.session.query(WorkShop).filter_by(**ws_kwargs).one_or_none() is not None, 'object should be preserved'
     finally:
         # unconditioned object deletion
         db.session.delete(object_)

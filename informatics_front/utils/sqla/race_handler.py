@@ -13,15 +13,14 @@ def get_or_create(model_class: db.Model, **kwargs) -> Tuple[db.Model, bool]:
     :param model_class: SQLAchemy model for instance to be found or created
     :param kwargs: model instance attributes, with which it should be creted
     :return: Tuple of two elements:
-        1. exisitng model instance. Wither created or found in DB;
+        1. exisitng model instance. Wither created wor found in DB;
         2. boolean. True, if objects was created, otherwise False.
     """
     is_created = False
     object_ = _get_object(model_class, **kwargs)
 
     if object_ is None:
-        object_ = _create_object(model_class, **kwargs)
-        is_created = True
+        object_, is_created = _create_object(model_class, **kwargs)
 
     return object_, is_created
 
@@ -40,20 +39,24 @@ def _get_object(model_class: db.Model, **kwargs) -> Optional[db.Model]:
         .one_or_none()
 
 
-def _create_object(model_class: db.Model, **kwargs) -> db.Model:
+def _create_object(model_class: db.Model, **kwargs) -> Tuple[db.Model, bool]:
     """
 
     :param model: SQLAchemy model to create instance of
     :param kwargs: model instance attributes for insertion
     :return: created model instance
     """
+    is_created = False
     object_ = model_class(**kwargs)
+
     db.session.begin_nested()
     try:
         db.session.add(object_)
         db.session.commit()
         db.session.refresh(object_)
+        is_created = True
     except IntegrityError:
         db.session.rollback()
         object_ = _get_object(model_class, **kwargs)
-    return object_
+
+    return object_, is_created

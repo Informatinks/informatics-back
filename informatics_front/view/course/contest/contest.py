@@ -29,8 +29,7 @@ class ContestApi(MethodView):
             raise NotFound(f'Cannot find contest module id #{contest_id}')
 
         user_id = current_user.id
-        self._check_workshop_permissions(user_id,
-                                         contest.workshop)
+        self._check_workshop_permissions(user_id, contest.workshop)
 
         cc, is_created = get_or_create(ContestConnection, user_id=user_id, contest_id=contest.id)
 
@@ -40,12 +39,12 @@ class ContestApi(MethodView):
         contest.statement.problems = self._load_problems(contest.statement_id)
         cc.contest = contest
 
-        if is_created is True:
-            db.session.commit()
-
         cc_schema = ContestConnectionSchema()
 
         response = cc_schema.dump(cc)
+
+        if is_created is True:
+            db.session.commit()
 
         return jsonify(response.data)
 
