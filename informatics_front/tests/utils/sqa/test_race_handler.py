@@ -4,7 +4,7 @@ import pytest
 from informatics_front.model import db
 from informatics_front.model.workshop.workshop import WorkShop
 from informatics_front.utils.enums import WorkshopStatus
-from informatics_front.utils.sqla.race_handler import RaceHandler
+from informatics_front.utils.sqla.race_handler import get_or_create, _get_object, _create_object
 
 WORKSHOP_NAME = 'foo'
 WORKSHOP_ACCESS_TOKEN = 'bar'
@@ -20,7 +20,7 @@ def test_create_object(app, ):
     assert db.session.query(WorkShop).filter_by(**ws_kwargs).one_or_none() is None, 'object should not exist'
 
     try:
-        object_ = RaceHandler._create_object(WorkShop, **ws_kwargs)
+        object_ = _create_object(WorkShop, **ws_kwargs)
 
         assert db.session.query(WorkShop).filter_by(
             **ws_kwargs).one_or_none() is not None, 'object should be created'
@@ -41,8 +41,8 @@ def test_get_object(app, ):
     assert db.session.query(WorkShop).filter_by(**ws_kwargs).one_or_none() is None, 'object should not exist'
 
     try:
-        created_object = RaceHandler._create_object(WorkShop, **ws_kwargs)
-        found_object = RaceHandler._get_object(WorkShop, **ws_kwargs)
+        created_object = _create_object(WorkShop, **ws_kwargs)
+        found_object = _get_object(WorkShop, **ws_kwargs)
 
         assert created_object.id is found_object.id, 'proper object should be found'
     finally:
@@ -56,10 +56,10 @@ def test_get_or_create(app, ):
     assert db.session.query(WorkShop).count() == 0, 'no object should exist'
 
     try:
-        object_1 = RaceHandler.get_or_create(WorkShop, **ws_kwargs)
+        object_1 = get_or_create(WorkShop, **ws_kwargs)
         assert db.session.query(WorkShop).count() == 1, 'object should be created'
 
-        object_2 = RaceHandler.get_or_create(WorkShop, **ws_kwargs)
+        object_2 = get_or_create(WorkShop, **ws_kwargs)
         assert db.session.query(WorkShop).count() == 1, 'no new objects should be created'
 
         assert object_1.id == object_2.id, 'returned object is the same as created'
@@ -74,7 +74,7 @@ def test_auto_rollback_transaction(app, ):
     assert db.session.query(WorkShop).count() == 0, 'no object should exist'
 
     try:
-        object_ = RaceHandler.get_or_create(WorkShop, **ws_kwargs)
+        object_ = get_or_create(WorkShop, **ws_kwargs)
 
         db.session.rollback()
         assert db.session.query(

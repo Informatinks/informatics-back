@@ -10,7 +10,7 @@ from informatics_front.model.workshop.workshop_connection import WorkshopConnect
 from informatics_front.utils.auth.middleware import login_required
 from informatics_front.utils.auth.request_user import current_user
 from informatics_front.utils.response import jsonify
-from informatics_front.utils.sqla.race_handler import RaceHandler
+from informatics_front.utils.sqla.race_handler import get_or_create
 
 
 class JoinWorkshopApi(MethodView):
@@ -40,8 +40,7 @@ class JoinWorkshopApi(MethodView):
         if workshop_connection is not None:
             raise BadRequest('You are already in this workshop')
 
-        wc: WorkshopConnection = RaceHandler.get_or_create(WorkshopConnection,
-                                                           user_id=user_id, workshop_id=workshop_id)
+        wc: WorkshopConnection = get_or_create(WorkshopConnection, user_id=user_id, workshop_id=workshop_id)
 
         # TODO: return connection object
         return jsonify({})

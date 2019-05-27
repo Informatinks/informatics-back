@@ -1,11 +1,9 @@
 from typing import Optional, List
 
 from flask.views import MethodView
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Load, joinedload
 from werkzeug.exceptions import NotFound, Forbidden
 
-from informatics_front.utils.auth.request_user import current_user
 from informatics_front.model import Problem, StatementProblem
 from informatics_front.model.base import db
 from informatics_front.model.contest.contest import Contest
@@ -13,9 +11,10 @@ from informatics_front.model.workshop.contest_connection import ContestConnectio
 from informatics_front.model.workshop.workshop import WorkshopStatus
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection
 from informatics_front.utils.auth.middleware import login_required
+from informatics_front.utils.auth.request_user import current_user
 from informatics_front.utils.response import jsonify
+from informatics_front.utils.sqla.race_handler import get_or_create
 from informatics_front.view.course.contest.serializers.contest import ContestConnectionSchema
-from informatics_front.utils.sqla.race_handler import RaceHandler
 
 
 class ContestApi(MethodView):
@@ -33,7 +32,7 @@ class ContestApi(MethodView):
         self._check_workshop_permissions(user_id,
                                          contest.workshop)
 
-        cc = RaceHandler.get_or_create(ContestConnection, user_id=user_id, contest_id=contest.id)
+        cc = get_or_create(ContestConnection, user_id=user_id, contest_id=contest.id)
 
         if not contest.is_available(cc):
             raise Forbidden('Contest is not started or already finished')
