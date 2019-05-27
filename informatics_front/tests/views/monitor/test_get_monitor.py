@@ -13,8 +13,9 @@ from informatics_front.view.course.monitor.monitor import WorkshopMonitorApi
 
 def test_get_users(applied_workshop_connection):
     workshop = applied_workshop_connection.workshop
+    load_only_fields = ('id',)
 
-    users = WorkshopMonitorApi._find_users_on_workshop(workshop.id)
+    users = WorkshopMonitorApi._find_users_on_workshop(workshop.id, load_only_fields)
 
     assert users == [applied_workshop_connection.user]
 

@@ -1,6 +1,6 @@
 import datetime
 from collections import namedtuple
-from typing import List, Type, Callable, Optional
+from typing import List, Type, Callable, Optional, Iterable
 
 from flask import request
 from flask.views import MethodView
@@ -69,33 +69,32 @@ class WorkshopMonitorApi(MethodView):
         return jsonify(data.data)
 
     @classmethod
-    def _find_users_on_workshop(cls, workshop_id: int) -> List[User]:
+    def _find_users_on_workshop(cls, workshop_id: int, load_fields: Iterable[str]) -> List[User]:
         """ Returns list of ids of users who has connection to workshop """
         users = db.session.query(User) \
             .join(WorkshopConnection) \
             .filter(WorkshopConnection.workshop_id == workshop_id) \
-            .options(load_only('id', 'firstname', 'lastname')) \
+            .options(load_only(*load_fields)) \
             .all()
 
         return users
 
     @classmethod
-    def _find_users_by_group(cls, group_id: int) -> List[User]:
+    def _find_users_by_group(cls, group_id: int, load_fields: Iterable[str]) -> List[User]:
         users = db.session.query(User).join(UserGroup).join(Group).filter(Group.id == group_id) \
-            .options(load_only('id', 'firstname', 'lastname')) \
+            .options(load_only(*load_fields)) \
             .all()
         return users
 
     @classmethod
     def _get_users(cls, monitor, group_id: Optional[int]) -> List[User]:
+        load_only_fields = ('firstname', 'lastname', 'city', 'school', )
         if not current_user.is_teacher and monitor.is_for_user_only():
-            users = [User(id=current_user.id,
-                          firstname=current_user.firstname,
-                          lastname=current_user.lastname)]
+            users = [db.session.query(User).get(current_user.id)]
         elif group_id is not None:
-            users = cls._find_users_by_group(group_id)
+            users = cls._find_users_by_group(group_id, load_only_fields)
         else:
-            users = cls._find_users_on_workshop(monitor.workshop_id)
+            users = cls._find_users_on_workshop(monitor.workshop_id, load_only_fields)
 
         return users
 

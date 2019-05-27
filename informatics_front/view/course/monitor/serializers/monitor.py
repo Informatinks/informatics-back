@@ -7,6 +7,8 @@ class UserSchema(Schema):
     id = fields.Integer()
     firstname = fields.String()
     lastname = fields.String()
+    city = fields.String()
+    school = fields.String()
 
 
 class MonitorSchema(Schema):

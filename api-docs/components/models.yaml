@@ -320,6 +320,15 @@ components:
           type: string
           description: Фамилия
 
+        school:
+          type:
+            - string
+            - 'null'
+
+        city:
+          type: string
+          description: Город
+
     MonitorResultsSchema:
       type: object
       description: Результат ученика в мониторе
