@@ -171,7 +171,7 @@ class WorkshopMonitorApi(MethodView):
             user_id_time[user_id] = created_time
 
         def time_by_cc(user_id: int):
-            time = user_id_time.get(user_id, datetime.datetime.utcfromtimestamp(0))
+            time = user_id_time.get(user_id) or datetime.datetime.utcfromtimestamp(0)
             return time.astimezone()
 
         return time_by_cc
