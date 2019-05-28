@@ -19,7 +19,7 @@ class WorkshopConnection(db.Model):
 
     status = db.Column(
         IntEnum(WorkshopConnectionStatus),
-        default=WorkshopConnectionStatus.ACCEPTED,  # TODO: возможно, поменять на APPLIED
+        default=WorkshopConnectionStatus.APPLIED,  # TODO: возможно, вернуть на ACCEPTED
         nullable=False
     )
 

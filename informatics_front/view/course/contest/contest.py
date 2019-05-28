@@ -1,11 +1,9 @@
 from typing import Optional, List
 
 from flask.views import MethodView
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Load, joinedload
 from werkzeug.exceptions import NotFound, Forbidden
 
-from informatics_front.utils.auth.request_user import current_user
 from informatics_front.model import Problem, StatementProblem
 from informatics_front.model.base import db
 from informatics_front.model.contest.contest import Contest
@@ -13,7 +11,9 @@ from informatics_front.model.workshop.contest_connection import ContestConnectio
 from informatics_front.model.workshop.workshop import WorkshopStatus
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection
 from informatics_front.utils.auth.middleware import login_required
+from informatics_front.utils.auth.request_user import current_user
 from informatics_front.utils.response import jsonify
+from informatics_front.utils.sqla.race_handler import get_or_create
 from informatics_front.view.course.contest.serializers.contest import ContestConnectionSchema
 
 
@@ -29,11 +29,9 @@ class ContestApi(MethodView):
             raise NotFound(f'Cannot find contest module id #{contest_id}')
 
         user_id = current_user.id
-        self._check_workshop_permissions(user_id,
-                                         contest.workshop)
+        self._check_workshop_permissions(user_id, contest.workshop)
 
-        cc = self._get_contest_connection(user_id, contest.id) or \
-             self._create_contest_connection(user_id, contest.id)
+        cc, is_created = get_or_create(ContestConnection, user_id=user_id, contest_id=contest.id)
 
         if not contest.is_available(cc):
             raise Forbidden('Contest is not started or already finished')
@@ -44,6 +42,9 @@ class ContestApi(MethodView):
         cc_schema = ContestConnectionSchema()
 
         response = cc_schema.dump(cc)
+
+        if is_created is True:
+            db.session.commit()
 
         return jsonify(response.data)
 
@@ -76,25 +77,3 @@ class ContestApi(MethodView):
                 and workshop.status == WorkshopStatus.ONGOING:
             return workshop_connection
         raise NotFound('Contest is not found')
-
-    @classmethod
-    def _get_contest_connection(cls, user_id: int, contest_id: int) \
-            -> Optional[ContestConnection]:
-        """ Returns user connection on contest instance"""
-        return db.session.query(ContestConnection) \
-            .filter_by(user_id=user_id, contest_id=contest_id) \
-            .one_or_none()
-
-    @classmethod
-    def _create_contest_connection(cls, user_id, contest_id: int) -> ContestConnection:
-        """ Beware: we use COMMIT and ROLLBACK in this function! """
-        cc = ContestConnection(user_id=user_id, contest_id=contest_id)
-        db.session.begin_nested()
-        try:
-            db.session.add(cc)
-            db.session.commit()
-            db.session.refresh(cc)
-        except IntegrityError:
-            db.session.rollback()
-            cc = cls._get_contest_connection(user_id, contest_id)
-        return cc

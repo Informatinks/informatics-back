@@ -44,35 +44,8 @@ def test_check_workshop_permissions_with_accepted_connection(ongoing_workshop, a
 
 
 @pytest.mark.contest_problem
-@pytest.mark.usefixtures('authorized_user')
-def test_create_contest_connection_when_not_exists(ongoing_workshop):
-    contest = ongoing_workshop['contest']
-    user_id = g.user['id']
-    cc = ContestApi._create_contest_connection(user_id, contest.id)
-    assert cc is not None
-    try:
-        assert db.session.query(ContestConnection) \
-            .filter_by(user_id=user_id, contest_id=contest.id).one_or_none()
-    finally:
-        # we wont to check object creation so we have to clear after that
-        db.session.delete(cc)
-        db.session.commit()
-
-
-@pytest.mark.contest_problem
-@pytest.mark.usefixtures('authorized_user')
-def test_create_contest_connection_when_exists(ongoing_workshop, contest_connection):
-    contest = ongoing_workshop['contest']
-    user_id = g.user['id']
-    cc = ContestApi._create_contest_connection(user_id, contest.id)
-    assert cc is not None
-    assert cc.id == contest_connection.id
-
-
-@pytest.mark.contest_problem
 @pytest.mark.usefixtures('authorized_user', 'statement', 'accepted_workshop_connection')
 def test_contest_api(client, ongoing_workshop):
-
     contest = ongoing_workshop['contest']
 
     url = url_for('contest.contest', contest_id=contest.id)

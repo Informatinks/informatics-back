@@ -14,4 +14,5 @@ class WorkShop(db.Model):
     visibility = db.Column(IntEnum(WorkshopVisibility), nullable=False,
                            default=WorkshopVisibility.PRIVATE)
 
+    access_token = db.Column(db.String(32), nullable=False)
     contests = db.relationship('Contest', back_populates='workshop')

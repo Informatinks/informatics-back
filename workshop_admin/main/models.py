@@ -1,9 +1,13 @@
+import random
+import string
+
 from django.db import models
 from utils.types import DateTimeBasedDuration
 
 from informatics_front.utils.enums import WorkshopStatus, WorkshopVisibility, WorkshopConnectionStatus, \
     WorkshopMonitorType, WorkshopMonitorUserVisibility
 
+ACCESS_TOKEN_LENGTH = 32
 WORKSHOP_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopStatus))
 WORKSHOP_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopVisibility))
 WORKSHOP_CONNECTION_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopConnectionStatus))
@@ -60,10 +64,21 @@ class RefreshToken(models.Model):
         db_table = 'refresh_token'
 
 
+def generate_access_token():
+    """Generate workshop access token when workshop is created from admin panel.
+
+    Access token is 32-length digit-letter string.
+    """
+    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=ACCESS_TOKEN_LENGTH))
+
+
 class Workshop(models.Model):
     name = models.CharField(max_length=255)
     status = models.IntegerField(choices=WORKSHOP_STATUS_CHOICES)
     visibility = models.IntegerField(choices=WORKSHOP_VISIBILITY_CHOICES)
+    access_token = models.CharField(max_length=ACCESS_TOKEN_LENGTH, blank=False, null=False,
+                                    default=generate_access_token,
+                                    help_text='Код доступа, генерируется автоматически.', )
 
     class Meta:
         managed = False
