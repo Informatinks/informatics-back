@@ -1,0 +1,6 @@
+{% extends 'admin/base.html' %}
+{% load tz_detect %}
+
+{% block extrastyle %}
+    {% tz_detect %}
+{% endblock %}
