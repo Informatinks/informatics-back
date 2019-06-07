@@ -15,14 +15,14 @@ contest_blueprint.add_url_rule('/problem/<int:problem_id>', methods=('GET',),
 contest_blueprint.add_url_rule('/problem/<int:problem_id>/submission', methods=('GET', 'POST'),
                                view_func=ProblemSubmissionApi.as_view('submissions'))
 
+contest_blueprint.add_url_rule('/problem/<int:problem_id>/run/<int:run_id>/protocol', methods=('GET',),
+                               view_func=RunProtocolApi.as_view('run_protocol'))
+
 
 run_blueprint = Blueprint('run', __name__, url_prefix='/api/v1/run/<int:run_id>')
 
 run_blueprint.add_url_rule('/source', methods=('GET',),
                            view_func=RunSourceApi.as_view('source'))
-
-run_blueprint.add_url_rule('/protocol', methods=('GET',),
-                           view_func=RunProtocolApi.as_view('protocol'))
 
 run_blueprint.add_url_rule('/comments', methods=('GET',),
                            view_func=RunCommentsApi.as_view('comments'))

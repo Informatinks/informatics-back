@@ -6,18 +6,19 @@ from flask import url_for
 from informatics_front.model import db
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.contest.monitor import WorkshopMonitor
-from informatics_front.utils.enums import WorkshopMonitorUserVisibility
+from informatics_front.utils.enums import WorkshopMonitorUserVisibility, WorkshopConnectionStatus
 from informatics_front.model.user.user import SimpleUser
 from informatics_front.view.course.monitor.monitor import WorkshopMonitorApi
 
 
-def test_get_users(applied_workshop_connection):
-    workshop = applied_workshop_connection.workshop
+def test_get_users(workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.APPLIED)
+    workshop = workshop_connection.workshop
     load_only_fields = ('id',)
 
     users = WorkshopMonitorApi._find_users_on_workshop(workshop.id, load_only_fields)
 
-    assert users == [applied_workshop_connection.user]
+    assert users == [workshop_connection.user]
 
 
 def test_get_users_when_for_user_only(authorized_user):
@@ -56,13 +57,15 @@ def test_get_users_by_group(authorized_user, users, group):
     assert users == expected_users
 
 
-def test_ensure_permissions_without_conn(applied_workshop_connection):
-    workshop = applied_workshop_connection.workshop
+def test_ensure_permissions_without_conn(workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.APPLIED)
+    workshop = workshop_connection.workshop
     assert not WorkshopMonitorApi._ensure_permissions(workshop.id)
 
 
-def test_ensure_permissions(accepted_workshop_connection):
-    workshop = accepted_workshop_connection.workshop
+def test_ensure_permissions(workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.ACCEPTED)
+    workshop = workshop_connection.workshop
     assert WorkshopMonitorApi._ensure_permissions(workshop.id)
 
 
@@ -105,15 +108,17 @@ def test_make_function_user_start_time_when_virtual(contest_connection):
     assert func(123) == datetime.datetime.utcfromtimestamp(0).astimezone()
 
 
-def test_simple_view(client, monitor, accepted_workshop_connection):
-    workshop = accepted_workshop_connection.workshop
+def test_simple_view(client, monitor, workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.ACCEPTED)
+    workshop = workshop_connection.workshop
     url = url_for('monitor.workshop', workshop_id=workshop.id)
     resp = client.get(url)
     assert resp.status_code == 200
 
 
-def test_view_with_group(client, monitor, accepted_workshop_connection, group):
-    workshop = accepted_workshop_connection.workshop
+def test_view_with_group(client, monitor, workshop_connection_builder, group):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.ACCEPTED)
+    workshop = workshop_connection.workshop
     url = url_for('monitor.workshop', workshop_id=workshop.id, group_id=group.id)
     resp = client.get(url)
     assert resp.status_code == 200
