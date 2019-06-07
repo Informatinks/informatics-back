@@ -2,7 +2,7 @@ from django.db import models
 from utils.types import DateTimeBasedDuration
 
 from informatics_front.utils.enums import WorkshopStatus, WorkshopVisibility, WorkshopConnectionStatus, \
-    WorkshopMonitorType, WorkshopMonitorUserVisibility
+    WorkshopMonitorType, WorkshopMonitorUserVisibility, ContestProtocolVisibility
 
 WORKSHOP_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopStatus))
 WORKSHOP_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopVisibility))
@@ -21,15 +21,19 @@ MONITOR_USER_VISIBILITY_CHOICES = tuple(
     (e.value, monitor_user_visibility_human.get(e, e.name)) for e in WorkshopMonitorUserVisibility
 )
 
+PROTOCOL_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in ContestProtocolVisibility))
+
 
 class Contest(models.Model):
     workshop = models.ForeignKey('Workshop', models.DO_NOTHING, blank=True, null=True)
     statement = models.ForeignKey('moodle.Statement', on_delete=models.DO_NOTHING, blank=True, null=True)
     author = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE, editable=False)
     position = models.IntegerField(blank=True, null=True)
-    is_virtual = models.BooleanField(default=False)
+    protocol_visibility = models.IntegerField(choices=PROTOCOL_VISIBILITY_CHOICES,
+                                              blank=False, null=False)
     time_start = models.DateTimeField()
     time_stop = models.DateTimeField()
+    is_virtual = models.BooleanField(default=False)
     virtual_duration = DateTimeBasedDuration(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 

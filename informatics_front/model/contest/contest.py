@@ -1,15 +1,9 @@
 import datetime
-from enum import Enum
 
 from informatics_front.model.base import db
 from informatics_front.model.workshop.contest_connection import ContestConnection
+from informatics_front.utils.enums import ContestProtocolVisibility
 from informatics_front.utils.sqla.types import IntEnum
-
-
-class ContestProtocolVisibility(Enum):
-    FULL = 1
-    FIRST_BAD_TEST = 2
-    INVISIBLE = 3
 
 
 class Contest(db.Model):

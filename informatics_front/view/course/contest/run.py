@@ -2,7 +2,8 @@ from flask.views import MethodView
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import BadRequest, NotFound
 
-from informatics_front.model.contest.contest import Contest, ContestProtocolVisibility
+from informatics_front.model.contest.contest import Contest
+from informatics_front.utils.enums import ContestProtocolVisibility
 from informatics_front.utils.auth.request_user import current_user
 from informatics_front.plugins import internal_rmatics
 from informatics_front.model import Comment, Statement, StatementProblem

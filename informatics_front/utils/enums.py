@@ -1,4 +1,5 @@
 import enum
+from enum import Enum
 
 
 class WorkshopStatus(enum.Enum):
@@ -34,3 +35,9 @@ class WorkshopMonitorUserVisibility(enum.Enum):
     FOR_USER_ONLY = 1
     FULL = 2
     DISABLED_FOR_STUDENT = 3
+
+
+class ContestProtocolVisibility(Enum):
+    FULL = 1
+    FIRST_BAD_TEST = 2
+    INVISIBLE = 3

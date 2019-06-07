@@ -2,7 +2,7 @@ import pytest
 from flask import url_for, g
 from unittest.mock import patch
 
-from informatics_front.model.contest.contest import ContestProtocolVisibility
+from informatics_front.utils.enums import ContestProtocolVisibility
 from informatics_front.view.course.contest.run import RunProtocolApi
 
 NON_EXISTING_USER = -1
