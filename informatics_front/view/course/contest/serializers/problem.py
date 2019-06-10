@@ -1,6 +1,6 @@
 from marshmallow import fields, Schema
 
-from informatics_front.model import Problem
+from informatics_front.model.problem import Problem
 
 
 class ProblemSchema(Schema):
