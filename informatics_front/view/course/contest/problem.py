@@ -5,6 +5,7 @@ from sqlalchemy.orm import joinedload
 from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound, BadRequest
 
+from informatics_front.model.problem import EjudgeProblem
 from informatics_front.utils.auth.request_user import current_user
 from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.plugins import internal_rmatics
@@ -30,9 +31,7 @@ class ProblemApi(MethodView):
                                  NotFound(f'Problem with id #{problem_id} is not found or '
                                           f'you don\'t have permissions to participate'))
 
-        problem = db.session.query(Problem) \
-            .options(joinedload(Problem.ejudge_problem)) \
-            .get(problem_id)
+        problem = db.session.query(EjudgeProblem).filter_by(id=problem_id).one_or_none()
         if problem is None:
             raise NotFound(f'Problem with id #{problem_id} is not found or '
                            f'you don\'t have permissions to participate')
