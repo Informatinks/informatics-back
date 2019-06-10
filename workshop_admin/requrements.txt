@@ -1,6 +1,8 @@
 Django==2.2.1
 django-ajax-selects==1.7.1
 django-grappelli==2.12.3
+django-tz-detect==0.2.10
 mysqlclient==1.4.2.post1
 pytz==2019.1
+six==1.12.0
 sqlparse==0.3.0

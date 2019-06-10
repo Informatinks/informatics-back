@@ -6,7 +6,6 @@ import pytest
 from flask import g
 from werkzeug.local import LocalProxy
 
-from informatics_front.utils.auth.request_user import RequestUser
 from informatics_front.model import StatementProblem, Problem, Statement, Comment, db, Group, UserGroup
 from informatics_front.model import User
 from informatics_front.model.contest.contest import Contest
@@ -16,12 +15,14 @@ from informatics_front.model.workshop.contest_connection import ContestConnectio
 from informatics_front.model.workshop.workshop import WorkShop, WorkshopStatus
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection, WorkshopConnectionStatus
 from informatics_front.utils.auth.make_jwt import generate_refresh_token
+from informatics_front.utils.auth.request_user import RequestUser
 from informatics_front.view.auth.serializers.auth import RoleAuthSerializer
 
 VALID_TIME = 100500
 COURSE_VISIBLE = 1
 
 NESTED_EJUDGE_PROBLEM_SEQ = 1
+WORKSHOP_ACCESS_TOKEN = 'foo'
 
 
 @pytest.yield_fixture
@@ -100,8 +101,8 @@ def problem(app) -> dict:
 
 
 @contextmanager
-def create_workshop(statement, status: WorkshopStatus):
-    w = WorkShop(status=status)
+def create_workshop(statement, status: WorkshopStatus, access_token: str = WORKSHOP_ACCESS_TOKEN):
+    w = WorkShop(status=status, access_token=access_token)
     db.session.add(w)
     db.session.flush()
 

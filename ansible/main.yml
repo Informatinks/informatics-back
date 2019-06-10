@@ -1,5 +1,5 @@
 ---
-- name: Prepare source code arthcive
+- name: Prepare source code archive
   hosts: localhost
   vars:
     project: rmatics-back
@@ -13,7 +13,6 @@
       archive:
         path: "{{ app_dir }}"
         dest: "{{ app_dir }}/{{ project }}.tgz"
-
 
 - name: Deliver code to target server
   hosts: "{{ target_server }}"
@@ -114,7 +113,28 @@
         mode: 0755
         recurse: yes
 
-    - name: Start systemd unitc
+    - name: Start systemd unit
       systemd:
         name: "{{ project }}"
+        state: started
+
+- name: Restart admin panel
+  hosts: "{{ target_server }}"
+  vars:
+    project: rmatics-back
+    user: rmatics-back
+    group: uwsgi
+  tasks:
+    - name: Stop systemd unit
+      systemd:
+        name: "{{ project }}-admin"
+        state: stopped
+    - name: Symlink production config
+      file:
+        src: "/usr/src/tpl/{{ project }}/settings.py"
+        dest: "/usr/src/{{ project }}/workshop_admin/workshop_admin/settings/production.py"
+        state: link
+    - name: Start systemd unit
+      systemd:
+        name: "{{ project }}-admin"
         state: started
