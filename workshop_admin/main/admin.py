@@ -3,6 +3,7 @@ import datetime
 from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdminTabularInline, AjaxSelectAdmin
 from django.contrib import admin
+from django.forms import ModelForm, ValidationError
 from moodle.models import Statement
 
 from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor
@@ -22,10 +23,30 @@ class ContestConnectionAdmin(admin.ModelAdmin):
     })
 
 
+class ContestForm(ModelForm):
+    def clean(self):
+        """Formset validators on create and update Contest object.
+
+        First we invoke fields auto-validators with `clean()` method.
+        Then run our ones with additional logic.
+        """
+        cleaned_data = super().clean()
+
+        # Contest can be virtual only if virtual duration is supplied.
+        is_virtual = cleaned_data.get('is_virtual')
+        virtual_duration = cleaned_data.get('virtual_duration')
+
+        if is_virtual and not virtual_duration:
+            raise ValidationError(
+                'Нельзя сделать контест виртуальным, не указав его длительность. '
+                'Укажите длительность в поле "Virtual duration"'
+            )
+
+
 class ContestAdmin(AjaxSelectAdmin):
     readonly_fields = ('author', 'created_at',)
 
-    form = make_ajax_form(Contest, {
+    form = make_ajax_form(Contest, superclass=ContestForm, fieldlist={
         'statement': 'statement_lookup'
     })
 
@@ -46,7 +67,7 @@ class ContestAdminInline(AjaxSelectAdminTabularInline):
     model = Contest
     ordering = ('position',)
     exclude = ('author', 'created_at',)
-    form = make_ajax_form(Contest, {
+    form = make_ajax_form(Contest, superclass=ContestForm, fieldlist={
         'statement': 'statement_lookup'
     })
 
