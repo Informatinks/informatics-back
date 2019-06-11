@@ -18,7 +18,7 @@ class Contest(db.Model):
 
     protocol_visibility = db.Column(IntEnum(ContestProtocolVisibility),
                                     default=ContestProtocolVisibility.FULL,
-                                    server_default=ContestProtocolVisibility.FULL,
+                                    server_default=str(ContestProtocolVisibility.FULL.value),
                                     nullable=False)
 
     is_virtual = db.Column(db.Boolean, default=False)
