@@ -132,8 +132,7 @@ def draft_workshop(app, statement):
 
 
 @pytest.yield_fixture
-@pytest.mark.usefixtures('authorized_user')
-def workshop_connection_builder(ongoing_workshop):
+def workshop_connection_builder(ongoing_workshop, authorized_user):
     wc = None
 
     def make_workshop_connection(status: WorkshopConnectionStatus):

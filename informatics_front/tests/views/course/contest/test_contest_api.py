@@ -70,8 +70,9 @@ def test_contest_api(client, ongoing_workshop, workshop_connection_builder):
 
 
 @pytest.mark.contest_problem
-@pytest.mark.usefixtures('authorized_user', 'statement', 'accepted_workshop_connection')
-def test_contest_api_not_exists(client):
+@pytest.mark.usefixtures('authorized_user', 'statement')
+def test_contest_api_not_exists(client, workshop_connection_builder):
+    workshop_connection_builder(WorkshopConnectionStatus.APPLIED)
     url = url_for('contest.contest', contest_id=NON_EXISTING_ID)
     resp = client.get(url)
     assert resp.status_code == 404

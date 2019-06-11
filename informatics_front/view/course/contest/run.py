@@ -78,7 +78,11 @@ class RunProtocolApi(MethodView):
 
     @classmethod
     def _remove_all_after_bad_test(cls, protocol: dict) -> dict:
-        """ Returns protocol where we have only first failed test """
+        """ Returns protocol where we have only first failed test
+            protocol tests are like:
+            {'1': {status: OK, ...<some_fields>},
+             '2': {status: WA, ...<some_fields>}}
+        """
         tests = protocol.get('tests')
         sorted_tests = list(sorted(tests.items(), key=lambda t: int(t[0])))
         visible_tests = {}
