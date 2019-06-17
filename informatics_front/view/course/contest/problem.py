@@ -1,16 +1,15 @@
 from flask import request
 from flask.views import MethodView
 from marshmallow import fields
-from sqlalchemy.orm import joinedload
 from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound, BadRequest
 
+from informatics_front.model import db
 from informatics_front.model.problem import EjudgeProblem
-from informatics_front.utils.auth.request_user import current_user
 from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.plugins import internal_rmatics
-from informatics_front.model import db, Problem
 from informatics_front.utils.auth.middleware import login_required
+from informatics_front.utils.auth.request_user import current_user
 from informatics_front.utils.response import jsonify
 from informatics_front.view.course.contest.serializers.problem import ProblemSchema
 
@@ -77,6 +76,7 @@ class ProblemSubmissionApi(MethodView):
         content, status = internal_rmatics.send_submit(file,
                                                        current_user.id,
                                                        problem_id,
+                                                       contest_id,
                                                        args['statement_id'],
                                                        args['lang_id'])
         return jsonify(content, status_code=status)
@@ -92,7 +92,5 @@ class ProblemSubmissionApi(MethodView):
         # set current authorized user to args
         args['user_id'] = current_user.id
 
-        # TODO: Приделать контекст посылки (NFRMTCS-192)
-
-        content, status = internal_rmatics.get_runs_filter(problem_id, args, is_admin=False)
+        content, status = internal_rmatics.get_runs_filter(problem_id, contest_id, args)
         return jsonify(content, status_code=status)

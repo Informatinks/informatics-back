@@ -60,17 +60,20 @@ def test_check_contest_connection_without_conn():
 @pytest.mark.problem
 @pytest.mark.usefixtures('authorized_user')
 def test_get_problem_submission(client, problem):
+    CONTEST_ID = 12335
     user_id = g.user['id']
-    url = url_for('contest.submissions', contest_id=12345,
+    url = url_for('contest.submissions', contest_id=CONTEST_ID,
                   problem_id=problem.id, page=DEFAULT_PAGE, )
+
     with patch('informatics_front.plugins.internal_rmatics.get_runs_filter') as get_runs_filter:
         get_runs_filter.return_value = ({}, 200)
         with patch('informatics_front.view.course.contest.problem.check_contest_connection') as mock_check_conn:
             resp = client.get(url)
+
     assert resp.status_code == 200
-    get_runs_filter.assert_called_with(problem.id, {'page': DEFAULT_PAGE,
-                                                    'user_id': user_id,
-                                                    'count': DEFAULT_COUNT}, is_admin=False)
+    get_runs_filter.assert_called_with(problem.id, CONTEST_ID, {'page': DEFAULT_PAGE,
+                                                                'user_id': user_id,
+                                                                'count': DEFAULT_COUNT})
     mock_check_conn.assert_called_once()
 
 

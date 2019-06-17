@@ -8,28 +8,34 @@ from informatics_front.utils.services.base import BaseService
 class InternalRmatics(BaseService):
     service_url_param = 'INTERNAL_RMATICS_URL'
     default_timeout = 60
+    context_source = 2
 
     def send_submit(self,
                     file: FileStorage,
                     user_id: int,
                     problem_id: int,
+                    contest_id: int,
                     statement_id: int,
                     lang_id: int) -> Tuple[dict, int]:
         data = {
             'lang_id': lang_id,
             'user_id': user_id,
-            'statement_id': statement_id
+            'statement_id': statement_id,
+            'context_id': contest_id,
+            'context_source': self.context_source,
+            'is_visible': False,
+
         }
         url = f'{self.service_url}/problem/trusted/{problem_id}/submit_v2'
 
         return self.client.post_data(url, json=data, files={'file': file.stream}, silent=True)
 
-    def get_runs_filter(self, problem_id: int,
-                        args: dict,
-                        is_admin=False) -> Tuple[dict, int]:
+    def get_runs_filter(self, problem_id: int, contest_id: int, args: dict) -> Tuple[dict, int]:
         filter_args = {
             **args,
-            'is_admin': is_admin,
+            'context_id': contest_id,
+            'context_source': self.context_source,
+            'is_visible': False,
         }
         url = f'{self.service_url}/problem/{problem_id}/submissions/'
 
