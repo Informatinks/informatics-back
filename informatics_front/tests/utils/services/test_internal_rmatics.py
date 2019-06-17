@@ -8,7 +8,6 @@ from informatics_front.utils.services.internal_rmatics import InternalRmatics
 
 PROBLEM_ID = 1
 CONTEST_ID = 2
-CONTEXT_SOURCE = 2
 RUN_ID = 2
 USER_ID = 666
 CLIENT_SERVICE_URL = 'foo'
@@ -27,7 +26,7 @@ def test_get_runs_filter(client):
     client.get_runs_filter(PROBLEM_ID, CONTEST_ID, {'a': 1})
     client.client.get_data.assert_called_with(
         f'{client.service_url}/problem/{PROBLEM_ID}/submissions/',
-        params={'a': 1, 'context_source': CONTEXT_SOURCE, 'context_id': CONTEST_ID, 'is_visible': False},
+        params={'a': 1, 'context_source': InternalRmatics.default_context_source, 'context_id': CONTEST_ID},
         default=[],
         silent=True
     )
@@ -36,7 +35,7 @@ def test_get_runs_filter(client):
 @pytest.mark.internal_rmatics
 def test_send_submit(client):
     data = {'lang_id': 1, 'user_id': 2, 'statement_id': 3,
-            'context_source': CONTEXT_SOURCE, 'context_id': CONTEST_ID, 'is_visible': False}
+            'context_source': InternalRmatics.default_context_source, 'context_id': CONTEST_ID, 'is_visible': False}
     file = FileStorage(
         io.BytesIO(b'sample data'), filename='test.cpp', content_type='application/pdf'
     )

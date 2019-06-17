@@ -61,8 +61,6 @@ class ProblemSubmissionApi(MethodView):
 
     @login_required
     def post(self, contest_id, problem_id):
-        # TODO: Выпилить statement (NFRMTCS-192)
-
         check_contest_connection(contest_id,
                                  NotFound(f'Problem with id #{problem_id} is not found or '
                                           f'you don\'t have permissions to participate'))
@@ -70,8 +68,6 @@ class ProblemSubmissionApi(MethodView):
         file = request.files.get('file')
         if file is None:
             raise BadRequest('Parameter \'file\' is not fulfilled')
-
-        # TODO: Приделать контекст посылки (NFRMTCS-192)
 
         content, status = internal_rmatics.send_submit(file,
                                                        current_user.id,

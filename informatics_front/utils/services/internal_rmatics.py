@@ -4,11 +4,13 @@ from werkzeug.datastructures import FileStorage
 
 from informatics_front.utils.services.base import BaseService
 
+CONTEXT_SOURCE = 2
+
 
 class InternalRmatics(BaseService):
     service_url_param = 'INTERNAL_RMATICS_URL'
     default_timeout = 60
-    context_source = 2
+    default_context_source = 2
 
     def send_submit(self,
                     file: FileStorage,
@@ -22,7 +24,7 @@ class InternalRmatics(BaseService):
             'user_id': user_id,
             'statement_id': statement_id,
             'context_id': contest_id,
-            'context_source': self.context_source,
+            'context_source': self.default_context_source,
             'is_visible': False,
 
         }
@@ -34,8 +36,7 @@ class InternalRmatics(BaseService):
         filter_args = {
             **args,
             'context_id': contest_id,
-            'context_source': self.context_source,
-            'is_visible': False,
+            'context_source': self.default_context_source,
         }
         url = f'{self.service_url}/problem/{problem_id}/submissions/'
 
