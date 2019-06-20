@@ -13,13 +13,11 @@ WORKSHOP_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopVisibili
 WORKSHOP_CONNECTION_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopConnectionStatus))
 MONITOR_TYPE_CHOICES = tuple(((e.value, e.name) for e in WorkshopMonitorType))
 
-
 monitor_user_visibility_human = {
     WorkshopMonitorUserVisibility.FOR_USER_ONLY: 'Ученик видит свои результаты',
     WorkshopMonitorUserVisibility.FULL: 'Ученик видит все результаты',
     WorkshopMonitorUserVisibility.DISABLED_FOR_STUDENT: 'Ученик не видит результаты'
 }
-
 
 MONITOR_USER_VISIBILITY_CHOICES = tuple(
     (e.value, monitor_user_visibility_human.get(e, e.name)) for e in WorkshopMonitorUserVisibility
@@ -40,6 +38,9 @@ class Contest(models.Model):
     class Meta:
         managed = False
         db_table = 'contest'
+
+    def __str__(self):
+        return self.statement.name
 
 
 class ContestConnection(models.Model):
@@ -110,8 +111,10 @@ class WorkshopMonitor(models.Model):
                                null=False, blank=False,
                                default=WorkshopMonitorType.ACM.value)
     user_visibility = models.IntegerField(choices=MONITOR_USER_VISIBILITY_CHOICES)
-    with_penalty_time = models.BooleanField(default=False)
     freeze_time = models.DateField(null=True, blank=True)
+
+    # Depricated in favour of 'type'
+    # with_penalty_time = models.BooleanField(default=False)
 
     def __str__(self):
         type = WorkshopMonitorType(self.type).name if self.type else ''
