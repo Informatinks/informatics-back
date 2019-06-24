@@ -4,8 +4,6 @@ from werkzeug.datastructures import FileStorage
 
 from informatics_front.utils.services.base import BaseService
 
-CONTEXT_SOURCE = 2
-
 
 class InternalRmatics(BaseService):
     service_url_param = 'INTERNAL_RMATICS_URL'
@@ -63,12 +61,12 @@ class InternalRmatics(BaseService):
         return self.client.get_data(url, params=user_args, silent=True)
 
     def get_monitor(self, problems: List[int], users: List[int], time_before: Optional[int]):
-        # TODO: Приделать контекст посылки (NFRMTCS-192)
         url = f'{self.service_url}/monitor/problem_monitor'
 
         monitor_args = {
             'user_id': users,
             'problem_id': problems
+            'context_source': self.default_context_source,
         }
         if time_before:
             monitor_args['time_before'] = time_before
