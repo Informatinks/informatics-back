@@ -28,7 +28,7 @@ class Contest(models.Model):
     workshop = models.ForeignKey('Workshop', models.DO_NOTHING, blank=True, null=True)
     statement = models.ForeignKey('moodle.Statement', on_delete=models.DO_NOTHING, blank=True, null=True)
     author = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE, editable=False)
-    position = models.IntegerField(blank=True, null=True)
+    position = models.PositiveIntegerField(default=0, blank=False, null=False)
     is_virtual = models.BooleanField(default=False)
     time_start = models.DateTimeField()
     time_stop = models.DateTimeField()
@@ -38,6 +38,7 @@ class Contest(models.Model):
     class Meta:
         managed = False
         db_table = 'contest'
+        ordering = ['position']
 
     def __str__(self):
         return self.statement.name

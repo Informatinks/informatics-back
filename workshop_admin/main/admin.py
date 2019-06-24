@@ -2,10 +2,10 @@ import datetime
 
 from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdminTabularInline, AjaxSelectAdmin
+from grappelli.forms import GrappelliSortableHiddenMixin
 from django.contrib import admin
 from django.forms import ModelForm, ValidationError
 from moodle.models import Statement
-
 from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor
 
 
@@ -67,10 +67,12 @@ class ContestAdmin(AjaxSelectAdmin):
         return ['author', 'created_at']
 
 
-class ContestAdminInline(AjaxSelectAdminTabularInline):
+class ContestAdminInline(GrappelliSortableHiddenMixin, AjaxSelectAdminTabularInline):
     model = Contest
     ordering = ('position',)
     exclude = ('author', 'created_at',)
+    sortable_field_name = 'position'
+    extra = 0  # Don't render default empty formsest    
     form = make_ajax_form(Contest, superclass=ContestForm, fieldlist={
         'statement': 'statement_lookup'
     })
