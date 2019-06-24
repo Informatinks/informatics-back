@@ -38,7 +38,6 @@ class Contest(models.Model):
     class Meta:
         managed = False
         db_table = 'contest'
-        ordering = ['position']
 
     def __str__(self):
         return self.statement.name
