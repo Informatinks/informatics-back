@@ -65,7 +65,7 @@ class InternalRmatics(BaseService):
 
         monitor_args = {
             'user_id': users,
-            'problem_id': problems
+            'problem_id': problems,
             'context_source': self.default_context_source,
         }
         if time_before:
