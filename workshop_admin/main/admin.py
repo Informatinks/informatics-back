@@ -11,6 +11,8 @@ from .models import WorkshopConnection, Workshop, ContestConnection, Contest, Wo
 
 @admin.register(WorkshopConnection)
 class WorkshopConnectionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'workshop', 'user', 'status',)
+    list_filter = ('status', 'workshop',)
     form = make_ajax_form(WorkshopConnection, {
         'user': 'moodleuser_lookup'
     })
@@ -18,6 +20,7 @@ class WorkshopConnectionAdmin(admin.ModelAdmin):
 
 @admin.register(ContestConnection)
 class ContestConnectionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'contest', 'user',)
     form = make_ajax_form(ContestConnection, {
         'user': 'moodleuser_lookup'
     })
@@ -45,6 +48,7 @@ class ContestForm(ModelForm):
 
 class ContestAdmin(AjaxSelectAdmin):
     readonly_fields = ('author', 'created_at',)
+    list_display = ('__str__', 'workshop', 'is_virtual',)
 
     form = make_ajax_form(Contest, superclass=ContestForm, fieldlist={
         'statement': 'statement_lookup'
@@ -77,6 +81,7 @@ class MonitorAdminInline(admin.TabularInline):
 
 
 class WorkshopAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'status', 'visibility',)
     inlines = (ContestAdminInline,
                MonitorAdminInline)
 
@@ -95,6 +100,7 @@ class WorkshopAdmin(admin.ModelAdmin):
 
 
 class WorkshopMonitorAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'workshop', 'type', 'user_visibility',)
     pass
 
 
