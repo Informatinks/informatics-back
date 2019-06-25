@@ -1,0 +1,31 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+    <h1>Изменить статус заявок на сбор</h1>
+    <br/>
+    <form action="{% url 'change_conn_status' %}" method="POST">
+        {% csrf_token %}
+        <div class="grp-module grp-collapse grp-open ">
+            <h3 class="grp-collapse-handler">Проверьте выбранные заявки</h3>
+            <div class="grp-module">
+                {% for obj in objects %}
+                    <div class="grp-row">{{ obj }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div style="clear: both;"></div>
+
+        <div style="margin-top: 2rem;">
+            <h4>Сменить статус выбранных заявок на:</h4>
+            <br/>
+            <select name="status">
+                {% for status in statuses %}
+                    <option value="{{ status.id }}">{{ status.title }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="Сменить"/>
+        </div>
+
+        <input name="object_ids" type="hidden" value="{{ obj_ids }}"/>
+    </form>
+{% endblock %}

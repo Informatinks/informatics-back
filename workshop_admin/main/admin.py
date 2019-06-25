@@ -2,10 +2,13 @@ import datetime
 
 from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdminTabularInline, AjaxSelectAdmin
-from grappelli.forms import GrappelliSortableHiddenMixin
 from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
 from django.forms import ModelForm, ValidationError
+from django.http import HttpResponseRedirect
+from grappelli.forms import GrappelliSortableHiddenMixin
 from moodle.models import Statement
+
 from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor
 
 
@@ -16,6 +19,16 @@ class WorkshopConnectionAdmin(admin.ModelAdmin):
     form = make_ajax_form(WorkshopConnection, {
         'user': 'moodleuser_lookup'
     })
+
+    def change_status(self, request, queryset):
+        # queryset.update(status='p')
+        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+        ct = ContentType.objects.get_for_model(queryset.model)
+        return HttpResponseRedirect("/admin/actions/change_status?ct=%s&ids=%s" % (ct.pk, ",".join(selected)))
+
+    change_status.short_description = "Принять или отклонить заявки на сбор"
+
+    actions = ['change_status']
 
 
 @admin.register(ContestConnection)
