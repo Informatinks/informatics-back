@@ -34,7 +34,7 @@ class WorkshopConnectionAdmin(admin.ModelAdmin):
         )
 
     change_status.short_description = "Принять или отклонить заявки на сбор"
-
+    change_list_template = "admin/change_list_filter_sidebar.html"
     actions = ['change_status']
 
 
