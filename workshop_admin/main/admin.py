@@ -30,12 +30,12 @@ class WorkshopConnectionAdmin(admin.ModelAdmin):
         query_params = urlencode({
             'ct': ct.pk,
             'id': selected
-        }, doseq=True)
+        }, doseq=True)  # Stage as param sequesce, e.g. id=1&id=2&...
 
-        return HttpResponseRedirect('%s?%s' % (
+        return HttpResponseRedirect('{0}?{1}'.format(
             reverse('change_wsconn_status'),
-            query_params
-        ))
+            query_params)
+        )
 
     change_status.short_description = "Принять или отклонить заявки на сбор"
 
