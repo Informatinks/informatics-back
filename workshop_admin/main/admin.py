@@ -4,7 +4,6 @@ from urllib.parse import urlencode
 from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdminTabularInline, AjaxSelectAdmin
 from django.contrib import admin
-from django.contrib.contenttypes.models import ContentType
 from django.forms import ModelForm, ValidationError
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -24,13 +23,10 @@ class WorkshopConnectionAdmin(admin.ModelAdmin):
 
     def change_status(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
-        ct = ContentType.objects.get_for_model(queryset.model)
 
-        # Build query params
-        query_params = urlencode({
-            'ct': ct.pk,
-            'id': selected
-        }, doseq=True)  # Stage as param sequesce, e.g. id=1&id=2&...
+        # Build query params.
+        # Stage as param sequesce, e.g. id=1&id=2&...
+        query_params = urlencode({'id': selected}, doseq=True)
 
         return HttpResponseRedirect('{0}?{1}'.format(
             reverse('change_wsconn_status'),

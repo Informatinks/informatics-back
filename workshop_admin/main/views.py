@@ -1,7 +1,6 @@
 from collections import namedtuple
 
 from django.contrib import messages
-from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -19,15 +18,8 @@ class WorkshopConnectionMassUpdateAdmin(View):
 
     def get(self, request, *args, **kwargs):
         try:
-            content_type = int(request.GET.get('ct'))
             ids = [int(id) for id in request.GET.getlist('id')]
         except (TypeError, ValueError):
-            return HttpResponseBadRequest()
-
-        # Find objects of requested type
-        try:
-            ct = ContentType.objects.get(id=content_type, app_label='main')
-        except ContentType.DoesNotExist:
             return HttpResponseBadRequest()
 
         objs = WorkshopConnection.objects.prefetch_related('user', 'workshop').filter(pk__in=ids)
