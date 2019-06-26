@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .views import change_conn_status
+from .views import WorkshopConnectionMassUpdateAdmin 
 
 urlpatterns = [
-    path('change_status', change_conn_status, name='change_conn_status'),
+    path('change_status', WorkshopConnectionMassUpdateAdmin.as_view(), name='change_wsconn_status'),
 ]

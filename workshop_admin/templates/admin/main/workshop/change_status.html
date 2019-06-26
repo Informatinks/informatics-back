@@ -1,15 +1,42 @@
 {% extends "admin/base_site.html" %}
+{% load workshop_extras %}
 {% block content %}
     <h1>Изменить статус заявок на сбор</h1>
     <br/>
-    <form action="{% url 'change_conn_status' %}" method="POST">
+    <form action="" method="POST">
         {% csrf_token %}
         <div class="grp-module grp-collapse grp-open ">
             <h3 class="grp-collapse-handler">Проверьте выбранные заявки</h3>
-            <div class="grp-module">
-                {% for obj in objects %}
-                    <div class="grp-row">{{ obj }}</div>
-                {% endfor %}
+
+            <div class="grp-module grp-changelist-results">
+                <table id="result_list" cellspacing="0" class="grp-table grp-sortable">
+                    <thead>
+                    <tr>
+                        <th scope="col" class="column-__str__">
+                            <div class="grp-text"><span>Приглашение</span></div>
+                        </th>
+                        <th scope="col" class="sortable column-workshop">
+                            <div class="grp-text"><span>Сбор</span></div>
+                        </th>
+                        <th scope="col" class="sortable column-user">
+                            <div class="grp-text"><span>Ученик</span></div>
+                        </th>
+                        <th scope="col" class="sortable column-status">
+                            <div class="grp-text"><span>Текущий статус заявки</span></div>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for obj in objects %}
+                        <tr class="grp-row grp-row-even">
+                            <th class="field-__str__">{{ obj }}</th>
+                            <td class="field-workshop nowrap">{{ obj.workshop }}</td>
+                            <td class="field-user nowrap">{{ obj.user }}</td>
+			    <td class="field-status">{{ obj.status|humazine_wsconnection_status }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -26,6 +53,8 @@
             <input type="submit" value="Сменить"/>
         </div>
 
-        <input name="object_ids" type="hidden" value="{{ obj_ids }}"/>
+        {% for object in objects %}
+            <input name="object_id" type="hidden" value="{{ object.id }}"/>
+        {% endfor %}
     </form>
 {% endblock %}
