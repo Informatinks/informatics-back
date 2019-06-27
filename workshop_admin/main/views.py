@@ -88,7 +88,10 @@ class WorkshopMassInviteAdmin(LoginRequiredMixin, View):
             users_file = form.cleaned_data.get('users_file')
 
             # Find requested workshop
-            workshop = Workshop.objects.get(pk=workshop_id)
+            try:
+                workshop = Workshop.objects.get(pk=workshop_id)
+            except:
+                return HttpResponseBadRequest()
 
             # Clear provided users features
             # One feature per line
@@ -97,7 +100,11 @@ class WorkshopMassInviteAdmin(LoginRequiredMixin, View):
                 for line in users_file.readlines()
             ]
 
-            # Determine, which feature is supplied
+            # Abort on empty users list
+            if len(users_featues) == 0:
+                return HttpResponseBadRequest()
+
+                # Determine, which feature is supplied
             # Assume all features should be the same type
             try:
                 # Check only first
