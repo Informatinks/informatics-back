@@ -2,7 +2,11 @@
 {% load workshop_extras %}
 <!-- CONTENT-TITLE -->
 {% block content_title %}
-    <h1>Записать на сбор «{{ workshop.name }}» из файла</h1>
+    {% if workshop %}
+        <h1>Записать на сбор «{{ workshop.name }}» из файла</h1>
+    {% else %}
+        <h1>Записать на сбор из файла</h1>
+    {% endif %}
 {% endblock %}
 
 {% block content %}

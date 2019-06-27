@@ -2,7 +2,6 @@ from collections import namedtuple
 
 from django import forms
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
 from django.http import HttpResponseBadRequest
@@ -47,7 +46,6 @@ class WorkshopConnectionMassUpdateAdmin(LoginRequiredMixin, View):
             'statuses': [Status(s.name, s.value) for s in WorkshopConnectionStatus]
         })
 
-    @login_required
     def post(self, request, *args, **kwargs):
         try:
             status = int(request.POST.get('status'))
@@ -66,78 +64,88 @@ class WorkshopMassInviteAdmin(LoginRequiredMixin, View):
     def login_url(self):
         return reverse('admin:login')
 
+    def _render_form_response(self, form, workshop=None):
+        """Generic method for response with form.
+
+        Can render form with valid workshop or response for invalid workshop requests.
+        """
+        return render(self.request, 'admin/main/workshop/mass_invite.html', {
+            'form': form,
+            'workshop': workshop
+        })
+
     def get(self, request, *args, **kwargs):
         workshop_id = request.GET.get('id')
+        form = MassInviteForm()
+
+        # If user requested invalid workshop,
+        # safe failback to form with error
         try:
             workshop = Workshop.objects.get(pk=workshop_id)
         except Workshop.DoesNotExist:
-            return HttpResponseBadRequest()
+            messages.add_message(request, messages.ERROR,
+                                 'Запрошенный сбор с таким ID не найден. '
+                                 'Попробуйте начать процесс массового добавления заново со страницы сбора.')
+            return self._render_form_response(form)
 
-        form = MassInviteForm()
-        return render(request, 'admin/main/workshop/mass_invite.html', {
-            'form': form,
-            'workshop': workshop,
-        })
+        return self._render_form_response(form, workshop)
 
     def post(self, request, *args, **kwargs):
+        workshop_id = request.GET.get('id')
         form = MassInviteForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Decode request payload
-            workshop_id = request.GET.get('id')
-            status = form.cleaned_data.get('status')
-            users_file = form.cleaned_data.get('users_file')
 
-            # Find requested workshop
+        # Find requested workshop
+        try:
+            workshop = Workshop.objects.get(pk=workshop_id)
+        except:
+            messages.add_message(request, messages.ERROR,
+                                 'Запрошенный сборк с таким ID не найден. '
+                                 'Попробуйте начать процесс массового добавления заново со страницы сбора.')
+            return self._render_form_response(form)
+
+        if not form.is_valid():
+            return self._render_form_response(form, workshop)
+
+        # Decode request payload
+        workshop_id = request.GET.get('id')
+        status = form.cleaned_data.get('status')
+        users_file = form.cleaned_data.get('users_file')
+
+        # Clear provided users features
+        # One feature per line
+        users_featues = [
+            line.decode('utf-8').rstrip('\n,')
+            for line in users_file.readlines()
+        ]
+
+        # Determine, which feature is supplied
+        try:
+            users_featues = [int(feat) for feat in users_featues]
+            feature_name = 'id'
+        except ValueError:
+            feature_name = 'username'
+
+        # Create connection for each user
+        for feature_value in users_featues:
             try:
-                workshop = Workshop.objects.get(pk=workshop_id)
-            except:
-                return HttpResponseBadRequest()
+                # Find user with determined feature
+                user = MoodleUser.objects.get(**{feature_name: feature_value})
 
-            # Clear provided users features
-            # One feature per line
-            users_featues = [
-                line.decode('utf-8').rstrip('\n,')
-                for line in users_file.readlines()
-            ]
+                # Safe create connection to avoid race conditions
+                workshop_conn = WorkshopConnection.objects.get_or_create(user=user,
+                                                                         workshop=workshop,
+                                                                         status=status)
+                messages.add_message(request, messages.SUCCESS,
+                                     f'Пользователь «{feature_value}» был успешно записан на воркшоп')
+            except MoodleUser.DoesNotExist:
+                # Can't find user by determined feature
+                messages.add_message(request, messages.ERROR,
+                                     f'Пользователь «{feature_value}» не был найден в базе!')
+            except IntegrityError:
+                # Get_or_create returned error, which usually means
+                # there's another connection for this workshop
+                WorkshopConnection.objects.filter(user=user, workshop=workshop).update(status=status)
+                messages.add_message(request, messages.WARNING,
+                                     f'Для пользователя «{feature_value}» обновлена заявка на этот сбор.')
 
-            # Abort on empty users list
-            if len(users_featues) == 0:
-                return HttpResponseBadRequest()
-
-                # Determine, which feature is supplied
-            # Assume all features should be the same type
-            try:
-                # Check only first
-                int(users_featues[0])
-                feature_name = 'id'
-            except ValueError:
-                feature_name = 'username'
-
-            # Create connection for each user
-            for feature_value in users_featues:
-                try:
-                    # Find user with determined feature
-                    user = MoodleUser.objects.get(**{feature_name: feature_value})
-
-                    # Safe create connection to avoid race conditions
-                    workshop_conn = WorkshopConnection.objects.get_or_create(user=user,
-                                                                             workshop=workshop,
-                                                                             status=status)
-                    messages.add_message(request, messages.SUCCESS,
-                                         f'Пользователь «{feature_value}» был успешно записан на воркшоп')
-                except MoodleUser.DoesNotExist:
-                    # Can't find user by determined feature
-                    messages.add_message(request, messages.ERROR,
-                                         f'Пользователь «{feature_value}» не был найден в базе!')
-                except IntegrityError:
-                    # Get_or_create returned error, which usually means
-                    # there's another connection for this workshop
-                    messages.add_message(request, messages.WARNING,
-                                         f'Пользователь «{feature_value}» уже был записан на этот воркшоп с другим статусом.')
-
-            return redirect(reverse('admin:main_workshopconnection_changelist'))
-
-        # Render form with possible errors
-        return render(request, 'admin/main/workshop/mass_invite.html', {
-            'form': form
-        })
+        return redirect(reverse('admin:main_workshopconnection_changelist'))
