@@ -18,7 +18,7 @@ Status = namedtuple('Status', ['title', 'id'])
 class MassInviteForm(forms.Form):
     users_file = forms.FileField(label='Список учеников для инвайта',
                                  required=True,
-                                 help_text='Файл должен содержать данные в формате CSV, в котором первая строка — заголовки столбцов. Обязательно должны присутствовать столбцы "username" или "id".')
+                                 help_text='Файл должен список ID или логинов пользователей по одному на каждой строке')
     status = forms.ChoiceField(choices=WORKSHOP_CONNECTION_STATUS_CHOICES,
                                required=True,
                                label='В каком статусе записать учеников?')
