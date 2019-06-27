@@ -1,18 +1,29 @@
 {% extends "admin/change_form.html" %}
 {% load workshop_extras %}
 {% block after_field_sets %}
+    <!-- Workshop invite link for teacher -->
     {% if original.access_token %}
         <style>
-            .workshop-public-link {
-                font-size: 1.2rem;
+            .workshop_extra-info-block {
                 margin-top: 0.6rem;
                 margin-bottom: 1rem;
+            }
+
+            .workshop_extra-info-block p {
+                font-size: 1.2rem;
                 font-weight: bold;
             }
         </style>
-        <p class="workshop-public-link">
-            Ссылка на воркшоп для студентов:
-            <a href="{{ original|public_link }}">{{ original|public_link }}</a>
-        </p>
+        <div class="workshop_extra-info-block">
+            <p> Ссылка на воркшоп для студентов:
+                <a href="{{ original|public_link }}">{{ original|public_link }}</a>
+            </p>
+        </div>
     {% endif %}
+
+    <!-- Workshop mass invite link -->
+    <div class="workshop_extra-info-block">
+        <a href="{% url 'workshop_mass_invite' %}?id={{ original.id }}" class="grp-button">Добавить учеников на сбор
+            массово</a>
+    </div>
 {% endblock %}
