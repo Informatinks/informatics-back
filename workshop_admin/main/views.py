@@ -106,17 +106,25 @@ class WorkshopMassInviteAdmin(LoginRequiredMixin, View):
         if not form.is_valid():
             return self._render_form_response(form, workshop)
 
-        # Decode request payload
+        # Retrieve request payload
         workshop_id = request.GET.get('id')
         status = form.cleaned_data.get('status')
         users_file = form.cleaned_data.get('users_file')
-
-        # Clear provided users features
+        
+        # Clear provided from file users features
         # One feature per line
-        users_featues = [
-            line.decode('utf-8').rstrip('\n,')
-            for line in users_file.readlines()
-        ]
+        try:
+            users_featues = [
+                # If user supllied binary file,
+                # first decode attempt will raise UnicodeDecodeError 
+                line.decode('utf-8').rstrip('\n,')
+                for line in users_file.readlines()
+            ]
+        except UnicodeDecodeError:
+            form.add_error('users_file', 'Не удается распознать загруженный файл. '
+                                         'Скорее всего, вы попробовали загрузить бинарный файл. '
+                                         'Пожалуйста, используйте текстовый файлы в формате TXT или CSV.')
+            return self._render_form_response(form, workshop)
 
         # Determine, which feature is supplied
         try:
