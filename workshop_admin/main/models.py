@@ -111,7 +111,7 @@ class WorkshopMonitor(models.Model):
                                null=False, blank=False,
                                default=WorkshopMonitorType.ACM.value)
     user_visibility = models.IntegerField(choices=MONITOR_USER_VISIBILITY_CHOICES)
-    freeze_time = models.DateField(null=True, blank=True)
+    freeze_time = models.DateTimeField(null=True, blank=True)
 
     # Depricated in favour of 'type'
     # with_penalty_time = models.BooleanField(default=False)
