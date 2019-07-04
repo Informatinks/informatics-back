@@ -32,18 +32,21 @@ class Contest(models.Model):
     workshop = models.ForeignKey('Workshop', models.DO_NOTHING, blank=True, null=True)
     statement = models.ForeignKey('moodle.Statement', on_delete=models.DO_NOTHING, blank=True, null=True)
     author = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE, editable=False)
-    position = models.IntegerField(blank=True, null=True)
+    position = models.PositiveIntegerField(default=0, blank=False, null=False)
+    is_virtual = models.BooleanField(default=False)
     protocol_visibility = models.IntegerField(choices=PROTOCOL_VISIBILITY_CHOICES,
                                               blank=False, null=False)
     time_start = models.DateTimeField()
     time_stop = models.DateTimeField()
-    is_virtual = models.BooleanField(default=False)
     virtual_duration = DateTimeBasedDuration(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'contest'
+
+    def __str__(self):
+        return self.statement.name
 
 
 class ContestConnection(models.Model):
@@ -114,8 +117,10 @@ class WorkshopMonitor(models.Model):
                                null=False, blank=False,
                                default=WorkshopMonitorType.ACM.value)
     user_visibility = models.IntegerField(choices=MONITOR_USER_VISIBILITY_CHOICES)
-    with_penalty_time = models.BooleanField(default=False)
-    freeze_time = models.DateField(null=True, blank=True)
+    freeze_time = models.DateTimeField(null=True, blank=True)
+
+    # Depricated in favour of 'type'
+    # with_penalty_time = models.BooleanField(default=False)
 
     def __str__(self):
         type = WorkshopMonitorType(self.type).name if self.type else ''

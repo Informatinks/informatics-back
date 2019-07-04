@@ -10,6 +10,7 @@ class RefreshToken(db.Model):
     __tablename__ = 'refresh_token'
     __table_args__ = (
         db.Index('search_token', 'token'),
+        db.UniqueConstraint('user_id', 'token', name='_user_refresh_token_uc'),
         {'schema': 'pynformatics'}
     )
 

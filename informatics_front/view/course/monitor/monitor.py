@@ -1,5 +1,5 @@
 import datetime
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 from typing import List, Type, Callable, Optional, Iterable
 
 from flask import request
@@ -10,7 +10,7 @@ from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound
 
 from informatics_front.utils.auth.request_user import current_user
-from informatics_front.model import db, Statement, User, Group, UserGroup, StatementProblem, Problem
+from informatics_front.model import db, User, Group, UserGroup, StatementProblem, Problem
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.contest.monitor import WorkshopMonitor
 from informatics_front.utils.enums import WorkshopMonitorType
@@ -110,19 +110,36 @@ class WorkshopMonitorApi(MethodView):
 
     @classmethod
     def _get_contests(cls, workshop_id):
-        contests: List[Contest] = db.session.query(Contest) \
-            .filter(Contest.workshop_id == workshop_id) \
-            .options(joinedload(Contest.statement)
-                     .joinedload(Statement.statement_problems)
-                     .joinedload(StatementProblem.problem)) \
-                     .options(Load(Problem).load_only('id', 'name')) \
-                     .options(Load(StatementProblem).load_only('rank')) \
-            .all()
+        contests: List[Contest] = db.session.query(Contest)\
+            .filter(Contest.workshop_id == workshop_id)\
+            .options(joinedload(Contest.statement))
+
+        statement_ids = [contest.statement.id for contest in contests]
+
+        statement_problems: List[StatementProblem] = db.session.query(StatementProblem) \
+            .filter(StatementProblem.statement_id.in_(statement_ids)) \
+            .filter(StatementProblem.problem_id.isnot(None)) \
+            .options(joinedload(StatementProblem.problem).load_only('id', 'name')) \
+            .options(Load(StatementProblem).load_only('statement_id', 'rank')) \
+            .options(Load(Problem).load_only('id', 'name'))
+
+        # Filter statement problems with removed problems
+        statement_problems = [sp
+                              for sp in statement_problems
+                              if sp.problem is not None]
+
+        for sp in statement_problems:
+            sp.problem.rank = sp.rank
+
+        statement_id_statement_problems = defaultdict(list)
+
+        for sp in statement_problems:
+            statement_id_statement_problems[sp.statement_id].append(sp.problem)
 
         for contest in contests:
-            for sp in contest.statement.statement_problems:
-                sp.problem.rank = sp.rank
-            contest.problems = [sp.problem for sp in contest.statement.statement_problems]
+            statement_id = contest.statement_id
+            problems = statement_id_statement_problems[statement_id]
+            contest.problems = problems
 
         return contests
 

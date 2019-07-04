@@ -83,3 +83,11 @@ class Statement(models.Model):
     class Meta:
         managed = False
         db_table = 'mdl_statements'
+
+
+class CourseModule(models.Model):
+    instance = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'mdl_course_modules'

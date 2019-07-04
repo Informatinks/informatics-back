@@ -310,6 +310,25 @@ fabric.properties
 pyvenv.cfg
 pip-selfcheck.json
 
+### Vim ###
+# Swap
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+
+# Temporary
+.netrwhist
+*~
+# Auto-generated tag files
+tags
+# Persistent undo
+[._]*.un~
+
 # End of https://www.gitignore.io/api/macos,linux,flask,python,pycharm,virtualenv
 
 .idea
@@ -320,3 +339,4 @@ informatics_front/settings.cfg
 node_modules
 api-docs/result.yaml
 *.retry
+

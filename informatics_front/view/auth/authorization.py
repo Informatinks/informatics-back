@@ -15,9 +15,10 @@ from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.model.user.user import User
 from informatics_front.plugins import gmail
 from informatics_front.plugins import tokenizer
-from informatics_front.utils.auth.middleware import authenticate, login_required
+from informatics_front.utils.auth.middleware import login_required
 from informatics_front.utils.auth.make_jwt import decode_jwt_token, generate_refresh_token
 from informatics_front.utils.response import jsonify
+from informatics_front.utils.sqla.race_handler import get_or_create
 from informatics_front.view.auth.serializers.auth import UserAuthSerializer
 
 
@@ -51,14 +52,15 @@ class LoginApi(MethodView):
         current_app.logger.debug(f'user_email={args["username"]} has logged in')
 
         token = generate_refresh_token(user)
-        refresh_token = RefreshToken(token=token, user_id=user.id)
+        refresh_token, is_created = get_or_create(RefreshToken, token=token, user_id=user.id)
         db.session.add(refresh_token)
 
         user_serializer = UserAuthSerializer()
         user.refresh_token = token
         user_data = user_serializer.dump(user)
 
-        db.session.commit()
+        if is_created:
+            db.session.commit()
 
         return jsonify(user_data.data)
 

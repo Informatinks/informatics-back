@@ -1,8 +1,13 @@
 import datetime
+from urllib.parse import urlencode
 
 from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdminTabularInline, AjaxSelectAdmin
 from django.contrib import admin
+from django.forms import ModelForm, ValidationError
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from grappelli.forms import GrappelliSortableHiddenMixin
 from moodle.models import Statement
 
 from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor
@@ -10,22 +15,62 @@ from .models import WorkshopConnection, Workshop, ContestConnection, Contest, Wo
 
 @admin.register(WorkshopConnection)
 class WorkshopConnectionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'workshop', 'user', 'status',)
+    list_filter = ('status', 'workshop',)
     form = make_ajax_form(WorkshopConnection, {
         'user': 'moodleuser_lookup'
     })
 
+    def change_status(self, request, queryset):
+        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+
+        # Build query params.
+        # Stage as param sequesce, e.g. id=1&id=2&...
+        query_params = urlencode({'id': selected}, doseq=True)
+
+        return HttpResponseRedirect('{0}?{1}'.format(
+            reverse('change_wsconn_status'),
+            query_params)
+        )
+
+    change_status.short_description = "Принять или отклонить заявки на сбор"
+    change_list_template = "admin/change_list_filter_sidebar.html"
+    actions = ['change_status']
+
 
 @admin.register(ContestConnection)
 class ContestConnectionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'contest', 'user',)
     form = make_ajax_form(ContestConnection, {
         'user': 'moodleuser_lookup'
     })
 
 
+class ContestForm(ModelForm):
+    def clean(self):
+        """Formset validators on create and update Contest object.
+
+        First we invoke fields auto-validators with `clean()` method.
+        Then run our ones with additional logic.
+        """
+        cleaned_data = super().clean()
+
+        # Contest can be virtual only if virtual duration is supplied.
+        is_virtual = cleaned_data.get('is_virtual')
+        virtual_duration = cleaned_data.get('virtual_duration')
+
+        if is_virtual and not virtual_duration:
+            raise ValidationError(
+                'Нельзя сделать контест виртуальным, не указав его длительность. '
+                'Укажите длительность в поле "Virtual duration"'
+            )
+
+
 class ContestAdmin(AjaxSelectAdmin):
     readonly_fields = ('author', 'created_at',)
+    list_display = ('__str__', 'workshop', 'is_virtual',)
 
-    form = make_ajax_form(Contest, {
+    form = make_ajax_form(Contest, superclass=ContestForm, fieldlist={
         'statement': 'statement_lookup'
     })
 
@@ -42,11 +87,13 @@ class ContestAdmin(AjaxSelectAdmin):
         return ['author', 'created_at']
 
 
-class ContestAdminInline(AjaxSelectAdminTabularInline):
+class ContestAdminInline(GrappelliSortableHiddenMixin, AjaxSelectAdminTabularInline):
     model = Contest
     ordering = ('position',)
     exclude = ('author', 'created_at',)
-    form = make_ajax_form(Contest, {
+    sortable_field_name = 'position'
+    extra = 0  # Don't render default empty formsest    
+    form = make_ajax_form(Contest, superclass=ContestForm, fieldlist={
         'statement': 'statement_lookup'
     })
 
@@ -56,6 +103,7 @@ class MonitorAdminInline(admin.TabularInline):
 
 
 class WorkshopAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'status', 'visibility',)
     inlines = (ContestAdminInline,
                MonitorAdminInline)
 
@@ -74,6 +122,7 @@ class WorkshopAdmin(admin.ModelAdmin):
 
 
 class WorkshopMonitorAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'workshop', 'type', 'user_visibility',)
     pass
 
 

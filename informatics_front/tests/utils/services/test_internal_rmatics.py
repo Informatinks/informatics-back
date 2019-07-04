@@ -1,12 +1,13 @@
 import io
-import pytest
-
 from unittest.mock import Mock
+
+import pytest
 from werkzeug.datastructures import FileStorage
 
 from informatics_front.utils.services.internal_rmatics import InternalRmatics
 
 PROBLEM_ID = 1
+CONTEST_ID = 2
 RUN_ID = 2
 USER_ID = 666
 CLIENT_SERVICE_URL = 'foo'
@@ -22,10 +23,10 @@ def client():
 
 @pytest.mark.internal_rmatics
 def test_get_runs_filter(client):
-    client.get_runs_filter(PROBLEM_ID, {'a': 1}, is_admin=True)
+    client.get_runs_filter(PROBLEM_ID, CONTEST_ID, {'a': 1})
     client.client.get_data.assert_called_with(
         f'{client.service_url}/problem/{PROBLEM_ID}/submissions/',
-        params={'a': 1, 'is_admin': True},
+        params={'a': 1, 'context_source': InternalRmatics.default_context_source, 'context_id': CONTEST_ID},
         default=[],
         silent=True
     )
@@ -33,13 +34,14 @@ def test_get_runs_filter(client):
 
 @pytest.mark.internal_rmatics
 def test_send_submit(client):
-    data = {'lang_id': 1, 'user_id': 2, 'statement_id': 3}
+    data = {'lang_id': 1, 'user_id': 2, 'statement_id': 3,
+            'context_source': InternalRmatics.default_context_source, 'context_id': CONTEST_ID, 'is_visible': False}
     file = FileStorage(
         io.BytesIO(b'sample data'), filename='test.cpp', content_type='application/pdf'
     )
 
     client.send_submit(
-        file, data['user_id'], PROBLEM_ID, data['statement_id'], data['lang_id']
+        file, data['user_id'], PROBLEM_ID, CONTEST_ID, data['statement_id'], data['lang_id'],
     )
     client.client.post_data.assert_called_with(
         f'{client.service_url}/problem/trusted/{PROBLEM_ID}/submit_v2',
@@ -77,7 +79,8 @@ def test_get_monitor(client):
     client.client.get_data.assert_called_with(
         f'{client.service_url}/monitor/problem_monitor',
         params={'user_id': users,
-                'problem_id': problems},
+                'problem_id': problems,
+                'context_source': InternalRmatics.default_context_source},
         silent=True,
         default=[]
     )
@@ -93,8 +96,8 @@ def test_get_monitor_with_time_before(client):
         f'{client.service_url}/monitor/problem_monitor',
         params={'user_id': users,
                 'problem_id': problems,
-                'time_before': time_before},
+                'time_before': time_before,
+                'context_source': InternalRmatics.default_context_source},
         silent=True,
         default=[]
     )
-

@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+{% load workshop_extras %}
+<!-- CONTENT-TITLE -->
+{% block content_title %}
+    {% if workshop %}
+        <h1>Записать на сбор «{{ workshop.name }}» из файла</h1>
+    {% else %}
+        <h1>Записать на сбор из файла</h1>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <style>
+        .grp-module {
+            display: block !important;
+            float: none !important;
+        }
+
+        .form {
+            padding-left: 1rem;
+        }
+
+        .form label {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .form .fieldWrapper {
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .form .fieldWrapper .input {
+            display: block;
+        }
+
+        .form .fieldWrapper .help_text {
+            color: #5e5e5e;
+        }
+    </style>
+
+
+    <form action="{% url 'workshop_mass_invite' %}?id={{ workshop.id }}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="grp-module grp-collapse grp-open form">
+            <div class="fieldWrapper">
+                {{ form.users_file.errors }}
+                <label for="{{ form.users_file.id_for_label }}">{{ form.users_file.label }}:</label>
+                <div class="input">
+                    {{ form.users_file }}
+                </div>
+                <p class="help_text">{{ form.users_file.help_text }}</p>
+            </div>
+            <div class=" fieldWrapper">
+                {{ form.status.errors }}
+                <label for="{{ form.status.id_for_label }}">{{ form.status.label }}:</label>
+                <div class="input">
+                    {{ form.status }}
+                </div>
+            </div>
+        </div>
+
+        <input type="submit" value="Записать на сбор"/>
+
+    </form>
+{% endblock %}
