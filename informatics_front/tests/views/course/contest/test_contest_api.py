@@ -5,6 +5,7 @@ from werkzeug.exceptions import NotFound
 
 from informatics_front.model import db
 from informatics_front.model.workshop.contest_connection import ContestConnection
+from informatics_front.utils.enums import WorkshopConnectionStatus, WorkshopStatus
 from informatics_front.view.course.contest.contest import ContestApi
 
 NON_EXISTING_ID = -1
@@ -26,26 +27,29 @@ def test_check_workshop_permissions_without_connection(ongoing_workshop):
 
 
 @pytest.mark.contest_problem
-@pytest.mark.usefixtures('authorized_user', 'applied_workshop_connection')
-def test_check_workshop_permissions_with_applied_connection(ongoing_workshop):
+@pytest.mark.usefixtures('authorized_user')
+def test_check_workshop_permissions_with_applied_connection(workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.APPLIED)
     user_id = g.user['id']
-    w = ongoing_workshop['workshop']
     with pytest.raises(NotFound):
-        ContestApi._check_workshop_permissions(user_id, w)
+        ContestApi._check_workshop_permissions(user_id, workshop_connection.workshop)
 
 
 @pytest.mark.contest_problem
 @pytest.mark.usefixtures('authorized_user')
-def test_check_workshop_permissions_with_accepted_connection(ongoing_workshop, accepted_workshop_connection):
+def test_check_workshop_permissions_with_accepted_connection(ongoing_workshop, workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.ACCEPTED)
     user_id = g.user['id']
     w = ongoing_workshop['workshop']
     ret_con = ContestApi._check_workshop_permissions(user_id, w)
-    assert ret_con.id == accepted_workshop_connection.id
+    assert ret_con.id == workshop_connection.id
 
 
 @pytest.mark.contest_problem
-@pytest.mark.usefixtures('authorized_user', 'statement', 'accepted_workshop_connection')
-def test_contest_api(client, ongoing_workshop):
+@pytest.mark.usefixtures('authorized_user', 'statement')
+def test_contest_api(client, ongoing_workshop, workshop_connection_builder):
+    workshop_connection_builder(WorkshopConnectionStatus.ACCEPTED)
+
     contest = ongoing_workshop['contest']
 
     url = url_for('contest.contest', contest_id=contest.id)
@@ -66,8 +70,9 @@ def test_contest_api(client, ongoing_workshop):
 
 
 @pytest.mark.contest_problem
-@pytest.mark.usefixtures('authorized_user', 'statement', 'accepted_workshop_connection')
-def test_contest_api_not_exists(client):
+@pytest.mark.usefixtures('authorized_user', 'statement')
+def test_contest_api_not_exists(client, workshop_connection_builder):
+    workshop_connection_builder(WorkshopConnectionStatus.APPLIED)
     url = url_for('contest.contest', contest_id=NON_EXISTING_ID)
     resp = client.get(url)
     assert resp.status_code == 404

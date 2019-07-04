@@ -1,9 +1,12 @@
 from flask.views import MethodView
 from sqlalchemy.orm import joinedload
+from werkzeug.exceptions import BadRequest, NotFound
 
+from informatics_front.model.contest.contest import Contest
+from informatics_front.utils.enums import ContestProtocolVisibility
 from informatics_front.utils.auth.request_user import current_user
 from informatics_front.plugins import internal_rmatics
-from informatics_front.model import Comment
+from informatics_front.model import Comment, Statement, StatementProblem
 from informatics_front.model.base import db
 from informatics_front.utils.auth.middleware import login_required
 from informatics_front.utils.response import jsonify
@@ -27,18 +30,37 @@ class RunSourceApi(MethodView):
 
 class RunProtocolApi(MethodView):
     @login_required
-    def get(self, run_id: int):
+    def get(self, contest_id: int, problem_id: int, run_id: int):
+        contest_visibility = db.session.query(Contest.protocol_visibility) \
+            .filter_by(id=contest_id).join(Statement) \
+            .join(StatementProblem) \
+            .filter(StatementProblem.problem_id == problem_id) \
+            .one_or_none()
+
+        if contest_visibility is None:
+            raise BadRequest('Bad protocol_id or problem_id')
+
+        contest_visibility = contest_visibility and contest_visibility[0]
+
+        if contest_visibility is ContestProtocolVisibility.INVISIBLE:
+            raise NotFound('Protocol for current')
+
         context, status = internal_rmatics.get_full_run_protocol(run_id, current_user.id)
 
         if status > 299:
             return jsonify(context, status_code=status)
 
+        # TODO: NFRMTCS-192: нужен контекст,
+        # TODO: чтобы нельзя было смотреть любой протокол, найдя открытый воркшоп
         protocol = self._remove_fields_from_full_protocol(context)
+
+        if contest_visibility is ContestProtocolVisibility.FIRST_BAD_TEST:
+            protocol = self._remove_all_after_bad_test(protocol)
 
         return jsonify(protocol, status_code=status)
 
     @classmethod
-    def _remove_fields_from_full_protocol(cls, protocol):
+    def _remove_fields_from_full_protocol(cls, protocol: dict) -> dict:
         # We need to remove some fields for student
         for field in PROTOCOL_EXCLUDE_FIELDS:
             protocol.pop(field, None)
@@ -52,6 +74,23 @@ class RunProtocolApi(MethodView):
             for field in PROTOCOL_EXCLUDE_TEST_FIELDS:
                 test.pop(field, None)
 
+        return protocol
+
+    @classmethod
+    def _remove_all_after_bad_test(cls, protocol: dict) -> dict:
+        """ Returns protocol where we have only first failed test
+            protocol tests are like:
+            {'1': {status: OK, ...<some_fields>},
+             '2': {status: WA, ...<some_fields>}}
+        """
+        tests = protocol.get('tests')
+        sorted_tests = list(sorted(tests.items(), key=lambda t: int(t[0])))
+        visible_tests = {}
+        for k, v in sorted_tests:
+            visible_tests[k] = v
+            if v.get('status') != 'OK':
+                break
+        protocol['tests'] = visible_tests
         return protocol
 
 

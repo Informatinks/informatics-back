@@ -2,6 +2,8 @@ import datetime
 
 from informatics_front.model.base import db
 from informatics_front.model.workshop.contest_connection import ContestConnection
+from informatics_front.utils.enums import ContestProtocolVisibility
+from informatics_front.utils.sqla.types import IntEnum
 
 
 class Contest(db.Model):
@@ -13,6 +15,11 @@ class Contest(db.Model):
     statement_id = db.Column(db.Integer, db.ForeignKey('moodle.mdl_statements.id'))
     author_id = db.Column(db.Integer)
     position = db.Column(db.Integer, default=1)
+
+    protocol_visibility = db.Column(IntEnum(ContestProtocolVisibility),
+                                    default=ContestProtocolVisibility.FULL,
+                                    server_default=str(ContestProtocolVisibility.FULL.value),
+                                    nullable=False)
 
     is_virtual = db.Column(db.Boolean, default=False)
     time_start = db.Column(db.DateTime)
