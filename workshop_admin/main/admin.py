@@ -111,6 +111,14 @@ class WorkshopAdmin(admin.ModelAdmin):
         data = form.cleaned_data
         return data and not data.get('id') and not data.get('DELETE')
 
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            super().save_model(request, obj, form, change)
+            obj.add_connection(request.user)
+            return
+
+        super().save_model(request, obj, form, change)
+
     def save_formset(self, request, form, formset, change):
         super().save_formset(request, form, formset, change)
         for idx, f in enumerate(formset.forms):

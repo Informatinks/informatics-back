@@ -87,6 +87,12 @@ class Workshop(models.Model):
                                     default=generate_access_token,
                                     help_text='Код доступа, генерируется автоматически.', )
 
+    def add_connection(self, user: 'MoodleUser'):
+        wc = WorkshopConnection(user=user,
+                                workshop=self,
+                                status=WorkshopConnectionStatus.ACCEPTED.value)
+        wc.save()
+
     class Meta:
         managed = False
         db_table = 'workshop'
