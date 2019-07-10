@@ -33,7 +33,7 @@ class ContestApi(MethodView):
 
         cc, is_created = get_or_create(ContestConnection, user_id=user_id, contest_id=contest.id)
 
-        if not contest.is_available(cc):
+        if current_user.is_teacher and not contest.is_available(cc):
             raise Forbidden('Contest is not started or already finished')
 
         contest.statement.problems = self._load_problems(contest.statement_id)
