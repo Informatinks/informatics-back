@@ -2,6 +2,7 @@ import datetime
 from collections import namedtuple, defaultdict
 from typing import List, Type, Callable, Optional, Iterable
 
+from dateutil.tz import UTC
 from flask import request
 from flask.views import MethodView
 from marshmallow import fields
@@ -176,7 +177,7 @@ class WorkshopMonitorApi(MethodView):
             start_time = contest.time_start or contest.created_at
 
             def const_time(*__, **___):
-                return start_time.astimezone()
+                return start_time.replace(tzinfo=UTC)
 
             return const_time
 
