@@ -110,10 +110,11 @@ class WorkshopMonitorApi(MethodView):
         return problem_ids
 
     @classmethod
-    def _get_contests(cls, workshop_id):
-        contests: List[Contest] = db.session.query(Contest)\
-            .filter(Contest.workshop_id == workshop_id)\
-            .options(joinedload(Contest.statement))
+    def _get_contests(cls, workshop_id) -> List[Contest]:
+        contests: List[Contest] = db.session.query(Contest) \
+            .filter(Contest.workshop_id == workshop_id) \
+            .options(joinedload(Contest.statement)) \
+            .all()
 
         statement_ids = [contest.statement.id for contest in contests]
 
