@@ -2,6 +2,7 @@ import datetime
 from unittest.mock import patch, MagicMock
 
 from flask import url_for
+from dateutil.tz import UTC
 
 from informatics_front.model import db
 from informatics_front.model.contest.contest import Contest
@@ -93,7 +94,7 @@ def test_get_raw_data_by_contest(ongoing_workshop):
 
 
 def test_make_function_user_start_time_when_not_virtual():
-    time_start = datetime.datetime.utcnow().astimezone()
+    time_start = datetime.datetime.utcnow().replace(tzinfo=UTC)
     c = Contest(is_virtual=False, time_start=time_start)
     func = WorkshopMonitorApi._make_start_time_retriever(c, [1, 2, 3])
     assert func() == time_start
