@@ -8,24 +8,41 @@ from informatics_front.utils.enums import WorkshopStatus, WorkshopVisibility, Wo
     WorkshopMonitorType, WorkshopMonitorUserVisibility, ContestProtocolVisibility
 
 ACCESS_TOKEN_LENGTH = 32
-WORKSHOP_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopStatus))
-WORKSHOP_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in WorkshopVisibility))
-WORKSHOP_CONNECTION_STATUS_CHOICES = tuple(((e.value, e.name) for e in WorkshopConnectionStatus))
-MONITOR_TYPE_CHOICES = tuple(((e.value, e.name) for e in WorkshopMonitorType))
 
-
-monitor_user_visibility_human = {
-    WorkshopMonitorUserVisibility.FOR_USER_ONLY: 'Ученик видит свои результаты',
-    WorkshopMonitorUserVisibility.FULL: 'Ученик видит все результаты',
-    WorkshopMonitorUserVisibility.DISABLED_FOR_STUDENT: 'Ученик не видит результаты'
-}
-
-
-MONITOR_USER_VISIBILITY_CHOICES = tuple(
-    (e.value, monitor_user_visibility_human.get(e, e.name)) for e in WorkshopMonitorUserVisibility
+CONTEST_PROTOCOL_VISIBILLITY_CHOICES = (
+    (ContestProtocolVisibility.FULL.value, 'Полностью'),
+    (ContestProtocolVisibility.FIRST_BAD_TEST.value, 'До первого непройденного теста'),
+    (ContestProtocolVisibility.INVISIBLE.value, 'Не виден'),
 )
 
-PROTOCOL_VISIBILITY_CHOICES = tuple(((e.value, e.name) for e in ContestProtocolVisibility))
+WORKSHOP_MONITOR_USER_VISIBILLITY_CHOICES = (
+    (WorkshopMonitorUserVisibility.FOR_USER_ONLY.value, 'Ученик видит свои результаты'),
+    (WorkshopMonitorUserVisibility.FULL.value, 'Ученик видит все результаты'),
+    (WorkshopMonitorUserVisibility.DISABLED_FOR_STUDENT.value, 'Ученик не видит результаты'),
+)
+
+WORKSHOP_CONNECTION_STATUS_CHOICES = (
+    (WorkshopConnectionStatus.APPLIED.value, 'Новый'),
+    (WorkshopConnectionStatus.ACCEPTED.value, 'Одобрен'),
+    (WorkshopConnectionStatus.DISQUALIFIED.value, 'Отчислен'),
+    (WorkshopConnectionStatus.REJECTED.value, 'Отклонен'),
+)
+
+WORKSHOP_STATUS_CHOICES = (
+    (WorkshopStatus.DRAFT.value, 'Черновик'),
+    (WorkshopStatus.ONGOING.value, 'Действующий'),
+)
+
+WORKSHOP_VISIBILITY_CHOICES = (
+    (WorkshopVisibility.PUBLIC.value, 'Открытый'),
+    (WorkshopVisibility.PRIVATE.value, 'Закрытый'),
+)
+
+WORKSHOP_MONITOR_TYPE_CHOICES = (
+    (WorkshopMonitorType.IOI.value, 'IOI'),
+    (WorkshopMonitorType.ACM.value, 'ACM'),
+    (WorkshopMonitorType.LightACM.value, 'LightACM'),
+)
 
 
 class Contest(models.Model):
@@ -34,7 +51,7 @@ class Contest(models.Model):
     author = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE, editable=False)
     position = models.PositiveIntegerField(default=0, blank=False, null=False)
     is_virtual = models.BooleanField(default=False)
-    protocol_visibility = models.IntegerField(choices=PROTOCOL_VISIBILITY_CHOICES,
+    protocol_visibility = models.IntegerField(choices=CONTEST_PROTOCOL_VISIBILLITY_CHOICES,
                                               blank=False, null=False)
     time_start = models.DateTimeField()
     time_stop = models.DateTimeField()
@@ -119,10 +136,10 @@ class WorkshopConnection(models.Model):
 
 class WorkshopMonitor(models.Model):
     workshop = models.OneToOneField(Workshop, models.DO_NOTHING)
-    type = models.IntegerField(choices=MONITOR_TYPE_CHOICES,
+    type = models.IntegerField(choices=WORKSHOP_MONITOR_TYPE_CHOICES,
                                null=False, blank=False,
                                default=WorkshopMonitorType.ACM.value)
-    user_visibility = models.IntegerField(choices=MONITOR_USER_VISIBILITY_CHOICES)
+    user_visibility = models.IntegerField(choices=WORKSHOP_MONITOR_USER_VISIBILLITY_CHOICES)
     freeze_time = models.DateTimeField(null=True, blank=True)
 
     # Depricated in favour of 'type'

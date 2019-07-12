@@ -1,6 +1,6 @@
 from django import template
 from django.conf import settings
-from main.models import WorkshopConnectionStatus
+from main.models import WORKSHOP_CONNECTION_STATUS_CHOICES
 
 register = template.Library()
 
@@ -12,4 +12,4 @@ def public_link(workshop):
 
 @register.filter(name='humazine_wsconnection_status')
 def humazine_wsconnection_status(status):
-    return WorkshopConnectionStatus(status).name
+    return next((wc_status for wc_status in WORKSHOP_CONNECTION_STATUS_CHOICES if wc_status[0] == status), None)
