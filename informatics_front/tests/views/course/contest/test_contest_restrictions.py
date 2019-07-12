@@ -38,8 +38,8 @@ def test_is_not_started_virtual():
     virtual_contest = Contest(is_virtual=True)
 
     cc = ContestConnection()
-    assert not virtual_contest.is_not_started(cc)
-    assert virtual_contest.is_not_started(None)
+    assert virtual_contest.is_started(cc)
+    assert not virtual_contest.is_started(None)
 
 
 def test_is_not_started_not_virtual():
@@ -47,8 +47,8 @@ def test_is_not_started_not_virtual():
 
     available_contest = Contest(time_start=current_time - datetime.timedelta(hours=1),
                                 is_virtual=False)
-    assert not available_contest.is_not_started(None)
+    assert available_contest.is_started(None)
 
     not_available_contest = Contest(time_start=current_time + datetime.timedelta(hours=1),
                                     is_virtual=False)
-    assert not_available_contest.is_not_started(None)
+    assert not not_available_contest.is_started(None)

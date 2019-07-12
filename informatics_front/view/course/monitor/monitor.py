@@ -26,9 +26,6 @@ from informatics_front.view.course.monitor.monitor_preprocessor import BaseResul
 from informatics_front.view.course.monitor.serializers.monitor import monitor_schema
 
 
-HIDDEN_PROBLEM_NAME = '???'
-
-
 MonitorData = namedtuple('MonitorData', 'contests users results type')
 
 
@@ -147,14 +144,14 @@ class WorkshopMonitorApi(MethodView):
             problems = statement_id_statement_problems[statement_id]
             contest.problems = problems
 
-        cls._hide_not_started_contests(contests)
+        contests = cls._filter_not_started_contests(contests)
 
         return contests
 
     @classmethod
-    def _hide_not_started_contests(cls, contests):
+    def _filter_not_started_contests(cls, contests) -> List[Contest]:
         if current_user.is_teacher:
-            return
+            return contests
 
         contest_cc = {contest.id: None for contest in contests}
 
@@ -166,14 +163,8 @@ class WorkshopMonitorApi(MethodView):
         for cc in ccs:
             contest_cc[cc.contest_id] = cc
 
-        for contest in contests:
-            if contest.is_not_started(contest_cc[contest.id]):
-                cls._hide_problem_name(contest.problems)
-
-    @classmethod
-    def _hide_problem_name(cls, problems: List[Problem]):
-        for problem in problems:
-            problem.name = HIDDEN_PROBLEM_NAME
+        return [contest for contest in contests
+                if contest.is_started(contest_cc[contest.id])]
 
     @classmethod
     def _ensure_permissions(cls, workshop_id) -> bool:

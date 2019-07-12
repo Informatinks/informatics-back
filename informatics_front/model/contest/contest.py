@@ -56,10 +56,10 @@ class Contest(db.Model):
         return self._is_available_by_duration() and \
                self._is_available_for_connection(cc)
 
-    def is_not_started(self, cc: Optional[ContestConnection]) -> bool:
+    def is_started(self, cc: Optional[ContestConnection]) -> bool:
         current_time = datetime.datetime.utcnow()
 
         if not self.is_virtual:
-            return current_time < self.time_start
+            return current_time > self.time_start
 
-        return not bool(cc)
+        return bool(cc)

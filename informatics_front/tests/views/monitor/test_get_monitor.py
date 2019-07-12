@@ -9,7 +9,7 @@ from informatics_front.model.contest.contest import Contest
 from informatics_front.model.contest.monitor import WorkshopMonitor
 from informatics_front.utils.enums import WorkshopMonitorUserVisibility, WorkshopConnectionStatus
 from informatics_front.model.user.user import SimpleUser
-from informatics_front.view.course.monitor.monitor import WorkshopMonitorApi, HIDDEN_PROBLEM_NAME
+from informatics_front.view.course.monitor.monitor import WorkshopMonitorApi
 
 
 def test_get_users(workshop_connection_builder):
@@ -93,37 +93,24 @@ def test_get_raw_data_by_contest(ongoing_workshop):
     mock_get_monitor.assert_called_with(problem_ids, user_ids, int(time_freeze.timestamp.return_value))
 
 
-def test_hide_problem_name():
-    problems = [Problem(name='name1'), Problem(name='name2'), Problem(name='name3')]
-    WorkshopMonitorApi._hide_problem_name(problems)
-    for problem in problems:
-        assert problem.name == HIDDEN_PROBLEM_NAME
-
-
-def test_hide_not_started_contests(authorized_user):
+def test_filter_not_started_contests(authorized_user):
     contests = [Contest(), Contest(), Contest()]
     for c in contests:
         c.problems = []
 
-    with patch('informatics_front.view.course.monitor.monitor.WorkshopMonitorApi._hide_problem_name') as hider:
-        with patch('informatics_front.model.contest.contest.Contest.is_not_started') as not_started:
-            not_started.return_value = True
-            WorkshopMonitorApi._hide_not_started_contests(contests)
-
-    assert hider.call_count == 3
+    with patch('informatics_front.model.contest.contest.Contest.is_started') as started:
+        started.return_value = False
+        assert [] == WorkshopMonitorApi._filter_not_started_contests(contests)
 
 
-def test_hide_not_started_contests_when_started(authorized_user):
+def test_filter_not_started_contests_when_started(authorized_user):
     contests = [Contest(), Contest(), Contest()]
     for c in contests:
         c.problems = []
 
-    with patch('informatics_front.view.course.monitor.monitor.WorkshopMonitorApi._hide_problem_name') as hider:
-        with patch('informatics_front.model.contest.contest.Contest.is_not_started') as not_started:
-            not_started.return_value = False
-            WorkshopMonitorApi._hide_not_started_contests(contests)
-
-    assert hider.call_count == 0
+    with patch('informatics_front.model.contest.contest.Contest.is_started') as started:
+        started.return_value = True
+        assert contests == WorkshopMonitorApi._filter_not_started_contests(contests)
 
 
 def test_make_function_user_start_time_when_not_virtual():
