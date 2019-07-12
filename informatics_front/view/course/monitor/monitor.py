@@ -25,6 +25,7 @@ from informatics_front.view.course.monitor.monitor_preprocessor import BaseResul
     MonitorPreprocessor, ACMResultMaker, LightACMResultMaker
 from informatics_front.view.course.monitor.serializers.monitor import monitor_schema
 
+
 MonitorData = namedtuple('MonitorData', 'contests users results type')
 
 
@@ -143,7 +144,27 @@ class WorkshopMonitorApi(MethodView):
             problems = statement_id_statement_problems[statement_id]
             contest.problems = problems
 
+        contests = cls._filter_not_started_contests(contests)
+
         return contests
+
+    @classmethod
+    def _filter_not_started_contests(cls, contests) -> List[Contest]:
+        if current_user.is_teacher:
+            return contests
+
+        contest_cc = {contest.id: None for contest in contests}
+
+        ccs: List[ContestConnection] = db.session.query(ContestConnection) \
+            .filter(ContestConnection.user_id == current_user.id) \
+            .filter(ContestConnection.contest_id.in_(contest_cc.keys())) \
+            .all()
+
+        for cc in ccs:
+            contest_cc[cc.contest_id] = cc
+
+        return [contest for contest in contests
+                if contest.is_started(contest_cc[contest.id])]
 
     @classmethod
     def _ensure_permissions(cls, workshop_id) -> bool:

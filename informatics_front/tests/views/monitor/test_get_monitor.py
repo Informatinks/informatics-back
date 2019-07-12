@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 from flask import url_for
 from dateutil.tz import UTC
 
-from informatics_front.model import db
+from informatics_front.model import db, Problem
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.contest.monitor import WorkshopMonitor
 from informatics_front.utils.enums import WorkshopMonitorUserVisibility, WorkshopConnectionStatus
@@ -91,6 +91,26 @@ def test_get_raw_data_by_contest(ongoing_workshop):
     problem_ids = list(p.id for p in problems)
 
     mock_get_monitor.assert_called_with(problem_ids, user_ids, int(time_freeze.timestamp.return_value))
+
+
+def test_filter_not_started_contests(authorized_user):
+    contests = [Contest(), Contest(), Contest()]
+    for c in contests:
+        c.problems = []
+
+    with patch('informatics_front.model.contest.contest.Contest.is_started') as started:
+        started.return_value = False
+        assert [] == WorkshopMonitorApi._filter_not_started_contests(contests)
+
+
+def test_filter_not_started_contests_when_started(authorized_user):
+    contests = [Contest(), Contest(), Contest()]
+    for c in contests:
+        c.problems = []
+
+    with patch('informatics_front.model.contest.contest.Contest.is_started') as started:
+        started.return_value = True
+        assert contests == WorkshopMonitorApi._filter_not_started_contests(contests)
 
 
 def test_make_function_user_start_time_when_not_virtual():

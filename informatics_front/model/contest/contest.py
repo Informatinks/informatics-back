@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from informatics_front.model.base import db
 from informatics_front.model.workshop.contest_connection import ContestConnection
@@ -51,6 +52,14 @@ class Contest(db.Model):
 
         return True
 
-    def is_available(self, cc):
+    def is_available(self, cc) -> bool:
         return self._is_available_by_duration() and \
                self._is_available_for_connection(cc)
+
+    def is_started(self, cc: Optional[ContestConnection]) -> bool:
+        current_time = datetime.datetime.utcnow()
+
+        if not self.is_virtual:
+            return current_time > self.time_start
+
+        return bool(cc)
