@@ -8,7 +8,7 @@ from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
-from main.models import WorkshopConnection, WorkshopConnectionStatus, WORKSHOP_CONNECTION_STATUS_CHOICES, Workshop
+from main.models import WorkshopConnection, WorkshopConnectionStatus, Workshop, WORKSHOP_CONNECTION_STATUS_CHOICES
 from moodle.models import MoodleUser
 
 Status = namedtuple('Status', ['title', 'id'])
@@ -43,7 +43,7 @@ class WorkshopConnectionMassUpdateAdmin(LoginRequiredMixin, View):
 
         return render(request, 'admin/main/workshop/change_status.html', {
             'objects': objs,
-            'statuses': [Status(s.name, s.value) for s in WorkshopConnectionStatus]
+            'statuses': WORKSHOP_CONNECTION_STATUS_CHOICES, 
         })
 
     def post(self, request, *args, **kwargs):

@@ -47,7 +47,7 @@
             <br/>
             <select name="status">
                 {% for status in statuses %}
-                    <option value="{{ status.id }}">{{ status.title }}</option>
+                    <option value="{{ status.0 }}">{{ status.1 }}</option>
                 {% endfor %}
             </select>
             <input type="submit" value="Сменить"/>
