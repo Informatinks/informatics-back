@@ -4,13 +4,14 @@ from urllib.parse import urlencode
 from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdminTabularInline, AjaxSelectAdmin
 from django.contrib import admin
+from django.db.models import Q
 from django.forms import ModelForm, ValidationError
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from grappelli.forms import GrappelliSortableHiddenMixin
 from moodle.models import Statement
 
-from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor
+from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor, WorkshopConnectionStatus
 
 
 @admin.register(WorkshopConnection)
@@ -103,9 +104,21 @@ class MonitorAdminInline(admin.TabularInline):
 
 
 class WorkshopAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'status', 'visibility',)
+    list_display = ('__str__', 'status', 'visibility', 'owner')
     inlines = (ContestAdminInline,
                MonitorAdminInline)
+
+    def get_queryset(self, request):
+        qs = super(WorkshopAdmin, self).get_queryset(request)
+
+        # Allow superuser to view all workshops
+        if request.user.is_superuser:
+            return qs
+
+        return qs.filter(Q(owner=request.user) |
+                         Q(connections__user=request.user,
+                           connections__status=WorkshopConnectionStatus.PROMOTED.value)) \
+            .distinct()
 
     def is_new_object_in_form_creating(self, form):
         data = form.cleaned_data

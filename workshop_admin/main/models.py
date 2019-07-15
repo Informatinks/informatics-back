@@ -26,6 +26,7 @@ WORKSHOP_CONNECTION_STATUS_CHOICES = (
     (WorkshopConnectionStatus.ACCEPTED.value, 'Одобрен'),
     (WorkshopConnectionStatus.DISQUALIFIED.value, 'Отчислен'),
     (WorkshopConnectionStatus.REJECTED.value, 'Отклонен'),
+    (WorkshopConnectionStatus.PROMOTED.value, 'Редактор'),
 )
 
 WORKSHOP_STATUS_CHOICES = (
@@ -97,12 +98,16 @@ def generate_access_token():
 
 
 class Workshop(models.Model):
-    name = models.CharField(max_length=255)
-    status = models.IntegerField(choices=WORKSHOP_STATUS_CHOICES)
-    visibility = models.IntegerField(choices=WORKSHOP_VISIBILITY_CHOICES)
+    name = models.CharField(max_length=255, verbose_name='Название')
+    status = models.IntegerField(choices=WORKSHOP_STATUS_CHOICES, verbose_name='Статус')
+    visibility = models.IntegerField(choices=WORKSHOP_VISIBILITY_CHOICES,
+                                     verbose_name='Видимость для учеников')
     access_token = models.CharField(max_length=ACCESS_TOKEN_LENGTH, blank=False, null=False,
+                                    verbose_name='Код доступа',
                                     default=generate_access_token,
                                     help_text='Код доступа, генерируется автоматически.', )
+    owner = models.ForeignKey('moodle.MoodleUser', blank=True, null=True,
+                              on_delete=models.CASCADE, verbose_name='Создатель')
 
     def add_connection(self, user: 'MoodleUser'):
         wc = WorkshopConnection(user=user,
@@ -121,7 +126,7 @@ class Workshop(models.Model):
 
 class WorkshopConnection(models.Model):
     user = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE)
-    workshop = models.ForeignKey(Workshop, models.DO_NOTHING)
+    workshop = models.ForeignKey(Workshop, models.DO_NOTHING, related_name='connections')
     status = models.IntegerField(choices=WORKSHOP_CONNECTION_STATUS_CHOICES)
 
     def __str__(self):
