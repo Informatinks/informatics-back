@@ -105,9 +105,13 @@ class MonitorAdminInline(admin.TabularInline):
 
 class WorkshopAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'status', 'visibility', 'owner')
-    inlines = (ContestAdminInline,
-               MonitorAdminInline)
+    # inlines = (ContestAdminInline,
+    #            MonitorAdminInline)
 
+    form = make_ajax_form(Workshop, fieldlist={
+        'owner': 'moodleuser_lookup'
+    })
+    
     def get_queryset(self, request):
         qs = super(WorkshopAdmin, self).get_queryset(request)
 
