@@ -30,12 +30,12 @@ WORKSHOP_CONNECTION_STATUS_CHOICES = (
 
 WORKSHOP_STATUS_CHOICES = (
     (WorkshopStatus.DRAFT.value, 'Черновик'),
-    (WorkshopStatus.ONGOING.value, 'Действующий'),
+    (WorkshopStatus.ONGOING.value, 'Опубликованный'),
 )
 
 WORKSHOP_VISIBILITY_CHOICES = (
     (WorkshopVisibility.PUBLIC.value, 'Открытый'),
-    (WorkshopVisibility.PRIVATE.value, 'Закрытый'),
+    (WorkshopVisibility.PRIVATE.value, 'Приватный'),
 )
 
 WORKSHOP_MONITOR_TYPE_CHOICES = (
