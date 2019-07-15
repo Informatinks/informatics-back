@@ -12,4 +12,5 @@ def public_link(workshop):
 
 @register.filter(name='humazine_wsconnection_status')
 def humazine_wsconnection_status(status):
-    return next((wc_status for wc_status in WORKSHOP_CONNECTION_STATUS_CHOICES if wc_status[0] == status), None)
+    a = [wc_status for wc_status in WORKSHOP_CONNECTION_STATUS_CHOICES if wc_status[0] == status]
+    return a and a[0] or None
