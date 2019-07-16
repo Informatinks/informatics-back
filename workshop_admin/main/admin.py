@@ -105,6 +105,7 @@ class MonitorAdminInline(admin.TabularInline):
 
 class WorkshopAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'status', 'visibility', 'owner')
+    readonly_fields = ('owner',)
     inlines = (ContestAdminInline,
                MonitorAdminInline)
 
@@ -130,7 +131,10 @@ class WorkshopAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
+            # Set current user as workshop owner
+            obj.owner = request.user
             super().save_model(request, obj, form, change)
+
             obj.add_connection(request.user)
             return
 
