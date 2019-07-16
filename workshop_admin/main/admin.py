@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 
 from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdminTabularInline, AjaxSelectAdmin
+from django import forms
 from django.contrib import admin
 from django.db.models import Q
 from django.forms import ModelForm, ValidationError
@@ -14,12 +15,40 @@ from moodle.models import Statement
 from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor, WorkshopConnectionStatus
 
 
+class WorkshopConnectionForm(ModelForm):
+    """Custom WorkshopConnection form with Workshop relation
+    queryset, based on current user permissions.
+    """
+    workshop = forms.ModelChoiceField(queryset=Workshop.objects.none())
+
+    def __init__(self, *args, **kwargs):
+        """Restrict default Workshop relation queryset.
+        """
+        super(WorkshopConnectionForm, self).__init__(*args, **kwargs)
+        self.fields['workshop'].queryset = Workshop.objects.filter(
+            Q(owner=self.current_user) |
+            Q(connections__status=WorkshopConnectionStatus.PROMOTED.value,
+              connections__user=self.current_user)) \
+            .distinct()
+
+
 class WorkshopConnectionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'workshop', 'user', 'status',)
     list_filter = ('status', 'workshop',)
-    form = make_ajax_form(WorkshopConnection, {
+    form = make_ajax_form(WorkshopConnection, superclass=WorkshopConnectionForm, fieldlist={
         'user': 'moodleuser_lookup'
     })
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Inherit get WorkshopConnection form method to store
+        current user in Form instance.
+
+        Further it can be used to create custom Workshop queryset,
+        based on current user permissions.
+        """
+        form = super(WorkshopConnectionAdmin, self).get_form(request, **kwargs)
+        form.current_user = request.user
+        return form
 
     def get_queryset(self, request):
         """Get connections, which belong to workshop with:
@@ -40,9 +69,8 @@ class WorkshopConnectionAdmin(admin.ModelAdmin):
                          Q(workshop__connections__status=WorkshopConnectionStatus.PROMOTED.value,
                            workshop__connections__user=request.user)) \
             .exclude(user=request.user,
-                     status=WorkshopConnectionStatus.PROMOTED.value)\
+                     status=WorkshopConnectionStatus.PROMOTED.value) \
             .distinct()
-
 
     def change_status(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
@@ -133,7 +161,7 @@ class WorkshopAdmin(admin.ModelAdmin):
     form = make_ajax_form(Workshop, fieldlist={
         'owner': 'moodleuser_lookup'
     })
-    
+
     def get_queryset(self, request):
         qs = super(WorkshopAdmin, self).get_queryset(request)
 
