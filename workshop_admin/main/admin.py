@@ -31,16 +31,14 @@ class ScopedWorkshopListFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        a = [
+        return [
             (w[0], w[1])
-            for w in Workshop.objects.values_list('id', 'name') \
-                .filter(
+            for w in Workshop.objects.values_list('id', 'name').filter(
                 Q(owner=request.user) |
                 Q(connections__status=WorkshopConnectionStatus.PROMOTED.value,
                   connections__user=request.user)) \
                 .distinct()
         ]
-        return a
 
     def queryset(self, request, queryset):
         """
@@ -98,7 +96,7 @@ class WorkshopConnectionAdmin(admin.ModelAdmin):
         Exclude promoted self connections to prevent
         occasionaly delete self promotion
         """
-        qs = super(WorkshopConnectionAdmin, self).get_queryset(request)
+        qs = super().get_queryset(request)
 
         # Allow superuser to view all workshops
         if request.user.is_superuser:
