@@ -63,8 +63,8 @@ class Contest(models.Model):
         managed = False
         db_table = 'contest'
 
-        verbose_name='Контест'
-        verbose_name_plural='Контесты'
+        verbose_name = 'Контест'
+        verbose_name_plural = 'Контесты'
 
     def __str__(self):
         return self.statement.name
@@ -122,8 +122,8 @@ class Workshop(models.Model):
         managed = False
         db_table = 'workshop'
 
-        verbose_name='Сбор'
-        verbose_name_plural='Сборы'
+        verbose_name = 'Сбор'
+        verbose_name_plural = 'Сборы'
 
     def __str__(self):
         status = WorkshopStatus(self.status).name if self.status else ''
@@ -131,9 +131,10 @@ class Workshop(models.Model):
 
 
 class WorkshopConnection(models.Model):
-    user = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE)
-    workshop = models.ForeignKey(Workshop, models.DO_NOTHING, related_name='connections')
-    status = models.IntegerField(choices=WORKSHOP_CONNECTION_STATUS_CHOICES)
+    user = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE,
+                             verbose_name='Пользователь')
+    workshop = models.ForeignKey(Workshop, models.DO_NOTHING, related_name='connections', verbose_name='Сбор')
+    status = models.IntegerField(choices=WORKSHOP_CONNECTION_STATUS_CHOICES, verbose_name='Статус приглашения')
 
     def __str__(self):
         status = WorkshopConnectionStatus(self.status).name if self.status else ''
@@ -144,8 +145,8 @@ class WorkshopConnection(models.Model):
         db_table = 'workshop_connection'
         unique_together = (('user', 'workshop'),)
 
-        verbose_name='Приглашение'
-        verbose_name_plural='Приглашения'
+        verbose_name = 'Приглашение'
+        verbose_name_plural = 'Приглашения'
 
 
 class WorkshopMonitor(models.Model):
@@ -166,3 +167,6 @@ class WorkshopMonitor(models.Model):
     class Meta:
         managed = False
         db_table = 'contest_monitor'
+
+        verbose_name = 'Монитор'
+        verbose_name_plural = 'Мониторы'
