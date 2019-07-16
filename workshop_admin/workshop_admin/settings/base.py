@@ -102,7 +102,7 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
@@ -130,3 +130,5 @@ DATABASE_ROUTERS = (
 
 AJAX_SELECT_JSON_ENCODER = 'django.core.serializers.json.DjangoJSONEncoder'
 MAIN_APP_URL = os.getenv('MAIN_APP_URL', 'http://localhost:80')
+
+GRAPPELLI_ADMIN_TITLE = 'Informatics: Админка'

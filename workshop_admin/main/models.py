@@ -63,6 +63,9 @@ class Contest(models.Model):
         managed = False
         db_table = 'contest'
 
+        verbose_name='Контест'
+        verbose_name_plural='Контесты'
+
     def __str__(self):
         return self.statement.name
 
@@ -119,6 +122,9 @@ class Workshop(models.Model):
         managed = False
         db_table = 'workshop'
 
+        verbose_name='Сбор'
+        verbose_name_plural='Сборы'
+
     def __str__(self):
         status = WorkshopStatus(self.status).name if self.status else ''
         return f'#{self.pk} {self.name} ({status})'
@@ -137,6 +143,9 @@ class WorkshopConnection(models.Model):
         managed = False
         db_table = 'workshop_connection'
         unique_together = (('user', 'workshop'),)
+
+        verbose_name='Приглашение'
+        verbose_name_plural='Приглашения'
 
 
 class WorkshopMonitor(models.Model):
