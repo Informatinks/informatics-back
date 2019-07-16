@@ -15,6 +15,45 @@ from moodle.models import Statement
 from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor, WorkshopConnectionStatus
 
 
+class ScopedWorkshopListFilter(admin.SimpleListFilter):
+    # Human-readable title which will be displayed in the
+    # right admin sidebar just above the filter options.
+    title = 'Сбор'
+
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = 'workshop'
+
+    def lookups(self, request, model_admin):
+        """
+        Returns a list of tuples. The first element in each
+        tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        """
+        a = [
+            (w[0], w[1])
+            for w in Workshop.objects.values_list('id', 'name') \
+                .filter(
+                Q(owner=request.user) |
+                Q(connections__status=WorkshopConnectionStatus.PROMOTED.value,
+                  connections__user=request.user)) \
+                .distinct()
+        ]
+        return a
+
+    def queryset(self, request, queryset):
+        """
+        Returns the filtered queryset based on the value
+        provided in the query string and retrievable via
+        `self.value()`.
+        """
+        workshop_id = request.GET.get('workshop')
+        if not workshop_id:
+            return queryset
+        return queryset.filter(Q(workshop__id=workshop_id))
+
+
 class WorkshopConnectionForm(ModelForm):
     """Custom WorkshopConnection form with Workshop relation
     queryset, based on current user permissions.
@@ -34,7 +73,7 @@ class WorkshopConnectionForm(ModelForm):
 
 class WorkshopConnectionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'workshop', 'user', 'status',)
-    list_filter = ('status', 'workshop',)
+    list_filter = ('status', ScopedWorkshopListFilter,)
     form = make_ajax_form(WorkshopConnection, superclass=WorkshopConnectionForm, fieldlist={
         'user': 'moodleuser_lookup'
     })
