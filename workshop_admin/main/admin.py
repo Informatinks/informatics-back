@@ -14,13 +14,35 @@ from moodle.models import Statement
 from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor, WorkshopConnectionStatus
 
 
-@admin.register(WorkshopConnection)
 class WorkshopConnectionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'workshop', 'user', 'status',)
     list_filter = ('status', 'workshop',)
     form = make_ajax_form(WorkshopConnection, {
         'user': 'moodleuser_lookup'
     })
+
+    def get_queryset(self, request):
+        """Get connections, which belong to workshop with:
+        
+        - current user is workshop owner
+        - current user has PROMOTED connection
+        
+        Exclude promoted self connections to prevent
+        occasionaly delete self promotion
+        """
+        qs = super(WorkshopConnectionAdmin, self).get_queryset(request)
+
+        # Allow superuser to view all workshops
+        if request.user.is_superuser:
+            return qs
+
+        return qs.filter(Q(workshop__owner=request.user) |
+                         Q(workshop__connections__status=WorkshopConnectionStatus.PROMOTED.value,
+                           workshop__connections__user=request.user)) \
+            .exclude(user=request.user,
+                     status=WorkshopConnectionStatus.PROMOTED.value)\
+            .distinct()
+
 
     def change_status(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
@@ -39,7 +61,6 @@ class WorkshopConnectionAdmin(admin.ModelAdmin):
     actions = ['change_status']
 
 
-@admin.register(ContestConnection)
 class ContestConnectionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'contest', 'user',)
     form = make_ajax_form(ContestConnection, {
@@ -158,4 +179,6 @@ class WorkshopMonitorAdmin(admin.ModelAdmin):
 admin.site.register(Contest, ContestAdmin)
 admin.site.register(Workshop, WorkshopAdmin)
 admin.site.register(WorkshopMonitor, WorkshopMonitorAdmin)
+admin.site.register(WorkshopConnection, WorkshopConnectionAdmin)
+admin.site.register(ContestConnection, ContestConnectionAdmin)
 admin.site.register(Statement)
