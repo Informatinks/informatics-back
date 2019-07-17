@@ -104,11 +104,12 @@ class Workshop(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название')
     status = models.IntegerField(choices=WORKSHOP_STATUS_CHOICES, verbose_name='Статус')
     visibility = models.IntegerField(choices=WORKSHOP_VISIBILITY_CHOICES,
-                                     verbose_name='Видимость для учеников')
+                                     verbose_name='Видимость')
     access_token = models.CharField(max_length=ACCESS_TOKEN_LENGTH, blank=False, null=False,
-                                    verbose_name='Код доступа',
+                                    verbose_name='Токен безопасности',
                                     default=generate_access_token,
-                                    help_text='Код доступа, генерируется автоматически.', )
+                                    help_text='Токен генерируется автоматически.'
+                                              'Он будет содержаться в ссылке на воркшоп, которую получат ученики.', )
     owner = models.ForeignKey('moodle.MoodleUser', blank=True, null=True,
                               on_delete=models.CASCADE, verbose_name='Создатель')
 
