@@ -26,6 +26,7 @@ WORKSHOP_CONNECTION_STATUS_CHOICES = (
     (WorkshopConnectionStatus.ACCEPTED.value, 'Одобрен'),
     (WorkshopConnectionStatus.DISQUALIFIED.value, 'Отчислен'),
     (WorkshopConnectionStatus.REJECTED.value, 'Отклонен'),
+    (WorkshopConnectionStatus.PROMOTED.value, 'Редактор'),
 )
 
 WORKSHOP_STATUS_CHOICES = (
@@ -62,6 +63,9 @@ class Contest(models.Model):
         managed = False
         db_table = 'contest'
 
+        verbose_name = 'Контест'
+        verbose_name_plural = 'Контесты'
+
     def __str__(self):
         return self.statement.name
 
@@ -97,12 +101,17 @@ def generate_access_token():
 
 
 class Workshop(models.Model):
-    name = models.CharField(max_length=255)
-    status = models.IntegerField(choices=WORKSHOP_STATUS_CHOICES)
-    visibility = models.IntegerField(choices=WORKSHOP_VISIBILITY_CHOICES)
+    name = models.CharField(max_length=255, verbose_name='Название')
+    status = models.IntegerField(choices=WORKSHOP_STATUS_CHOICES, verbose_name='Статус')
+    visibility = models.IntegerField(choices=WORKSHOP_VISIBILITY_CHOICES,
+                                     verbose_name='Видимость')
     access_token = models.CharField(max_length=ACCESS_TOKEN_LENGTH, blank=False, null=False,
+                                    verbose_name='Токен безопасности',
                                     default=generate_access_token,
-                                    help_text='Код доступа, генерируется автоматически.', )
+                                    help_text='Токен генерируется автоматически.'
+                                              'Он будет содержаться в ссылке на воркшоп, которую получат ученики.', )
+    owner = models.ForeignKey('moodle.MoodleUser', blank=True, null=True,
+                              on_delete=models.CASCADE, verbose_name='Создатель')
 
     def add_connection(self, user: 'MoodleUser'):
         wc = WorkshopConnection(user=user,
@@ -114,15 +123,19 @@ class Workshop(models.Model):
         managed = False
         db_table = 'workshop'
 
+        verbose_name = 'Сбор'
+        verbose_name_plural = 'Сборы'
+
     def __str__(self):
         status = WorkshopStatus(self.status).name if self.status else ''
         return f'#{self.pk} {self.name} ({status})'
 
 
 class WorkshopConnection(models.Model):
-    user = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE)
-    workshop = models.ForeignKey(Workshop, models.DO_NOTHING)
-    status = models.IntegerField(choices=WORKSHOP_CONNECTION_STATUS_CHOICES)
+    user = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE,
+                             verbose_name='Пользователь')
+    workshop = models.ForeignKey(Workshop, models.DO_NOTHING, related_name='connections', verbose_name='Сбор')
+    status = models.IntegerField(choices=WORKSHOP_CONNECTION_STATUS_CHOICES, verbose_name='Статус приглашения')
 
     def __str__(self):
         status = WorkshopConnectionStatus(self.status).name if self.status else ''
@@ -132,6 +145,9 @@ class WorkshopConnection(models.Model):
         managed = False
         db_table = 'workshop_connection'
         unique_together = (('user', 'workshop'),)
+
+        verbose_name = 'Приглашение'
+        verbose_name_plural = 'Приглашения'
 
 
 class WorkshopMonitor(models.Model):
@@ -152,3 +168,6 @@ class WorkshopMonitor(models.Model):
     class Meta:
         managed = False
         db_table = 'contest_monitor'
+
+        verbose_name = 'Монитор'
+        verbose_name_plural = 'Мониторы'

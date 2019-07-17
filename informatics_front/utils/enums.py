@@ -17,6 +17,7 @@ class WorkshopConnectionStatus(enum.Enum):
     ACCEPTED = 2  # принят на курс
     DISQUALIFIED = 3  # отчислен с курса (после ACCEPTED)
     REJECTED = 4  # заявка не одобрена (после APPLIED)
+    PROMOTED = 10  # статус, присваиваемый учителям для выполенния администритивных действий
 
 
 class WorkshopMonitorType(enum.Enum):

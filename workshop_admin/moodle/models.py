@@ -1,6 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
-
+from django.utils.functional import cached_property
 
 class Role(models.Model):
     shortname = models.CharField(max_length=100)
@@ -54,7 +54,7 @@ class MoodleUser(models.Model):
     is_authenticated = True
     is_active = True  # TODO
 
-    @property
+    @cached_property
     def is_staff(self):
         return self.roles.filter(roleassignment__role__shortname__in=Role.super_user_roles).count() > 0
 

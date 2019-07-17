@@ -3,23 +3,111 @@ from urllib.parse import urlencode
 
 from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdminTabularInline, AjaxSelectAdmin
+from django import forms
 from django.contrib import admin
+from django.db.models import Q
 from django.forms import ModelForm, ValidationError
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from grappelli.forms import GrappelliSortableHiddenMixin
 from moodle.models import Statement
 
-from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor
+from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor, WorkshopConnectionStatus
+
+def _get_allowed_workshops_for(user):
+    """Get iterable Workshops queryset,
+    which can be edited by provided user.
+
+    user: MoodleUser, for which we retrieve avialable workshops
+    """
+    return Workshop.objects.filter(
+        Q(owner=user) |
+        Q(connections__status=WorkshopConnectionStatus.PROMOTED.value,
+          connections__user=user)) \
+        .distinct()
+
+class ScopedWorkshopListFilter(admin.SimpleListFilter):
+    # Human-readable title which will be displayed in the
+    # right admin sidebar just above the filter options.
+    title = 'Сбор'
+
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = 'workshop'
+
+    def lookups(self, request, model_admin):
+        """
+        Returns a list of tuples. The first element in each
+        tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        """
+        return _get_allowed_workshops_for(request.user)\
+                .values_list('id', 'name')
+
+    def queryset(self, request, queryset):
+        """
+        Returns the filtered queryset based on the value
+        provided in the query string and retrievable via
+        `self.value()`.
+        """
+        workshop_id = request.GET.get('workshop')
+        if not workshop_id:
+            return queryset
+        return queryset.filter(Q(workshop__id=workshop_id))
 
 
-@admin.register(WorkshopConnection)
+class WorkshopConnectionForm(ModelForm):
+    """Custom WorkshopConnection form with Workshop relation
+    queryset, based on current user permissions.
+    """
+    workshop = forms.ModelChoiceField(queryset=Workshop.objects.none())
+
+    def __init__(self, *args, **kwargs):
+        """Restrict default Workshop relation queryset.
+        """
+        super(WorkshopConnectionForm, self).__init__(*args, **kwargs)
+        self.fields['workshop'].queryset = _get_allowed_workshops_for(self.current_user)  
+
 class WorkshopConnectionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'workshop', 'user', 'status',)
-    list_filter = ('status', 'workshop',)
-    form = make_ajax_form(WorkshopConnection, {
+    list_filter = ('status', ScopedWorkshopListFilter,)
+    form = make_ajax_form(WorkshopConnection, superclass=WorkshopConnectionForm, fieldlist={
         'user': 'moodleuser_lookup'
     })
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Inherit get WorkshopConnection form method to store
+        current user in Form instance.
+
+        Further it can be used to create custom Workshop queryset,
+        based on current user permissions.
+        """
+        form = super(WorkshopConnectionAdmin, self).get_form(request, **kwargs)
+        form.current_user = request.user
+        return form
+
+    def get_queryset(self, request):
+        """Get connections, which belong to workshop with:
+        
+        - current user is workshop owner
+        - current user has PROMOTED connection
+        
+        Exclude promoted self connections to prevent
+        occasionaly delete self promotion
+        """
+        qs = super().get_queryset(request)
+
+        # Allow superuser to view all workshops
+        if request.user.is_superuser:
+            return qs
+
+        return qs.filter(Q(workshop__owner=request.user) |
+                         Q(workshop__connections__status=WorkshopConnectionStatus.PROMOTED.value,
+                           workshop__connections__user=request.user)) \
+            .exclude(user=request.user,
+                     status=WorkshopConnectionStatus.PROMOTED.value) \
+            .distinct()
 
     def change_status(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
@@ -38,7 +126,6 @@ class WorkshopConnectionAdmin(admin.ModelAdmin):
     actions = ['change_status']
 
 
-@admin.register(ContestConnection)
 class ContestConnectionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'contest', 'user',)
     form = make_ajax_form(ContestConnection, {
@@ -103,9 +190,26 @@ class MonitorAdminInline(admin.TabularInline):
 
 
 class WorkshopAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'status', 'visibility',)
+    list_display = ('__str__', 'status', 'visibility', 'owner')
+    readonly_fields = ('owner',)
     inlines = (ContestAdminInline,
                MonitorAdminInline)
+
+    form = make_ajax_form(Workshop, fieldlist={
+        'owner': 'moodleuser_lookup'
+    })
+
+    def get_queryset(self, request):
+        qs = super(WorkshopAdmin, self).get_queryset(request)
+
+        # Allow superuser to view all workshops
+        if request.user.is_superuser:
+            return qs
+
+        return qs.filter(Q(owner=request.user) |
+                         Q(connections__user=request.user,
+                           connections__status=WorkshopConnectionStatus.PROMOTED.value)) \
+            .distinct()
 
     def is_new_object_in_form_creating(self, form):
         data = form.cleaned_data
@@ -113,7 +217,10 @@ class WorkshopAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
+            # Set current user as workshop owner
+            obj.owner = request.user
             super().save_model(request, obj, form, change)
+
             obj.add_connection(request.user)
             return
 
@@ -137,4 +244,6 @@ class WorkshopMonitorAdmin(admin.ModelAdmin):
 admin.site.register(Contest, ContestAdmin)
 admin.site.register(Workshop, WorkshopAdmin)
 admin.site.register(WorkshopMonitor, WorkshopMonitorAdmin)
+admin.site.register(WorkshopConnection, WorkshopConnectionAdmin)
+admin.site.register(ContestConnection, ContestConnectionAdmin)
 admin.site.register(Statement)
