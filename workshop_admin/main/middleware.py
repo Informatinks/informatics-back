@@ -25,6 +25,6 @@ class MoodleAccountAuthorization:
 
     def get_user(self, user_id):
         try:
-            return User.objects.get(pk=user_id)
+            return User.objects.prefetch_related('roles').get(pk=user_id)
         except User.DoesNotExist:
             return None

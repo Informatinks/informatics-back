@@ -60,11 +60,15 @@ class MoodleUser(models.Model):
 
     @cached_property
     def is_staff(self):
-        return self.roles.filter(roleassignment__role__shortname__in=(Role.staff_roles + Role.superuser_roles)).count() > 0
+        is_staff = any(map(lambda r: r.shortname in (Role.staff_roles + Role.superuser_roles),
+                           self.roles.all()))
+        return self.is_superuser or is_staff
 
     @cached_property
     def is_superuser(self):
-        return self.roles.filter(roleassignment__role__shortname__in=Role.superuser_roles).count() > 0
+        is_superuser = any(map(lambda r: r.shortname in Role.superuser_roles,
+                               self.roles.all()))
+        return is_superuser
 
     def has_perm(self, *__, **___):
         return self.is_staff
