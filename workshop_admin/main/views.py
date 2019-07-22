@@ -117,7 +117,7 @@ class WorkshopMassInviteAdmin(LoginRequiredMixin, View):
             users_featues = [
                 # If user supllied binary file,
                 # first decode attempt will raise UnicodeDecodeError 
-                line.decode('utf-8').rstrip('\n,')
+                line.decode('utf-8').rstrip('\n\r, ')
                 for line in users_file.readlines()
             ]
         except UnicodeDecodeError:
