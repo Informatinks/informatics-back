@@ -20,11 +20,8 @@ class WorkshopApi(MethodView):
         workshop_connection: WorkshopConnection = db.session.query(WorkshopConnection) \
             .filter(WorkshopConnection.workshop_id == workshop_id,
                     WorkshopConnection.user_id == current_user.id,
-                    # Allow view workshops only for:
-                    # - student with ACCEPTED status
-                    # - teahers with PROMOTED status
-                    #
-                    # TODO: workshop owner
+                    # Allow view workshops only for user with ACCEPTED (students)
+                    # or PROMOTED (teacher or workshop owners) status
                     WorkshopConnection.status.in_((WorkshopConnectionStatus.ACCEPTED,
                                                    WorkshopConnectionStatus.PROMOTED)),
                     # Workshop should be active and visible
