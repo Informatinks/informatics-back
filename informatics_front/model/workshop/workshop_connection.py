@@ -33,6 +33,12 @@ class WorkshopConnection(db.Model):
     def is_accepted(self):
         return self.status == WorkshopConnectionStatus.ACCEPTED
 
+    def is_promoted(self):
+        return self.status == WorkshopConnectionStatus.PROMOTED
+
+    def is_avialable(self):
+        return self.is_accepted() or self.is_promoted()
+
     def __repr__(self):
         return (
             f'<WorkshopConnection '

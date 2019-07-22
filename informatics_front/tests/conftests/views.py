@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 from contextlib import contextmanager
 from typing import List
@@ -106,7 +107,16 @@ def create_workshop(statement, status: WorkshopStatus, access_token: str = WORKS
     db.session.add(w)
     db.session.flush()
 
-    ci = Contest(workshop_id=w.id, statement_id=statement.id)
+    time_start = datetime.datetime.utcnow()
+    time_stop = time_start + datetime.timedelta(days=30)
+    ci = Contest(workshop_id=w.id,
+                 statement_id=statement.id,
+                 # We assume, if contest is not virtual,
+                 # start and end time is required
+                 # ref: informatics_front.model.contest.contest.Contest#is_started
+                 time_start=time_start,
+                 time_stop=time_stop,
+                 )
     db.session.add(ci)
     db.session.flush()
 
@@ -164,7 +174,6 @@ def draft_workshop_connection(authorized_user, draft_workshop):
     yield wc
 
     db.session.delete(wc)
-
 
 
 @pytest.yield_fixture

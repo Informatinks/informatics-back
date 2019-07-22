@@ -102,6 +102,26 @@ def test_read_rejected_workshop(client, workshop_connection_builder):
 
 @pytest.mark.workshop
 @pytest.mark.usefixtures('authorized_user')
+def test_read_promoted_workshop(client, workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.PROMOTED)
+    url = url_for('workshop.read', workshop_id=workshop_connection.workshop.id)
+    resp = client.get(url)
+    assert resp.status_code == 200
+    content = resp.json
+
+    assert 'status' in content
+    assert content['status'] == 'success'
+
+    assert 'data' in content
+    data = content['data']
+    assert data['id'] == workshop_connection.workshop.id
+
+    assert 'contests' in data
+    assert len(data.get('contests')) == 1
+
+
+@pytest.mark.workshop
+@pytest.mark.usefixtures('authorized_user')
 def test_read_draft_workshop(client, draft_workshop_connection):
     url = url_for('workshop.read', workshop_id=draft_workshop_connection.workshop.id)
 
@@ -158,4 +178,4 @@ def test_workshop_not_produce_n1(client, workshop_connection_builder):
         resp = client.get(url)
 
     assert resp.status_code == 200
-    assert ctr.get_count() == 1 , 'should produce only one SQL request to prevent N+1'
+    assert ctr.get_count() == 1, 'should produce only one SQL request to prevent N+1'
