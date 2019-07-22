@@ -22,8 +22,9 @@ class WorkshopApi(MethodView):
                     WorkshopConnection.user_id == current_user.id,
                     # Allow view workshops only for:
                     # - student with ACCEPTED status
-                    # -  teahers with PROMOTED status
-                    # - TODO: workshop owner"""
+                    # - teahers with PROMOTED status
+                    #
+                    # TODO: workshop owner
                     WorkshopConnection.status == (WorkshopConnectionStatus.ACCEPTED
                                                   or WorkshopConnectionStatus.PROMOTED),
                     # Workshop should be active and visible
