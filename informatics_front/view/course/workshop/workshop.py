@@ -25,8 +25,8 @@ class WorkshopApi(MethodView):
                     # - teahers with PROMOTED status
                     #
                     # TODO: workshop owner
-                    WorkshopConnection.status == (WorkshopConnectionStatus.ACCEPTED
-                                                  or WorkshopConnectionStatus.PROMOTED),
+                    WorkshopConnection.status.in_((WorkshopConnectionStatus.ACCEPTED,
+                                                   WorkshopConnectionStatus.PROMOTED)),
                     # Workshop should be active and visible
                     WorkShop.status == WorkshopStatus.ONGOING) \
             .options(joinedload(WorkshopConnection.workshop)
