@@ -44,6 +44,10 @@ class ScopedWorkshopListFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
+        # Allow superuser filter by any workshop
+        if request.user.is_superuser:
+            return Workshop.objects.values_list('id', 'name').all()
+
         return _get_allowed_workshops_for(request.user) \
             .values_list('id', 'name')
 
@@ -101,7 +105,7 @@ class WorkshopConnectionAdmin(admin.ModelAdmin):
         """
         qs = super().get_queryset(request)
 
-        # Allow superuser to view all workshops
+        # Allow superuser to view all workshop connections
         if request.user.is_superuser:
             return qs
 

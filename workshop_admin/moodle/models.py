@@ -2,11 +2,15 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
 from django.utils.functional import cached_property
 
+
 class Role(models.Model):
     shortname = models.CharField(max_length=100)
 
-    super_user_roles = (
+    superuser_roles = (
         'admin',
+    )
+
+    staff_roles = (
         'coursecreator',
         'editingteacher',
     )
@@ -56,11 +60,15 @@ class MoodleUser(models.Model):
 
     @cached_property
     def is_staff(self):
-        return self.roles.filter(roleassignment__role__shortname__in=Role.super_user_roles).count() > 0
+        is_staff = any(map(lambda r: r.shortname in (Role.staff_roles + Role.superuser_roles),
+                           self.roles.all()))
+        return self.is_superuser or is_staff
 
-    @property
+    @cached_property
     def is_superuser(self):
-        return False
+        is_superuser = any(map(lambda r: r.shortname in Role.superuser_roles,
+                               self.roles.all()))
+        return is_superuser
 
     def has_perm(self, *__, **___):
         return self.is_staff
