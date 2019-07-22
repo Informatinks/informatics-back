@@ -73,7 +73,7 @@ class ContestApi(MethodView):
                        workshop_id=workshop.id) \
             .one_or_none()
         if workshop_connection is not None \
-                and workshop_connection.is_accepted() \
+                and workshop_connection.allows_view_workshop() \
                 and workshop.status == WorkshopStatus.ONGOING:
             return workshop_connection
         raise NotFound('Contest is not found')

@@ -30,8 +30,16 @@ class WorkshopConnection(db.Model):
         backref=db.backref('connections', cascade='all, delete-orphan')
     )
 
-    def is_accepted(self):
-        return self.status == WorkshopConnectionStatus.ACCEPTED
+    def allows_view_workshop(self):
+        """Determine, if workshop can be viewed by:
+
+        * student, if status is ACCEPTED
+        * teacher, is status is PROMOTED
+
+        TODO: allow workshop owner to see it's own workshop
+        """
+        return self.status == (WorkshopConnectionStatus.ACCEPTED
+                               or WorkshopConnectionStatus.PROMOTED)
 
     def __repr__(self):
         return (
