@@ -116,7 +116,7 @@ class Workshop(models.Model):
     def add_connection(self, user: 'MoodleUser'):
         wc = WorkshopConnection(user=user,
                                 workshop=self,
-                                status=WorkshopConnectionStatus.ACCEPTED.value)
+                                status=WorkshopConnectionStatus.PROMOTED.value)
         wc.save()
 
     class Meta:

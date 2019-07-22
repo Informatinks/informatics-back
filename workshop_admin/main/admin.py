@@ -14,17 +14,19 @@ from moodle.models import Statement
 
 from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor, WorkshopConnectionStatus
 
+
 def _get_allowed_workshops_for(user):
     """Get iterable Workshops queryset,
     which can be edited by provided user.
 
-    user: MoodleUser, for which we retrieve available workshops
+    user: MoodleUser, for which we retrieve avialable workshops
     """
     return Workshop.objects.filter(
         Q(owner=user) |
         Q(connections__status=WorkshopConnectionStatus.PROMOTED.value,
           connections__user=user)) \
         .distinct()
+
 
 class ScopedWorkshopListFilter(admin.SimpleListFilter):
     # Human-readable title which will be displayed in the
@@ -46,8 +48,8 @@ class ScopedWorkshopListFilter(admin.SimpleListFilter):
         if request.user.is_superuser:
             return Workshop.objects.values_list('id', 'name').all()
 
-        return _get_allowed_workshops_for(request.user)\
-                .values_list('id', 'name')
+        return _get_allowed_workshops_for(request.user) \
+            .values_list('id', 'name')
 
     def queryset(self, request, queryset):
         """
@@ -71,7 +73,8 @@ class WorkshopConnectionForm(ModelForm):
         """Restrict default Workshop relation queryset.
         """
         super(WorkshopConnectionForm, self).__init__(*args, **kwargs)
-        self.fields['workshop'].queryset = _get_allowed_workshops_for(self.current_user)  
+        self.fields['workshop'].queryset = _get_allowed_workshops_for(self.current_user)
+
 
 class WorkshopConnectionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'workshop', 'user', 'status',)
