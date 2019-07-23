@@ -7,7 +7,7 @@ register = template.Library()
 
 @register.filter(name='public_link')
 def public_link(workshop):
-    return f'{settings.MAIN_APP_URL}/workshops/{workshop.id}/join?token={workshop.access_token}'
+    return f'{settings.MAIN_APP_URL}/workshop/{workshop.id}/join?token={workshop.access_token}'
 
 
 @register.filter(name='humazine_wsconnection_status')
