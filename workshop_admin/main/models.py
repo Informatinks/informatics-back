@@ -48,7 +48,12 @@ WORKSHOP_MONITOR_TYPE_CHOICES = (
 
 class Contest(models.Model):
     workshop = models.ForeignKey('Workshop', models.DO_NOTHING, blank=True, null=True)
-    statement = models.ForeignKey('moodle.Statement', on_delete=models.DO_NOTHING, blank=True, null=True)
+    statement = models.ForeignKey('moodle.Statement', on_delete=models.DO_NOTHING, blank=True, null=True,
+                                  help_text='ID можно найти в ссылке на Informatics. '
+                                             'Зайдите в нужный стейтмент и скопируйте его из URL. '
+                                             'Пример: https://informatics.msk.ru/mod/statements/view.php?id=2296. '
+                                             '2296 будет ID стейтмента.',
+                                  verbose_name='ID стейтмента')
     author = models.ForeignKey('moodle.MoodleUser', blank=True, null=True, on_delete=models.CASCADE, editable=False)
     position = models.PositiveIntegerField(default=0, blank=False, null=False)
     is_virtual = models.BooleanField(default=False)
