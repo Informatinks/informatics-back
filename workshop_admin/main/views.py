@@ -8,7 +8,7 @@ from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
-from main.models import WorkshopConnection, WorkshopConnectionStatus, Workshop, WORKSHOP_CONNECTION_STATUS_CHOICES
+from main.models import WorkshopConnection, Workshop, WORKSHOP_CONNECTION_STATUS_CHOICES
 from moodle.models import MoodleUser
 
 Status = namedtuple('Status', ['title', 'id'])
@@ -43,7 +43,7 @@ class WorkshopConnectionMassUpdateAdmin(LoginRequiredMixin, View):
 
         return render(request, 'admin/main/workshop/change_status.html', {
             'objects': objs,
-            'statuses': WORKSHOP_CONNECTION_STATUS_CHOICES, 
+            'statuses': WORKSHOP_CONNECTION_STATUS_CHOICES,
         })
 
     def post(self, request, *args, **kwargs):
@@ -76,6 +76,11 @@ class WorkshopMassInviteAdmin(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         workshop_id = request.GET.get('id')
+        if not workshop_id:
+            return HttpResponseBadRequest('Не найден сбор, на который нужно записать учеников. '
+                                          'Пожалуйста, создайте сбор, сохраните его, а затем '
+                                          'со страницы редактирования сбора нажмите кнопку '
+                                          '«Добавить учеников на сбор массово»')
         form = MassInviteForm()
 
         # If user requested invalid workshop,
@@ -110,7 +115,7 @@ class WorkshopMassInviteAdmin(LoginRequiredMixin, View):
         workshop_id = request.GET.get('id')
         status = form.cleaned_data.get('status')
         users_file = form.cleaned_data.get('users_file')
-        
+
         # Clear provided from file users features
         # One feature per line
         try:
