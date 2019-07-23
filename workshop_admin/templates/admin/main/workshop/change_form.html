@@ -33,10 +33,10 @@
 
     <!-- Workshop mass invite link -->
     <!-- Show only for existing workdhops -->
-{#    {% if original %}#}
+    {% if original %}
         <div class="workshop_extra-info-block">
             <a href="{% url 'workshop_mass_invite' %}?id={{ original.id }}" class="grp-button">Добавить учеников на сбор
                 массово</a>
         </div>
-{#    {% endif %}#}
+    {% endif %}
 {% endblock %}
