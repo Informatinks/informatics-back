@@ -1,4 +1,5 @@
 {% load i18n grp_tags static admin_urls %}
+
 <style>
     .help-text_extra {
         display: block;
@@ -12,7 +13,18 @@
     .help-dialog {
         display: none;
     }
+
+    {# Manually style dialog box not to include external JQuery UI theme #}
+    .ui-dialog-titlebar.ui-widget-header {
+        background: -webkit-linear-gradient(#4fb2d3,#309bbf);
+        border: 1px solid #2b8aab !important;
+    }
+    {# Prevent outline glow for close button in Webkit #}
+    .ui-dialog-titlebar.ui-widget-header textarea, select, input, button {
+        outline: none;
+    }
 </style>
+
 <!-- group -->
 <div class="inline-group grp-group grp-tabular{% if inline_admin_formset.opts.classes %} {{ inline_admin_formset.opts.classes|join:" " }}{% endif %}"
     id="{{ inline_admin_formset.formset.prefix }}-group" >
@@ -65,20 +77,11 @@
                                         {% if field.is_readonly %}
                                             <div class="grp-readonly">{{ field.contents }}</div>
                                         {% else %}
-
-
                                             {{ field.field }}
 
                                             {#  Render help icon only for new objects #}
                                             {% if not inline_admin_form.original %}
                                                 {% if field.field.help_text %}
-{#                                                    <img src="{% static "admin/img/icon-unknown.svg" %}"#}
-{#                                                         class="help-text_extra" width="15px" height="15px"#}
-{#                                                         alt="({{ field.help_text|striptags }})"#}
-{#                                                         title="{{ field.help_text|striptags }}"#}
-{#                                                         data-field-name="{{ field.field.name }}"#}
-{#                                                    />#}
-
                                                     <a class="help-text_extra" data-field-name="{{ field.field.name }}">Помощь</a>
                                                 {% endif %}
                                             {% endif %}
@@ -361,6 +364,8 @@
         $(".help-text_extra").on( "click", function() {
             var field_name = $(this).data("field-name");
             $("#dialog-" + field_name).dialog({
+                width: 400,
+                {# Position near help link #}
                 position: {
                     of: this,
                     my: "left top"
@@ -378,4 +383,3 @@
         </div>
     {% endif %}
 {% endfor %}
-
