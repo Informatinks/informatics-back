@@ -7,19 +7,49 @@
             .workshop_extra-info-block {
                 margin-top: 0.6rem;
                 margin-bottom: 1rem;
+                padding: 0px 10px;
             }
 
             .workshop_extra-info-block p {
                 font-size: 1.2rem;
                 font-weight: bold;
             }
+
+
+            .workshop_extra-info-block ul {
+                list-style: disc;
+                padding-left: 20px;
+            }
         </style>
-        <div class="workshop_extra-info-block">
-            <p> Ссылка на сбор для учеников:
-                <a href="{{ original|public_link }}">{{ original|public_link }}</a>
-            </p>
+
+        <div class="module grp-module">
+            <h2> Ссылки для сбор:</h2>
+            <div class="workshop_extra-info-block workshop_extra-links">
+                <ul>
+                    <li>
+                        на участие в сборе:
+                        <a href="{{ original|public_link }}">{{ original|public_link }}</a>
+                    </li>
+                    <li>
+                        на приглашение на сбор:
+                        <a href="{{ original|invite_link }}">{{ original|invite_link }}</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Workshop mass invite link -->
+            <!-- Show only for existing workdhops -->
+            {% if original %}
+                <div class="workshop_extra-info-block workshop_extra-invite">
+                    <a href="{% url 'workshop_mass_invite' %}?id={{ original.id }}" class="grp-button">Добавить учеников
+                        на сбор
+                        массово</a>
+                </div>
+            {% endif %}
         </div>
+
     {% endif %}
+
 
     <!-- HACK: bind for click handler on Add new Contest in ContestInline form.
          Grapelli uses own class 'grp-add-handler' for 'Add new inline Conest action'.
@@ -31,12 +61,4 @@
             });
     </script>
 
-    <!-- Workshop mass invite link -->
-    <!-- Show only for existing workdhops -->
-    {% if original %}
-        <div class="workshop_extra-info-block">
-            <a href="{% url 'workshop_mass_invite' %}?id={{ original.id }}" class="grp-button">Добавить учеников на сбор
-                массово</a>
-        </div>
-    {% endif %}
 {% endblock %}
