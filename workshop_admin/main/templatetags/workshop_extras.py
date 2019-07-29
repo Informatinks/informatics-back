@@ -7,6 +7,10 @@ register = template.Library()
 
 @register.filter(name='public_link')
 def public_link(workshop):
+    return f'{settings.MAIN_APP_URL}/workshop/{workshop.id}/'
+
+@register.filter(name='invite_link')
+def invite_link(workshop):
     return f'{settings.MAIN_APP_URL}/workshop/{workshop.id}/join?token={workshop.access_token}'
 
 
