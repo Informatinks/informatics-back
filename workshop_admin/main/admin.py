@@ -183,6 +183,7 @@ class ContestAdmin(AjaxSelectAdmin):
 
 class ContestAdminInline(GrappelliSortableHiddenMixin, AjaxSelectAdminTabularInline):
     model = Contest
+    template = 'admin/main/workshop/edit_inline/tabular.html'
     ordering = ('position',)
     exclude = ('author', 'created_at',)
     sortable_field_name = 'position'
