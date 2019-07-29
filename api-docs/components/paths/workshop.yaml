@@ -75,3 +75,32 @@ paths:
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
+  /workshop/{workshop_id}/join:
+    post:
+      tags:
+        - Workshop
+
+      summary: Записаться на сбор 
+
+      parameters:
+        - in: path
+          name: workshop_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the workshop to get
+
+      requestBody:
+        content:
+          multipart/json:
+            shema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: Токен безопасности для записи на сбор 
+
+      responses:
+        200:
+          description: Вернет пустой обьект с кодом ответа сервера 200, если запись на сбор прошла успешно. 
+
