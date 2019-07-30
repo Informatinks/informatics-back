@@ -168,13 +168,11 @@ class WorkshopMonitorApi(MethodView):
 
     @classmethod
     def _ensure_permissions(cls, workshop_id) -> bool:
-        if current_user.is_teacher:
-            return True
-
         return db.session.query(WorkshopConnection) \
             .filter(WorkshopConnection.workshop_id == workshop_id,
                     WorkshopConnection.user_id == current_user.id,
-                    WorkshopConnection.status == WorkshopConnectionStatus.ACCEPTED,
+                    WorkshopConnection.status.in_((WorkshopConnectionStatus.ACCEPTED,
+                                                   WorkshopConnectionStatus.PROMOTED,)),
                     WorkShop.status == WorkshopStatus.ONGOING) \
             .one_or_none()
 
