@@ -88,21 +88,21 @@ paths:
           schema:
             type: integer
           required: true
-          description: Numeric ID of the workshop to get
-
-      requestBody:
-        content:
-          multipart/json:
-            shema:
-              type: object
-              properties:
-                token:
-                  type: string
-                  description: Токен безопасности для записи на сбор 
+          description: Numeric ID of the workshop to join at
+        - in: query
+          name: token
+          schema:
+            type: string
+          required: true
+          description: Токен безопасности для записи на сбор 
 
       responses:
         200:
-          description: Вернет пустой обьект с кодом ответа сервера 200, если запись на сбор прошла успешно. 
+          description: Приглашние на сбор со статусом 
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/WorkshopConnectionSchema'
         404:
           description: Возвращается, если или не найден Сбор по предоставленному Workshop_id или предоставен неверный token
 
