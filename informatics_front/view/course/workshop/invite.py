@@ -34,10 +34,10 @@ class JoinWorkshopApi(MethodView):
 
         wc, is_created = get_or_create(WorkshopConnection, user_id=current_user.id, workshop_id=workshop_id)
 
-        if is_created is True:
-            db.session.commit()
-
         wc_schema = WorkshopConnectionSchema()
         response = wc_schema.dump(wc)
 
+        if is_created is True:
+            db.session.commit()
+        
         return jsonify(response.data)
