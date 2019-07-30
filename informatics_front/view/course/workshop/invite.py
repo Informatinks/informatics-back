@@ -11,6 +11,7 @@ from informatics_front.utils.auth.middleware import login_required
 from informatics_front.utils.auth.request_user import current_user
 from informatics_front.utils.response import jsonify
 from informatics_front.utils.sqla.race_handler import get_or_create
+from informatics_front.view.course.workshop.serializers.workshop_connection import WorkshopConnectionSchema
 
 
 class JoinWorkshopApi(MethodView):
@@ -36,5 +37,7 @@ class JoinWorkshopApi(MethodView):
         if is_created is True:
             db.session.commit()
 
-        # TODO: return connection object
-        return jsonify({})
+        wc_schema = WorkshopConnectionSchema()
+        response = wc_schema.dump(wc)
+
+        return jsonify(response.data)
