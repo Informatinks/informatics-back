@@ -131,7 +131,7 @@
         state: stopped
     - name: Symlink production config
       file:
-        src: "/usr/src/tpl/{{ project }}/settings.py"
+        src: "/usr/src/tpl/{{ project }}/production.py"
         dest: "/usr/src/{{ project }}/workshop_admin/workshop_admin/settings/production.py"
         state: link
     - name: Start systemd unit

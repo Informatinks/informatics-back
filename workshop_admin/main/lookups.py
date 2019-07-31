@@ -1,5 +1,5 @@
 from ajax_select import register, LookupChannel
-from moodle.models import MoodleUser, Statement
+from moodle.models import MoodleUser, Statement, CourseModule
 
 
 @register('moodleuser_lookup')
@@ -25,7 +25,7 @@ class StatementLookup(LookupChannel):
     def get_query(self, q, request):
         try:
             id = int(q)
-            return self.model.objects.filter(id=id)
+            return self.find_by_course_module(id)
         except:
             return self.model.objects.filter(name__icontains=q)
 
@@ -39,3 +39,12 @@ class StatementLookup(LookupChannel):
 
     def can_add(self, user, model):
         return False
+
+    def find_by_course_module(self, id):
+        cm = CourseModule.objects.filter(id=id).first()
+
+        if cm is None:
+            return []
+
+        instance_id = cm.instance
+        return self.model.objects.filter(id=instance_id)

@@ -75,3 +75,34 @@ paths:
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
+  /workshop/{workshop_id}/join:
+    post:
+      tags:
+        - Workshop
+
+      summary: Записаться на сбор 
+
+      parameters:
+        - in: path
+          name: workshop_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the workshop to join at
+        - in: query
+          name: token
+          schema:
+            type: string
+          required: true
+          description: Токен безопасности для записи на сбор 
+
+      responses:
+        200:
+          description: Приглашние на сбор со статусом 
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/WorkshopConnectionSchema'
+        404:
+          description: Возвращается, если или не найден Сбор по предоставленному Workshop_id или предоставен неверный token
+

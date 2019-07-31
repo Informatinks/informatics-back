@@ -51,12 +51,24 @@ paths:
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
-  /run/{run_id}/protocol:
+  /contest/{contest_id}/problem/{problem_id}/run/{run_id}/protocol:
     get:
       tags:
         - Run
       summary: Получить протокол тестирования посылки
       parameters:
+        - in: path
+          name: contest_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the contest
+        - in: path
+          name: problem_id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the problem
         - in: path
           name: run_id
           schema:

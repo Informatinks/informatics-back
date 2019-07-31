@@ -33,7 +33,7 @@ class ContestApi(MethodView):
 
         cc, is_created = get_or_create(ContestConnection, user_id=user_id, contest_id=contest.id)
 
-        if not contest.is_available(cc):
+        if not current_user.is_teacher and not contest.is_available(cc):
             raise Forbidden('Contest is not started or already finished')
 
         contest.statement.problems = self._load_problems(contest.statement_id)
@@ -73,7 +73,7 @@ class ContestApi(MethodView):
                        workshop_id=workshop.id) \
             .one_or_none()
         if workshop_connection is not None \
-                and workshop_connection.is_accepted() \
+                and workshop_connection.is_avialable() \
                 and workshop.status == WorkshopStatus.ONGOING:
             return workshop_connection
         raise NotFound('Contest is not found')

@@ -59,7 +59,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, os.pardir, 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -77,6 +77,7 @@ WSGI_APPLICATION = 'workshop_admin.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
+
 
 DATABASES = {
     'default': {
@@ -98,11 +99,10 @@ DATABASES = {
 
     },
 }
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
@@ -130,3 +130,5 @@ DATABASE_ROUTERS = (
 
 AJAX_SELECT_JSON_ENCODER = 'django.core.serializers.json.DjangoJSONEncoder'
 MAIN_APP_URL = os.getenv('MAIN_APP_URL', 'http://localhost:80')
+
+GRAPPELLI_ADMIN_TITLE = 'Informatics: Админка'

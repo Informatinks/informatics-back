@@ -281,6 +281,27 @@ components:
           $ref: '#/components/schemas/CommentAuthorSchema'
           description: объект с данными пользователя — автора комментария (подгружается на основе author_user_id)
 
+    WorkshopConnectionSchema:
+      type: object
+      description: Приглашение на сбор
+      properties:
+        id:
+          type: integer
+          description: ID приглашения на сбор 
+
+        user_id:
+          type: integer 
+          description: ID пользователя, записанного за сбор
+
+        workshop_id:
+          type: integer 
+          description: ID сбора, на который записан пользователь
+
+        status:
+          type: string
+          description: Статус приглашения на сбор
+          enum: [APPLIED, ACCEPTED, DISQUALIFIED, REJECTED, PROMOTED]
+
     WorkshopSchema:
       type: object
       description: Сбор (воркшоп). Может включать список своих контестов.

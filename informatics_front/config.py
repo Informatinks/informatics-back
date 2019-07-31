@@ -40,10 +40,13 @@ class BaseConfig:
     SECRET_KEY = os.getenv('SECRET_KEY', 'ZlXRrZypKWulCQuaMTdhkppPJSQXMRIqoFVMkqvHD5jbbYNO')
     ACTION_SECRET_KEY = os.getenv('ACTION_SECRET_KEY', 'pEdQsmKFzutMXp7TefrkbEddfgDOFqDgcFyUdofPJyEYqAfI')
 
-    # auth
-    JWT_TOKEN_EXP = 15 * 60
-    JWT_REFRESH_TOKEN_EXP = 10 * 24 * 60
+    # Auth
+    JWT_TOKEN_EXP_ENV = os.getenv('JWT_TOKEN_EXP')
+    JWT_TOKEN_EXP = int(JWT_TOKEN_EXP_ENV) if JWT_TOKEN_EXP_ENV else 15 * 60
 
+    JWT_REFRESH_TOKEN_EXP_ENV = os.getenv('JWT_REFRESH_TOKEN_EXP')
+    JWT_REFRESH_TOKEN_EXP = int(JWT_REFRESH_TOKEN_EXP_ENV) if JWT_REFRESH_TOKEN_EXP_ENV else 10 * 24 * 60 * 60
+   
     # databases
     MONGO_URI = os.getenv('MONGO_URI', 'mongodb://user:12345@localhost/test')
     URL_ENCODER_ALPHABET = os.getenv('URL_ENCODER_ALPHABET', 'abcdefghijkl')

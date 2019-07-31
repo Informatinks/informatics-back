@@ -3,6 +3,7 @@ import sqlalchemy
 from flask import url_for
 
 from informatics_front.model import db
+from informatics_front.utils.enums import WorkshopConnectionStatus
 
 NON_EXISTING_WORKSHOP_ID = -1
 
@@ -57,8 +58,9 @@ def test_read_non_existing_workshop(client):
 
 @pytest.mark.workshop
 @pytest.mark.usefixtures('authorized_user')
-def test_read_accepted_workshop(client, accepted_workshop_connection):
-    url = url_for('workshop.read', workshop_id=accepted_workshop_connection.workshop.id)
+def test_read_accepted_workshop(client, workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.ACCEPTED)
+    url = url_for('workshop.read', workshop_id=workshop_connection.workshop.id)
     resp = client.get(url)
     assert resp.status_code == 200
     content = resp.json
@@ -68,31 +70,54 @@ def test_read_accepted_workshop(client, accepted_workshop_connection):
 
     assert 'data' in content
     data = content['data']
-    assert data['id'] == accepted_workshop_connection.workshop.id
+    assert data['id'] == workshop_connection.workshop.id
 
 
 @pytest.mark.workshop
 @pytest.mark.usefixtures('authorized_user')
-def test_read_applied_workshop(client, applied_workshop_connection):
-    url = url_for('workshop.read', workshop_id=applied_workshop_connection.workshop.id)
+def test_read_applied_workshop(client, workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.APPLIED)
+    url = url_for('workshop.read', workshop_id=workshop_connection.workshop.id)
     resp = client.get(url)
     assert resp.status_code == 404
 
 
 @pytest.mark.workshop
 @pytest.mark.usefixtures('authorized_user')
-def test_read_disqualified_workshop(client, disqualified_workshop_connection):
-    url = url_for('workshop.read', workshop_id=disqualified_workshop_connection.workshop.id)
+def test_read_disqualified_workshop(client, workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.DISQUALIFIED)
+    url = url_for('workshop.read', workshop_id=workshop_connection.workshop.id)
     resp = client.get(url)
     assert resp.status_code == 404
 
 
 @pytest.mark.workshop
 @pytest.mark.usefixtures('authorized_user')
-def test_read_rejected_workshop(client, rejected_workshop_connection):
-    url = url_for('workshop.read', workshop_id=rejected_workshop_connection.workshop.id)
+def test_read_rejected_workshop(client, workshop_connection_builder):
+    workshop_conn = workshop_connection_builder(WorkshopConnectionStatus.REJECTED)
+    url = url_for('workshop.read', workshop_id=workshop_conn.workshop.id)
     resp = client.get(url)
     assert resp.status_code == 404
+
+
+@pytest.mark.workshop
+@pytest.mark.usefixtures('authorized_user')
+def test_read_promoted_workshop(client, workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.PROMOTED)
+    url = url_for('workshop.read', workshop_id=workshop_connection.workshop.id)
+    resp = client.get(url)
+    assert resp.status_code == 200
+    content = resp.json
+
+    assert 'status' in content
+    assert content['status'] == 'success'
+
+    assert 'data' in content
+    data = content['data']
+    assert data['id'] == workshop_connection.workshop.id
+
+    assert 'contests' in data
+    assert len(data.get('contests')) == 1
 
 
 @pytest.mark.workshop
@@ -106,8 +131,9 @@ def test_read_draft_workshop(client, draft_workshop_connection):
 
 @pytest.mark.workshop
 @pytest.mark.usefixtures('authorized_user')
-def test_workshop_has_contests(client, accepted_workshop_connection):
-    workshop = accepted_workshop_connection.workshop
+def test_workshop_has_contests(client, workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.ACCEPTED)
+    workshop = workshop_connection.workshop
     url = url_for('workshop.read', workshop_id=workshop.id)
     resp = client.get(url)
     assert resp.status_code == 200
@@ -125,8 +151,9 @@ def test_workshop_has_contests(client, accepted_workshop_connection):
 
 @pytest.mark.workshop
 @pytest.mark.usefixtures('authorized_user')
-def test_workshop_contest_has_valid_statement(client, accepted_workshop_connection):
-    workshop = accepted_workshop_connection.workshop
+def test_workshop_contest_has_valid_statement(client, workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.ACCEPTED)
+    workshop = workshop_connection.workshop
     url = url_for('workshop.read', workshop_id=workshop.id)
     resp = client.get(url)
     assert resp.status_code == 200
@@ -142,12 +169,13 @@ def test_workshop_contest_has_valid_statement(client, accepted_workshop_connecti
 
 @pytest.mark.workshop
 @pytest.mark.usefixtures('authorized_user')
-def test_workshop_not_produce_n1(client, accepted_workshop_connection):
-    workshop = accepted_workshop_connection.workshop
+def test_workshop_not_produce_n1(client, workshop_connection_builder):
+    workshop_connection = workshop_connection_builder(WorkshopConnectionStatus.ACCEPTED)
+    workshop = workshop_connection.workshop
     url = url_for('workshop.read', workshop_id=workshop.id)
 
     with DBStatementCounter(db.engine) as ctr:
         resp = client.get(url)
 
     assert resp.status_code == 200
-    assert ctr.get_count() == 1 , 'should produce only one SQL request to prevent N+1'
+    assert ctr.get_count() == 1, 'should produce only one SQL request to prevent N+1'

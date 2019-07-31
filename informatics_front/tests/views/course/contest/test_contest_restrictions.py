@@ -32,3 +32,23 @@ def test_is_available_for_connection():
     finished_cc = ContestConnection(created_at=current_time - datetime.timedelta(hours=2))
 
     assert not contest._is_available_for_connection(finished_cc)
+
+
+def test_is_not_started_virtual():
+    virtual_contest = Contest(is_virtual=True)
+
+    cc = ContestConnection()
+    assert virtual_contest.is_started(cc)
+    assert not virtual_contest.is_started(None)
+
+
+def test_is_not_started_not_virtual():
+    current_time = datetime.datetime.utcnow()
+
+    available_contest = Contest(time_start=current_time - datetime.timedelta(hours=1),
+                                is_virtual=False)
+    assert available_contest.is_started(None)
+
+    not_available_contest = Contest(time_start=current_time + datetime.timedelta(hours=1),
+                                    is_virtual=False)
+    assert not not_available_contest.is_started(None)

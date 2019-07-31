@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 from contextlib import contextmanager
 from typing import List
@@ -106,7 +107,16 @@ def create_workshop(statement, status: WorkshopStatus, access_token: str = WORKS
     db.session.add(w)
     db.session.flush()
 
-    ci = Contest(workshop_id=w.id, statement_id=statement.id)
+    time_start = datetime.datetime.utcnow()
+    time_stop = time_start + datetime.timedelta(days=30)
+    ci = Contest(workshop_id=w.id,
+                 statement_id=statement.id,
+                 # We assume, if contest is not virtual,
+                 # start and end time is required
+                 # ref: informatics_front.model.contest.contest.Contest#is_started
+                 time_start=time_start,
+                 time_stop=time_stop,
+                 )
     db.session.add(ci)
     db.session.flush()
 
@@ -131,55 +141,39 @@ def draft_workshop(app, statement):
         yield ret
 
 
-@contextmanager
-def create_workshop_connection(workshop, user_id, status: WorkshopConnectionStatus):
-    wc = WorkshopConnection(workshop_id=workshop.id, user_id=user_id, status=status)
-    db.session.add(wc)
-    db.session.commit()
+@pytest.yield_fixture
+def workshop_connection_builder(ongoing_workshop, authorized_user):
+    wc = None
 
-    yield wc
+    def make_workshop_connection(status: WorkshopConnectionStatus):
+        nonlocal wc
+        wc = WorkshopConnection(workshop_id=ongoing_workshop['workshop'].id,
+                                user_id=g.user['id'],
+                                status=status)
+        db.session.add(wc)
+        db.session.commit()
+
+        return wc
+
+    yield make_workshop_connection
 
     db.session.delete(wc)
-
-
-@pytest.yield_fixture
-def applied_workshop_connection(authorized_user, ongoing_workshop):
-    user_id = g.user['id']
-    w = ongoing_workshop['workshop']
-    with create_workshop_connection(w, user_id, WorkshopConnectionStatus.APPLIED) as ret:
-        yield ret
-
-
-@pytest.yield_fixture
-def accepted_workshop_connection(authorized_user, ongoing_workshop):
-    user_id = g.user['id']
-    w = ongoing_workshop['workshop']
-    with create_workshop_connection(w, user_id, WorkshopConnectionStatus.ACCEPTED) as ret:
-        yield ret
-
-
-@pytest.yield_fixture
-def disqualified_workshop_connection(authorized_user, ongoing_workshop):
-    user_id = g.user['id']
-    w = ongoing_workshop['workshop']
-    with create_workshop_connection(w, user_id, WorkshopConnectionStatus.DISQUALIFIED) as ret:
-        yield ret
-
-
-@pytest.yield_fixture
-def rejected_workshop_connection(authorized_user, ongoing_workshop):
-    user_id = g.user['id']
-    w = ongoing_workshop['workshop']
-    with create_workshop_connection(w, user_id, WorkshopConnectionStatus.REJECTED) as ret:
-        yield ret
 
 
 @pytest.yield_fixture
 def draft_workshop_connection(authorized_user, draft_workshop):
     user_id = g.user['id']
     w = draft_workshop['workshop']
-    with create_workshop_connection(w, user_id, WorkshopConnectionStatus.APPLIED) as ret:
-        yield ret
+
+    wc = WorkshopConnection(workshop_id=w.id,
+                            user_id=user_id,
+                            status=WorkshopConnectionStatus.APPLIED)
+    db.session.add(wc)
+    db.session.commit()
+
+    yield wc
+
+    db.session.delete(wc)
 
 
 @pytest.yield_fixture
@@ -333,3 +327,21 @@ def group(app, users):
     db.session.delete(group)
 
     db.session.commit()
+
+
+@pytest.yield_fixture
+def contest_builder(app, statement):
+    c = None
+
+    def make_contest(**kwargs):
+        nonlocal c
+        c = Contest(**kwargs)
+        c.statement_id = statement.id
+        db.session.add(c)
+        db.session.commit()
+        return c
+
+    yield make_contest
+
+    if c is not None:
+        db.session.delete(c)

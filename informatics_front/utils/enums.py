@@ -1,4 +1,5 @@
 import enum
+from enum import Enum
 
 
 class WorkshopStatus(enum.Enum):
@@ -16,6 +17,7 @@ class WorkshopConnectionStatus(enum.Enum):
     ACCEPTED = 2  # принят на курс
     DISQUALIFIED = 3  # отчислен с курса (после ACCEPTED)
     REJECTED = 4  # заявка не одобрена (после APPLIED)
+    PROMOTED = 10  # статус, присваиваемый учителям для выполенния администритивных действий
 
 
 class WorkshopMonitorType(enum.Enum):
@@ -34,3 +36,9 @@ class WorkshopMonitorUserVisibility(enum.Enum):
     FOR_USER_ONLY = 1
     FULL = 2
     DISABLED_FOR_STUDENT = 3
+
+
+class ContestProtocolVisibility(Enum):
+    FULL = 1
+    FIRST_BAD_TEST = 2
+    INVISIBLE = 3

@@ -1,7 +1,8 @@
 import datetime
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 from typing import List, Type, Callable, Optional, Iterable
 
+from dateutil.tz import UTC
 from flask import request
 from flask.views import MethodView
 from marshmallow import fields
@@ -10,7 +11,7 @@ from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound
 
 from informatics_front.utils.auth.request_user import current_user
-from informatics_front.model import db, Statement, User, Group, UserGroup, StatementProblem, Problem
+from informatics_front.model import db, User, Group, UserGroup, StatementProblem, Problem
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.contest.monitor import WorkshopMonitor
 from informatics_front.utils.enums import WorkshopMonitorType
@@ -23,6 +24,7 @@ from informatics_front.utils.response import jsonify
 from informatics_front.view.course.monitor.monitor_preprocessor import BaseResultMaker, IOIResultMaker, \
     MonitorPreprocessor, ACMResultMaker, LightACMResultMaker
 from informatics_front.view.course.monitor.serializers.monitor import monitor_schema
+
 
 MonitorData = namedtuple('MonitorData', 'contests users results type')
 
@@ -109,32 +111,68 @@ class WorkshopMonitorApi(MethodView):
         return problem_ids
 
     @classmethod
-    def _get_contests(cls, workshop_id):
+    def _get_contests(cls, workshop_id) -> List[Contest]:
         contests: List[Contest] = db.session.query(Contest) \
             .filter(Contest.workshop_id == workshop_id) \
-            .options(joinedload(Contest.statement)
-                     .joinedload(Statement.statement_problems)
-                     .joinedload(StatementProblem.problem)) \
-                     .options(Load(Problem).load_only('id', 'name')) \
-                     .options(Load(StatementProblem).load_only('rank')) \
+            .options(joinedload(Contest.statement)) \
             .all()
 
+        statement_ids = [contest.statement.id for contest in contests]
+
+        statement_problems: List[StatementProblem] = db.session.query(StatementProblem) \
+            .filter(StatementProblem.statement_id.in_(statement_ids)) \
+            .filter(StatementProblem.problem_id.isnot(None)) \
+            .options(joinedload(StatementProblem.problem).load_only('id', 'name')) \
+            .options(Load(StatementProblem).load_only('statement_id', 'rank')) \
+            .options(Load(Problem).load_only('id', 'name'))
+
+        # Filter statement problems with removed problems
+        statement_problems = [sp
+                              for sp in statement_problems
+                              if sp.problem is not None]
+
+        for sp in statement_problems:
+            sp.problem.rank = sp.rank
+
+        statement_id_statement_problems = defaultdict(list)
+
+        for sp in statement_problems:
+            statement_id_statement_problems[sp.statement_id].append(sp.problem)
+
         for contest in contests:
-            for sp in contest.statement.statement_problems:
-                sp.problem.rank = sp.rank
-            contest.problems = [sp.problem for sp in contest.statement.statement_problems]
+            statement_id = contest.statement_id
+            problems = statement_id_statement_problems[statement_id]
+            contest.problems = problems
+
+        contests = cls._filter_not_started_contests(contests)
 
         return contests
 
     @classmethod
-    def _ensure_permissions(cls, workshop_id) -> bool:
+    def _filter_not_started_contests(cls, contests) -> List[Contest]:
         if current_user.is_teacher:
-            return True
+            return contests
 
+        contest_cc = {contest.id: None for contest in contests}
+
+        ccs: List[ContestConnection] = db.session.query(ContestConnection) \
+            .filter(ContestConnection.user_id == current_user.id) \
+            .filter(ContestConnection.contest_id.in_(contest_cc.keys())) \
+            .all()
+
+        for cc in ccs:
+            contest_cc[cc.contest_id] = cc
+
+        return [contest for contest in contests
+                if contest.is_started(contest_cc[contest.id])]
+
+    @classmethod
+    def _ensure_permissions(cls, workshop_id) -> bool:
         return db.session.query(WorkshopConnection) \
             .filter(WorkshopConnection.workshop_id == workshop_id,
                     WorkshopConnection.user_id == current_user.id,
-                    WorkshopConnection.status == WorkshopConnectionStatus.ACCEPTED,
+                    WorkshopConnection.status.in_((WorkshopConnectionStatus.ACCEPTED,
+                                                   WorkshopConnectionStatus.PROMOTED,)),
                     WorkShop.status == WorkshopStatus.ONGOING) \
             .one_or_none()
 
@@ -159,7 +197,7 @@ class WorkshopMonitorApi(MethodView):
             start_time = contest.time_start or contest.created_at
 
             def const_time(*__, **___):
-                return start_time.astimezone()
+                return start_time.replace(tzinfo=UTC)
 
             return const_time
 

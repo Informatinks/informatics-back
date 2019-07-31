@@ -8,28 +8,33 @@ from informatics_front.utils.services.base import BaseService
 class InternalRmatics(BaseService):
     service_url_param = 'INTERNAL_RMATICS_URL'
     default_timeout = 60
+    default_context_source = 2
 
     def send_submit(self,
                     file: FileStorage,
                     user_id: int,
                     problem_id: int,
+                    contest_id: int,
                     statement_id: int,
                     lang_id: int) -> Tuple[dict, int]:
         data = {
             'lang_id': lang_id,
             'user_id': user_id,
-            'statement_id': statement_id
+            'statement_id': statement_id,
+            'context_id': contest_id,
+            'context_source': self.default_context_source,
+            'is_visible': False,
+
         }
         url = f'{self.service_url}/problem/trusted/{problem_id}/submit_v2'
 
         return self.client.post_data(url, json=data, files={'file': file.stream}, silent=True)
 
-    def get_runs_filter(self, problem_id: int,
-                        args: dict,
-                        is_admin=False) -> Tuple[dict, int]:
+    def get_runs_filter(self, problem_id: int, contest_id: int, args: dict) -> Tuple[dict, int]:
         filter_args = {
             **args,
-            'is_admin': is_admin,
+            'context_id': contest_id,
+            'context_source': self.default_context_source,
         }
         url = f'{self.service_url}/problem/{problem_id}/submissions/'
 
@@ -56,12 +61,12 @@ class InternalRmatics(BaseService):
         return self.client.get_data(url, params=user_args, silent=True)
 
     def get_monitor(self, problems: List[int], users: List[int], time_before: Optional[int]):
-        # TODO: Приделать контекст посылки (NFRMTCS-192)
         url = f'{self.service_url}/monitor/problem_monitor'
 
         monitor_args = {
             'user_id': users,
-            'problem_id': problems
+            'problem_id': problems,
+            'context_source': self.default_context_source,
         }
         if time_before:
             monitor_args['time_before'] = time_before
