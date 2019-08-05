@@ -8,6 +8,7 @@ from informatics_front.utils.services.internal_rmatics import InternalRmatics
 
 PROBLEM_ID = 1
 CONTEST_ID = 2
+LANG_ID = 1
 RUN_ID = 2
 USER_ID = 666
 CLIENT_SERVICE_URL = 'foo'
@@ -26,7 +27,12 @@ def test_get_runs_filter(client):
     client.get_runs_filter(PROBLEM_ID, CONTEST_ID, {'a': 1})
     client.client.get_data.assert_called_with(
         f'{client.service_url}/problem/{PROBLEM_ID}/submissions/',
-        params={'a': 1, 'context_source': InternalRmatics.default_context_source, 'context_id': CONTEST_ID},
+        params={
+            'a': 1,
+            'context_source': InternalRmatics.default_context_source,
+            'statement_id': CONTEST_ID,
+            'show_hidden': True,
+        },
         default=[],
         silent=True
     )
@@ -34,18 +40,24 @@ def test_get_runs_filter(client):
 
 @pytest.mark.internal_rmatics
 def test_send_submit(client):
-    data = {'lang_id': 1, 'user_id': 2, 'statement_id': 3,
-            'context_source': InternalRmatics.default_context_source, 'context_id': CONTEST_ID, 'is_visible': False}
+    expected_url = f'{CLIENT_SERVICE_URL}/problem/trusted/{PROBLEM_ID}/submit_v2'
+    expected_call_args = {
+        'lang_id': LANG_ID,
+        'user_id': USER_ID,
+
+        # Context params
+        'statement_id': CONTEST_ID,
+        'context_source': InternalRmatics.default_context_source,
+        'is_visible': False
+    }
     file = FileStorage(
         io.BytesIO(b'sample data'), filename='test.cpp', content_type='application/pdf'
     )
 
-    client.send_submit(
-        file, data['user_id'], PROBLEM_ID, CONTEST_ID, data['statement_id'], data['lang_id'],
-    )
+    client.send_submit(file, USER_ID, PROBLEM_ID, CONTEST_ID, LANG_ID)
     client.client.post_data.assert_called_with(
-        f'{client.service_url}/problem/trusted/{PROBLEM_ID}/submit_v2',
-        json=data,
+        expected_url,
+        json=expected_call_args,
         files={'file': file.stream},
         silent=True
     )
@@ -78,9 +90,11 @@ def test_get_monitor(client):
     client.get_monitor(problems, users, None)
     client.client.get_data.assert_called_with(
         f'{client.service_url}/monitor/problem_monitor',
-        params={'user_id': users,
-                'problem_id': problems,
-                'context_source': InternalRmatics.default_context_source},
+        params={
+            'user_id': users,
+            'problem_id': problems,
+            'context_source': InternalRmatics.default_context_source
+        },
         silent=True,
         default=[]
     )

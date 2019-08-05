@@ -15,16 +15,14 @@ class InternalRmatics(BaseService):
                     user_id: int,
                     problem_id: int,
                     contest_id: int,
-                    statement_id: int,
                     lang_id: int) -> Tuple[dict, int]:
         data = {
             'lang_id': lang_id,
             'user_id': user_id,
-            'statement_id': statement_id,
-            'context_id': contest_id,
+
+            'statement_id': contest_id,
             'context_source': self.default_context_source,
             'is_visible': False,
-
         }
         url = f'{self.service_url}/problem/trusted/{problem_id}/submit_v2'
 
@@ -33,8 +31,9 @@ class InternalRmatics(BaseService):
     def get_runs_filter(self, problem_id: int, contest_id: int, args: dict) -> Tuple[dict, int]:
         filter_args = {
             **args,
-            'context_id': contest_id,
+            'statement_id': contest_id,
             'context_source': self.default_context_source,
+            'show_hidden': True
         }
         url = f'{self.service_url}/problem/{problem_id}/submissions/'
 

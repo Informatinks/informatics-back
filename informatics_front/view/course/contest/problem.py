@@ -56,7 +56,6 @@ class ProblemSubmissionApi(MethodView):
 
     post_args = {
         'lang_id': fields.Integer(required=True),
-        'statement_id': fields.Integer(missing=None),
     }
 
     @login_required
@@ -73,7 +72,6 @@ class ProblemSubmissionApi(MethodView):
                                                        current_user.id,
                                                        problem_id,
                                                        contest_id,
-                                                       args['statement_id'],
                                                        args['lang_id'])
         return jsonify(content, status_code=status)
 
