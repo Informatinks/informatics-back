@@ -30,7 +30,7 @@ def test_get_runs_filter(client):
         params={
             'a': 1,
             'context_source': InternalRmatics.default_context_source,
-            'statement_id': CONTEST_ID,
+            'context_id': CONTEST_ID,
             'show_hidden': True,
         },
         default=[],
@@ -46,7 +46,7 @@ def test_send_submit(client):
         'user_id': USER_ID,
 
         # Context params
-        'statement_id': CONTEST_ID,
+        'context_id': CONTEST_ID,
         'context_source': InternalRmatics.default_context_source,
         'is_visible': False
     }
@@ -95,7 +95,7 @@ def test_get_monitor(client):
             'user_id': users,
             'problem_id': problems,
 
-            'statement_id': contest_id,
+            'context_id': contest_id,
             'context_source': InternalRmatics.default_context_source,
             'show_hidden': True,
         },
@@ -118,7 +118,7 @@ def test_get_monitor_with_time_before(client):
             'problem_id': problems,
             'time_before': time_before,
 
-            'statement_id': contest_id,
+            'context_id': contest_id,
             'context_source': InternalRmatics.default_context_source,
             'show_hidden': True,
         },

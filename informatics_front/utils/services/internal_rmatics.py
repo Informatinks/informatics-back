@@ -20,7 +20,7 @@ class InternalRmatics(BaseService):
             'lang_id': lang_id,
             'user_id': user_id,
 
-            'statement_id': contest_id,
+            'context_id': contest_id,
             'context_source': self.default_context_source,
             'is_visible': False,
         }
@@ -31,7 +31,7 @@ class InternalRmatics(BaseService):
     def get_runs_filter(self, problem_id: int, contest_id: int, args: dict) -> Tuple[dict, int]:
         filter_args = {
             **args,
-            'statement_id': contest_id,
+            'context_id': contest_id,
             'context_source': self.default_context_source,
             'show_hidden': True
         }
@@ -66,7 +66,7 @@ class InternalRmatics(BaseService):
             'user_id': users,
             'problem_id': problems,
 
-            'statement_id': contest_id,
+            'context_id': contest_id,
             'context_source': self.default_context_source,
             'show_hidden': True,
         }
