@@ -85,15 +85,19 @@ def test_get_full_run_protocol(client):
 
 @pytest.mark.internal_rmatics
 def test_get_monitor(client):
+    contest_id = 1
     problems = [1, 2, 3]
     users = [4, 5, 6]
-    client.get_monitor(problems, users, None)
+    client.get_monitor(contest_id, problems, users, None)
     client.client.get_data.assert_called_with(
         f'{client.service_url}/monitor/problem_monitor',
         params={
             'user_id': users,
             'problem_id': problems,
-            'context_source': InternalRmatics.default_context_source
+
+            'statement_id': contest_id,
+            'context_source': InternalRmatics.default_context_source,
+            'show_hidden': True,
         },
         silent=True,
         default=[]
@@ -102,16 +106,22 @@ def test_get_monitor(client):
 
 @pytest.mark.internal_rmatics
 def test_get_monitor_with_time_before(client):
+    contest_id = 1
     problems = [1, 2, 3]
     users = [4, 5, 6]
     time_before = 123456789
-    client.get_monitor(problems, users, time_before)
+    client.get_monitor(contest_id, problems, users, time_before)
     client.client.get_data.assert_called_with(
         f'{client.service_url}/monitor/problem_monitor',
-        params={'user_id': users,
-                'problem_id': problems,
-                'time_before': time_before,
-                'context_source': InternalRmatics.default_context_source},
+        params={
+            'user_id': users,
+            'problem_id': problems,
+            'time_before': time_before,
+
+            'statement_id': contest_id,
+            'context_source': InternalRmatics.default_context_source,
+            'show_hidden': True,
+        },
         silent=True,
         default=[]
     )

@@ -90,7 +90,7 @@ def test_get_raw_data_by_contest(ongoing_workshop):
     problems = contest.statement.problems
     problem_ids = list(p.id for p in problems)
 
-    mock_get_monitor.assert_called_with(problem_ids, user_ids, int(time_freeze.timestamp.return_value))
+    mock_get_monitor.assert_called_with(contest.id, problem_ids, user_ids, int(time_freeze.timestamp.return_value))
 
 
 def test_filter_not_started_contests(authorized_user):
