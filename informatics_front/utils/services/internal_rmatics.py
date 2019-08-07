@@ -15,16 +15,14 @@ class InternalRmatics(BaseService):
                     user_id: int,
                     problem_id: int,
                     contest_id: int,
-                    statement_id: int,
                     lang_id: int) -> Tuple[dict, int]:
         data = {
             'lang_id': lang_id,
             'user_id': user_id,
-            'statement_id': statement_id,
+
             'context_id': contest_id,
             'context_source': self.default_context_source,
             'is_visible': False,
-
         }
         url = f'{self.service_url}/problem/trusted/{problem_id}/submit_v2'
 
@@ -35,6 +33,7 @@ class InternalRmatics(BaseService):
             **args,
             'context_id': contest_id,
             'context_source': self.default_context_source,
+            'show_hidden': True
         }
         url = f'{self.service_url}/problem/{problem_id}/submissions/'
 
@@ -60,13 +59,16 @@ class InternalRmatics(BaseService):
 
         return self.client.get_data(url, params=user_args, silent=True)
 
-    def get_monitor(self, problems: List[int], users: List[int], time_before: Optional[int]):
+    def get_monitor(self, contest_id: int, problems: List[int], users: List[int], time_before: Optional[int]):
         url = f'{self.service_url}/monitor/problem_monitor'
 
         monitor_args = {
             'user_id': users,
             'problem_id': problems,
+
+            'context_id': contest_id,
             'context_source': self.default_context_source,
+            'show_hidden': True,
         }
         if time_before:
             monitor_args['time_before'] = time_before

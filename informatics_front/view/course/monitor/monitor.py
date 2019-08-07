@@ -10,27 +10,25 @@ from sqlalchemy.orm import joinedload, load_only, Load
 from webargs.flaskparser import parser
 from werkzeug.exceptions import NotFound
 
-from informatics_front.utils.auth.request_user import current_user
 from informatics_front.model import db, User, Group, UserGroup, StatementProblem, Problem
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.contest.monitor import WorkshopMonitor
-from informatics_front.utils.enums import WorkshopMonitorType
 from informatics_front.model.workshop.contest_connection import ContestConnection
 from informatics_front.model.workshop.workshop import WorkShop, WorkshopStatus
 from informatics_front.model.workshop.workshop_connection import WorkshopConnection, WorkshopConnectionStatus
 from informatics_front.plugins import internal_rmatics
 from informatics_front.utils.auth.middleware import login_required
+from informatics_front.utils.auth.request_user import current_user
+from informatics_front.utils.enums import WorkshopMonitorType
 from informatics_front.utils.response import jsonify
 from informatics_front.view.course.monitor.monitor_preprocessor import BaseResultMaker, IOIResultMaker, \
     MonitorPreprocessor, ACMResultMaker, LightACMResultMaker
 from informatics_front.view.course.monitor.serializers.monitor import monitor_schema
 
-
 MonitorData = namedtuple('MonitorData', 'contests users results type')
 
 
 class WorkshopMonitorApi(MethodView):
-
     get_args = {
         'group_id': fields.Integer(missing=None)
     }
@@ -90,7 +88,7 @@ class WorkshopMonitorApi(MethodView):
 
     @classmethod
     def _get_users(cls, monitor, group_id: Optional[int]) -> List[User]:
-        load_only_fields = ('firstname', 'lastname', 'city', 'school', )
+        load_only_fields = ('firstname', 'lastname', 'city', 'school',)
         if not current_user.is_teacher and monitor.is_for_user_only():
             users = [db.session.query(User).get(current_user.id)]
         elif group_id is not None:
@@ -183,7 +181,8 @@ class WorkshopMonitorApi(MethodView):
         runs_until = monitor.freeze_time
         runs_until = runs_until and int(runs_until.timestamp())
 
-        data, _ = internal_rmatics.get_monitor(problem_ids,
+        data, _ = internal_rmatics.get_monitor(contest.id,
+                                               problem_ids,
                                                user_ids,
                                                runs_until)
         return data
