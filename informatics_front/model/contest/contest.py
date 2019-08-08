@@ -31,6 +31,7 @@ class Contest(db.Model):
 
     statement = db.relationship('Statement')
     workshop = db.relationship('WorkShop', back_populates='contests')
+    languages = db.relationship('Contest', secondary='LanguageContest')
 
     def _is_available_by_duration(self) -> bool:
         """ Checks date time restrictions """
