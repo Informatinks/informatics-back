@@ -46,20 +46,20 @@ WORKSHOP_MONITOR_TYPE_CHOICES = (
 )
 
 
-# class Language(models.Model):
-#     code = models.PositiveIntegerField(blank=False, null=False, default=0)
-#     title = models.CharField(max_length=32, null=False, blank=False)
-#     mode = models.CharField(max_length=32, null=True, blank=True)
-#
-#     class Meta:
-#         managed = False
-#         db_table = 'languages'
-#
-#         verbose_name = 'Язык'
-#         verbose_name_plural = 'Языки'
-#
-#     def __str__(self):
-#         return self.title
+class Language(models.Model):
+    code = models.PositiveIntegerField(blank=False, null=False, default=0)
+    title = models.CharField(max_length=32, null=False, blank=False)
+    mode = models.CharField(max_length=32, null=True, blank=True)
+
+    class Meta:
+        managed = False
+        db_table = 'languages'
+
+        verbose_name = 'Язык'
+        verbose_name_plural = 'Языки'
+
+    def __str__(self):
+        return self.title
 
 
 class Contest(models.Model):
@@ -79,6 +79,8 @@ class Contest(models.Model):
     time_stop = models.DateTimeField()
     virtual_duration = DateTimeBasedDuration(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
+
+    languages = models.ManyToManyField('Language', through='LanguageContest')
 
     class Meta:
         managed = False
@@ -102,14 +104,14 @@ class ContestConnection(models.Model):
         unique_together = (('user', 'contest'),)
 
 
-# class LanguageContest(models.Model):
-#     language = models.ForeignKey(Language, blank=True, null=True, on_delete=models.CASCADE)
-#     contest = models.ForeignKey(Contest, models.DO_NOTHING, blank=True, null=True)
-#
-#     class Meta:
-#         managed = False
-#         db_table = 'language_contest'
-#         unique_together = (('language', 'contest'),)
+class LanguageContest(models.Model):
+    language = models.ForeignKey(Language, blank=True, null=True, on_delete=models.CASCADE)
+    contest = models.ForeignKey(Contest, models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'language_contest'
+        unique_together = (('language', 'contest'),)
 
 
 class RefreshToken(models.Model):
