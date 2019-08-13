@@ -21,6 +21,8 @@ def upgrade():
     op.create_table('languages',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=32), nullable=False),
+    sa.Column('code', sa.Integer(), nullable=False),
+    sa.Column('mode', sa.String(length=32), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     schema='pynformatics'
     )
