@@ -1,5 +1,7 @@
 from marshmallow import Schema, fields
 
+from informatics_front.view.course.contest.serializers.language import LanguageSchema
+
 
 class ContestProblemSchema(Schema):
     id = fields.Integer(dump_only=True)
@@ -25,6 +27,7 @@ class ContestSchema(Schema):
     is_virtual = fields.Boolean()
     virtual_duration = fields.TimeDelta(precision='seconds')
     statement = fields.Nested(StatementSchema)
+    languages = fields.Nested(LanguageSchema, many=True)
 
 
 class ContestConnectionSchema(Schema):

@@ -4,7 +4,7 @@ from flask.views import MethodView
 from sqlalchemy.orm import Load, joinedload
 from werkzeug.exceptions import NotFound, Forbidden
 
-from informatics_front.model import Problem, StatementProblem
+from informatics_front.model import Problem, StatementProblem, Language
 from informatics_front.model.base import db
 from informatics_front.model.contest.contest import Contest
 from informatics_front.model.workshop.contest_connection import ContestConnection
@@ -21,6 +21,7 @@ class ContestApi(MethodView):
     @login_required
     def get(self, contest_id):
         contest: Contest = db.session.query(Contest) \
+            .options(joinedload(Contest.languages)) \
             .options(joinedload(Contest.statement)) \
             .options(joinedload(Contest.workshop)) \
             .get(contest_id)
@@ -37,6 +38,9 @@ class ContestApi(MethodView):
             raise Forbidden('Contest is not started or already finished')
 
         contest.statement.problems = self._load_problems(contest.statement_id)
+        if not contest.languages:
+            contest.languages = db.session.query(Language).all()
+
         cc.contest = contest
 
         cc_schema = ContestConnectionSchema()

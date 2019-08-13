@@ -10,6 +10,7 @@ from werkzeug.local import LocalProxy
 from informatics_front.model import StatementProblem, Problem, Statement, Comment, db, Group, UserGroup
 from informatics_front.model import User
 from informatics_front.model.contest.contest import Contest
+from informatics_front.model.contest.language import Language
 from informatics_front.model.problem import EjudgeProblem
 from informatics_front.model.refresh_tokens import RefreshToken
 from informatics_front.model.workshop.contest_connection import ContestConnection
@@ -330,8 +331,10 @@ def group(app, users):
 
 
 @pytest.yield_fixture
-def contest_builder(app, statement):
+def contest_builder(app, statement, languages=None):
     c = None
+    if not languages:
+        languages = []
 
     def make_contest(**kwargs):
         nonlocal c
@@ -345,3 +348,23 @@ def contest_builder(app, statement):
 
     if c is not None:
         db.session.delete(c)
+
+
+@pytest.yield_fixture
+def languages(app):
+    languages = [
+        Language(title='Free Pascal 3.0.2', code=1, mode='text/x-pascal'),
+        Language(title='GNU C 7.2.0', code=5, mode='text/x-csrc'),
+        Language(title='GNU C++ 7.2.0', code=10, mode='text/x-c++src'),
+        Language(title='Turbo Pascal', code=15, mode='text/x-pascal'),
+        Language(title='Borland Delphi 6 - 14.5', code=20, mode='pascal'),
+    ]
+
+    db.session.add_all(languages)
+    db.session.commit()
+
+    yield languages
+
+    for language in languages:
+        db.session.delete(language)
+    db.session.commit()

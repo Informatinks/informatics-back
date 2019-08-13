@@ -178,4 +178,6 @@ def test_workshop_not_produce_n1(client, workshop_connection_builder):
         resp = client.get(url)
 
     assert resp.status_code == 200
-    assert ctr.get_count() == 1, 'should produce only one SQL request to prevent N+1'
+    # First for workshop.
+    # Second for languages, if no contest.languages specified
+    assert ctr.get_count() == 2, 'should produce no more than two SQL requests to prevent N+1'
