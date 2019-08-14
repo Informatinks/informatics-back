@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from flask import url_for, g
 from werkzeug.exceptions import NotFound
@@ -108,15 +110,10 @@ def test_contest_api_if_workshop_connection_not_exist(client, ongoing_workshop):
 
 @pytest.mark.contest_problem
 @pytest.mark.usefixtures('authorized_user', 'statement')
-def test_contest_api_returns_correct_language_list(client, ongoing_workshop, workshop_connection_builder, languages):
-    workshop_connection_builder(WorkshopConnectionStatus.ACCEPTED)
-    contest = ongoing_workshop['contest']
-
-    # Add languages for contest
+@patch('informatics_front.view.course.contest.contest.ContestApi._check_workshop_permissions')
+def test_contest_api_returns_correct_language_list(mock_check_ws_perms, client, contest_builder, languages):
     contest_languages = languages[0:3]
-    contest.languages = contest_languages
-    db.session.add(contest)
-    db.session.commit()
+    contest = contest_builder(languages=contest_languages)
 
     url = url_for('contest.contest', contest_id=contest.id)
     resp = client.get(url)
