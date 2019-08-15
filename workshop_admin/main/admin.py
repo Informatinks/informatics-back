@@ -12,7 +12,15 @@ from django.urls import reverse
 from grappelli.forms import GrappelliSortableHiddenMixin
 from moodle.models import Statement
 
-from .models import WorkshopConnection, Workshop, ContestConnection, Contest, WorkshopMonitor, WorkshopConnectionStatus
+from .models import (
+    WorkshopConnection,
+    Workshop,
+    ContestConnection,
+    Contest,
+    WorkshopMonitor,
+    WorkshopConnectionStatus,
+    Language,
+    LanguageContest)
 
 
 def _get_allowed_workshops_for(user):
@@ -140,6 +148,11 @@ class ContestConnectionAdmin(admin.ModelAdmin):
     })
 
 
+class LanguageAdminInline(admin.TabularInline):
+    model = LanguageContest
+    extra = 0  # Don't render default empty formsest
+
+
 class ContestForm(ModelForm):
     def clean(self):
         """Formset validators on create and update Contest object.
@@ -163,7 +176,7 @@ class ContestForm(ModelForm):
 class ContestAdmin(AjaxSelectAdmin):
     readonly_fields = ('author', 'created_at',)
     list_display = ('__str__', 'workshop', 'is_virtual',)
-
+    inlines = (LanguageAdminInline,)
     form = make_ajax_form(Contest, superclass=ContestForm, fieldlist={
         'statement': 'statement_lookup'
     })
@@ -255,3 +268,4 @@ admin.site.register(WorkshopMonitor, WorkshopMonitorAdmin)
 admin.site.register(WorkshopConnection, WorkshopConnectionAdmin)
 admin.site.register(ContestConnection, ContestConnectionAdmin)
 admin.site.register(Statement)
+admin.site.register(Language)

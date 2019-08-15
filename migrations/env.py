@@ -22,6 +22,8 @@ WHITELISTED_TABLES = (
     'workshop',
     'workshop_connection',
     'contest_monitor',
+    'languages',
+    'language_contest',
 )
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

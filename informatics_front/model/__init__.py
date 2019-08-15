@@ -6,3 +6,4 @@ from .problem import Problem
 from .user.group import Group, UserGroup
 from .user.role import Role, RoleAssignment
 from .user.user import User
+from .contest.language import Language, LanguageContest
