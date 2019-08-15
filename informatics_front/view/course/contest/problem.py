@@ -43,7 +43,7 @@ def check_contest_availability(contest_id, error_obj: Exception) -> ContestConne
     return cc
 
 
-def check_contest_languages(contest: Contest, language_id: int, error_obj: Exception) -> None:
+def check_contest_languages(contest: Contest, language_code: int, error_obj: Exception) -> None:
     """Check if language can be used for contest submissions.
 
     If contest is not language-aware (no languages are set for this contest),
@@ -51,7 +51,7 @@ def check_contest_languages(contest: Contest, language_id: int, error_obj: Excep
 
     :param contest: Contest object, for which we check permissions.
                     Assume it should have languages prefetched.
-    :param language_id: Language ID, for witch we check permissions.
+    :param language_code: code of language, for which we check permissions.
     :param error_obj: Error to raise, if using provided language_id is prohibited.
     :return: None
     """
@@ -60,7 +60,7 @@ def check_contest_languages(contest: Contest, language_id: int, error_obj: Excep
         return None
 
     # If language_id is allowed for this contest
-    lcs = [lc for lc in contest.languages if lc.code == language_id]
+    lcs = [lc for lc in contest.languages if lc.code == language_code]
     if not lcs:
         raise error_obj
 
