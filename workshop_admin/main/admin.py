@@ -10,7 +10,7 @@ from django.forms import ModelForm, ValidationError
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from grappelli.forms import GrappelliSortableHiddenMixin
-from moodle.models import Statement
+from moodle.models import Statement, MoodleUser
 
 from .models import (
     WorkshopConnection,
@@ -23,12 +23,19 @@ from .models import (
     LanguageContest)
 
 
-def _get_allowed_workshops_for(user):
+def _get_allowed_workshops_for(user: MoodleUser):
     """Get iterable Workshops queryset,
     which can be edited by provided user.
 
+    Used in WorkshopConnection change form.
+
     user: MoodleUser, for which we retrieve avialable workshops
     """
+    # If provided user is superuser,
+    # allow edit all WorkshopConnections
+    if user.is_superuser:
+        return Workshop.objects.all()
+
     return Workshop.objects.filter(
         Q(owner=user) |
         Q(connections__status=WorkshopConnectionStatus.PROMOTED.value,
@@ -51,11 +58,11 @@ class ScopedWorkshopListFilter(admin.SimpleListFilter):
         appear in the URL query. The second element is the
         human-readable name for the option that will appear
         in the right sidebar.
-        """
-        # Allow superuser filter by any workshop
-        if request.user.is_superuser:
-            return Workshop.objects.values_list('id', 'name').all()
 
+        Uses private _get_allowed_workshops_for() method,
+        which is permission-aware. So superusers can view
+        all workshops in list filter.
+        """
         return _get_allowed_workshops_for(request.user) \
             .values_list('id', 'name')
 
