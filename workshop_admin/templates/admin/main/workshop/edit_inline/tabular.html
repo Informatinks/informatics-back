@@ -23,6 +23,13 @@
     .ui-dialog-titlebar.ui-widget-header textarea, select, input, button {
         outline: none;
     }
+
+    .grapelli-inline_contest_extra-info {
+       display: block !important;
+        padding: 5px 20px;
+        /* HACK: allow full-space cell inside table-rows */
+        width: 500% !important;
+    }
 </style>
 
 <!-- group -->
@@ -121,6 +128,21 @@
                     {{ inline_admin_form.fk_field.field }}
                     {% if inline_admin_form.has_auto_field or inline_admin_form.needs_explicit_pk_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
                 </div>
+            </div>
+            <div class="grapelli-inline_contest_extra-info">
+                {% if inline_admin_form.original %}
+                    {% if inline_admin_form.original.languages.all %}
+                        Можно сдавать на:
+                        {% for language in inline_admin_form.original.languages.all %}
+                            <strong>{{ language }}{% if forloop.last %}.{% else %}, {% endif %}</strong>
+                        {% endfor %}
+                    {% else %}
+                        <em>Языки для этого контеста не заданы, можно сдавать задачи на всех доступных.</em>
+                    {% endif %}
+                    <div class="edit_contest-link">
+                        <a href="{% url 'admin:main_contest_change' inline_admin_form.original.id %}">Редактировать этот контест</a>
+                    </div>
+                {% endif %}
             </div>
         {% endfor %}
         {% endwith %}
