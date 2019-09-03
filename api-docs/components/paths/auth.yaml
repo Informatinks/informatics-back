@@ -44,8 +44,8 @@ paths:
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
-        401:
-          description: Неправильный пароль
+        403:
+          description: Неверный пароль, попробуйте еще раз
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/Forbidden'
 
@@ -91,6 +91,17 @@ paths:
                 refresh_token:
                   type: string
                   description: Refresh Token
+      responses:
+        200:
+          description: Новый токен
+          content:
+            application/json:
+              schema:
+                $ref: '../models.yaml#/components/schemas/UserAuthSchema'
+        403:
+          description: Неверный токен обновления
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/Forbidden'
 
   /auth/reset/:
     post:

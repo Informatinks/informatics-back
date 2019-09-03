@@ -124,6 +124,11 @@ paths:
             application/json:
               schema:
                 $ref: '../models.yaml#/components/schemas/ProblemSubmissionSchema'
+        404:
+          description: Задача не найдена
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+
     post:
       tags:
         - Submissions
@@ -176,3 +181,8 @@ paths:
           description: Пустой файл или дубликат посылки или файл слишком большой
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/BadRequest'
+
+        403:
+          description: Задачу нельзя решать на выбранном языке
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/Forbidden'

@@ -46,10 +46,10 @@ paths:
                   source:
                     type: string
                     descroption: Исходник посылки
-        404:
-          description: Посылка не найдена
-          allOf:
-            - $ref: '../error_responses.yaml#/components/responses/NotFound'
+        #  404:
+        #   description: Посылка не найдена
+        #   allOf:
+        #    - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
   /contest/{contest_id}/problem/{problem_id}/run/{run_id}/protocol:
     get:
@@ -86,6 +86,10 @@ paths:
             application/json:
               schema:
                 $ref: '../models.yaml#/components/schemas/RunProtocolSchema'
+        400:
+          description: Просмотр протокола для этого контеста недоступен
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/BadRequest'
         404:
           description: Посылка не найдена
           allOf:

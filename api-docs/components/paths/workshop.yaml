@@ -104,5 +104,5 @@ paths:
               schema:
                 $ref: '../models.yaml#/components/schemas/WorkshopConnectionSchema'
         404:
-          description: Возвращается, если или не найден Сбор по предоставленному Workshop_id или предоставен неверный token
+          description: Сбор не найден или недоступен
 
