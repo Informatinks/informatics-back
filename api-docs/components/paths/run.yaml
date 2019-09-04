@@ -46,10 +46,10 @@ paths:
                   source:
                     type: string
                     descroption: Исходник посылки
-        #  404:
-        #   description: Посылка не найдена
-        #   allOf:
-        #    - $ref: '../error_responses.yaml#/components/responses/NotFound'
+         404:
+          description: Посылка, для которой запрошен протокол, не найдена
+          allOf:
+           - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
   /contest/{contest_id}/problem/{problem_id}/run/{run_id}/protocol:
     get:
