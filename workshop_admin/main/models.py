@@ -113,8 +113,8 @@ class LanguageContest(models.Model):
         db_table = 'language_contest'
         unique_together = (('language', 'contest'),)
 
-        verbose_name = 'Язык контекста'
-        verbose_name_plural = 'Языки контекста'
+        verbose_name = 'Язык контеста'
+        verbose_name_plural = 'Языки контеста'
 
 
 class RefreshToken(models.Model):
