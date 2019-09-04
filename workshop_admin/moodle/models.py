@@ -58,15 +58,14 @@ class MoodleUser(models.Model):
     is_authenticated = True
     is_active = True  # TODO
 
-    def get_username(self):
-        """Get human-readable user full name.
+    def get_username(self) -> str:
+        """Get user username, which is required.
 
-        Used in Grapelli navbar, generate complex
-        name instead of plain username.
-
-        :return: String representation for navbar
+        Used in Grapelli navbar.
+        
+        :return: User representation for navbar
         """
-        return f'{self.firstname} {self.username} {self.lastname}'
+        return self.username
 
     @cached_property
     def is_staff(self):
