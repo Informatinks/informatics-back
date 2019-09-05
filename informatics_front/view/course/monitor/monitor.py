@@ -39,14 +39,14 @@ class WorkshopMonitorApi(MethodView):
         args = parser.parse(self.get_args, request, error_status_code=400)
 
         if not self._ensure_permissions(workshop_id):
-            raise NotFound(f'Monitor for workshop #{workshop_id} is not found')
+            raise NotFound(f'Результаты сбора #{workshop_id} не найдены или у пользователя нет приглашения на него')
 
         monitor: WorkshopMonitor = db.session.query(WorkshopMonitor) \
             .filter(WorkshopMonitor.workshop_id == workshop_id) \
             .first_or_404()
 
         if not current_user.is_teacher and monitor.is_disabled_for_students():
-            raise NotFound(f'Monitor for workshop #{workshop_id} is not found')
+            raise NotFound(f'Результаты сбора #{workshop_id} не найдены или у пользователя нет приглашения на него')
 
         contests = self._get_contests(workshop_id)
 

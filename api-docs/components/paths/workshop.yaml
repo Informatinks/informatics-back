@@ -71,7 +71,7 @@ paths:
               schema:
                 $ref: '../models.yaml#/components/schemas/MonitorSchema'
         404:
-          description: Результат не найден или у пользователя нет приглашения в него
+          description: Результаты сбора не найдены или у пользователя нет приглашения в него
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 

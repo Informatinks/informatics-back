@@ -30,7 +30,7 @@ class JoinWorkshopApi(MethodView):
             .one_or_none()
 
         if workshop is None:
-            raise NotFound(f'Workshop is not found')
+            raise NotFound(f'Сбор не найден')
 
         wc, is_created = get_or_create(WorkshopConnection, user_id=current_user.id, workshop_id=workshop_id)
 

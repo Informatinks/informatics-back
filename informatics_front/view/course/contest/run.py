@@ -24,7 +24,8 @@ class RunSourceApi(MethodView):
     @login_required
     def get(self, run_id):
         context, status = internal_rmatics.get_run_source(run_id, current_user.id)
-
+        if status == 404:
+            raise NotFound('Посылка не найдена')
         return jsonify(context, status_code=status)
 
 
@@ -38,12 +39,12 @@ class RunProtocolApi(MethodView):
             .one_or_none()
 
         if contest_visibility is None:
-            raise BadRequest('Bad protocol_id or problem_id')
+            raise BadRequest('Неправильный ID протокола или задачи')
 
         contest_visibility = contest_visibility and contest_visibility[0]
 
         if contest_visibility is ContestProtocolVisibility.INVISIBLE:
-            raise NotFound('Protocol for current')
+            raise NotFound('Просмотр протокола для этой посылки недоступен')
 
         context, status = internal_rmatics.get_full_run_protocol(run_id, current_user.id)
 
