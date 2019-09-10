@@ -58,6 +58,15 @@ class MoodleUser(models.Model):
     is_authenticated = True
     is_active = True  # TODO
 
+    def get_username(self) -> str:
+        """Get user username, which is required.
+
+        Used in Grapelli navbar.
+        
+        :return: User representation for navbar
+        """
+        return self.username
+
     @cached_property
     def is_staff(self):
         is_staff = any(map(lambda r: r.shortname in (Role.staff_roles + Role.superuser_roles),
