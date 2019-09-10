@@ -41,13 +41,13 @@ class LoginApi(MethodView):
             .one_or_none()
 
         if user is None:
-            raise exc.NotFound('User with this username does not exist')
+            raise exc.NotFound('Пользовалель не найден')
 
         is_password_valid = User.check_password(user.password_md5, password)
         if not is_password_valid:
             current_app.logger.warning(f'user_email={args["username"]} '
                                        f'has failed to log in')
-            raise exc.Forbidden('Invalid password')
+            raise exc.Forbidden('Неправильный пароль')
 
         current_app.logger.debug(f'user_email={args["username"]} has logged in')
 
@@ -111,7 +111,7 @@ class RefreshTokenApi(MethodView):
         user = self._validate_token(token)
         if user is None:
             current_app.logger.warning(f'Someone has sent invalid refresh token')
-            raise exc.Forbidden('Refresh token has been expired')
+            raise exc.Forbidden('Токен для обновления сессии недействителен')
 
         excludes = ('refresh_token',)
         serializer = UserAuthSerializer(exclude=excludes)
@@ -149,7 +149,8 @@ class PasswordResetApi(MethodView):
 
         # if user not found or user has no valid email
         if user is None or user.email is None or user.email == '':
-            raise BadRequest('Either user is not found or has no valid email')
+            raise BadRequest('Запрос не выполнен. Или пользователь с такими  '
+                             'данными не найден, или у найденого пользователя нет email')
 
         payload = {
             'user_id': user.id

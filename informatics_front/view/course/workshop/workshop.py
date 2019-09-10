@@ -32,7 +32,7 @@ class WorkshopApi(MethodView):
             .one_or_none()
 
         if workshop_connection is None:
-            raise NotFound(f'Cannot find workshop id #{workshop_id}')
+            raise NotFound(f'Сбор с id #{workshop_id} не найден')
 
         workshop_serializer: WorkshopSchema = WorkshopSchema(exclude=[
             'contests.statement.problems',

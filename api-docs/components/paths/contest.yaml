@@ -52,5 +52,9 @@ paths:
           description: Контест не найден или не открыт
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
+        403:
+          description: Контест еще не начался или уже закончился 
+          allOf:
+            - $ref: '../error_responses.yaml#/components/responses/Forbidden'
 
 

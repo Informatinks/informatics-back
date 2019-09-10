@@ -27,7 +27,7 @@ class ContestApi(MethodView):
             .get(contest_id)
 
         if contest is None:
-            raise NotFound(f'Cannot find contest module id #{contest_id}')
+            raise NotFound(f'Не удалость найти модуль контеста с ID #{contest_id}')
 
         user_id = current_user.id
         self._check_workshop_permissions(user_id, contest.workshop)
@@ -35,7 +35,7 @@ class ContestApi(MethodView):
         cc, is_created = get_or_create(ContestConnection, user_id=user_id, contest_id=contest.id)
 
         if not current_user.is_teacher and not contest.is_available(cc):
-            raise Forbidden('Contest is not started or already finished')
+            raise Forbidden('Контест не найден или не открыт')
 
         contest.statement.problems = self._load_problems(contest.statement_id)
         if not contest.languages:
@@ -80,4 +80,4 @@ class ContestApi(MethodView):
                 and workshop_connection.is_avialable() \
                 and workshop.status == WorkshopStatus.ONGOING:
             return workshop_connection
-        raise NotFound('Contest is not found')
+        raise NotFound('Контест не найден или не открыт')

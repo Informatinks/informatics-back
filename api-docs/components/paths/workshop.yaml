@@ -71,7 +71,7 @@ paths:
               schema:
                 $ref: '../models.yaml#/components/schemas/MonitorSchema'
         404:
-          description: Результат не найден или у пользователя нет приглашения в него
+          description: Результаты сбора не найдены или у пользователя нет приглашения в него
           allOf:
             - $ref: '../error_responses.yaml#/components/responses/NotFound'
 
@@ -104,5 +104,5 @@ paths:
               schema:
                 $ref: '../models.yaml#/components/schemas/WorkshopConnectionSchema'
         404:
-          description: Возвращается, если или не найден Сбор по предоставленному Workshop_id или предоставен неверный token
+          description: Сбор не найден или недоступен
 
