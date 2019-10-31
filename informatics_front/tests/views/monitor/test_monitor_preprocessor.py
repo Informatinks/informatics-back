@@ -217,22 +217,6 @@ class TestLightACMResultMaker:
             == int(datetime.timedelta(days=1).total_seconds())
 
 
-class TestACMResultMaker:
-    def test_get_time(self):
-        result_maker = ACMResultMaker(lambda: None)
-        wrong_tries = 3
-
-        patch_pref = 'informatics_front.view.course.monitor.monitor_preprocessor'
-        with patch(f'{patch_pref}.LightACMResultMaker.get_time') as mock_super_get_time, \
-                patch(f'{patch_pref}.LightACMResultMaker.get_wrong_tries_count') as mock_wrong_tries:
-            mock_super_get_time.return_value = 0
-            mock_wrong_tries.return_value = wrong_tries
-            time = result_maker.get_time(123, [])
-
-        mock_super_get_time.assert_called_once()
-        assert time == PENALTY_TIME_SEC * wrong_tries
-
-
 class TestMonitorPreprocessor:
     def test_group_by_users(self):
         runs = [

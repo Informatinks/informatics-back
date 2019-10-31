@@ -230,10 +230,10 @@ class LightACMResultMaker(BaseResultMaker):
 
 
 class ACMResultMaker(LightACMResultMaker):
-    def get_time(self, user_id: int, runs: List[dict]) -> int:
-        wrong_tries = self.get_wrong_tries_count(runs)
-        return super().get_time(user_id, runs) + \
-            wrong_tries * PENALTY_TIME_SEC
+    """No custom LightACMResultMaker.get_time
+    for appeding penalty time: it's counted on frontned.
+    """
+    pass
 
 
 class MonitorPreprocessor:
