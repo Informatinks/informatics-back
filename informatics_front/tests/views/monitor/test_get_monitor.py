@@ -125,8 +125,8 @@ def test_make_function_user_start_time_when_virtual(contest_connection):
     c.is_virtual = True
     func = WorkshopMonitorApi._make_start_time_retriever(c, [1, 2, contest_connection.user_id])
 
-    assert func(contest_connection.user_id) == contest_connection.created_at.astimezone()
-    assert func(123) == datetime.datetime.utcfromtimestamp(0).astimezone()
+    assert func(contest_connection.user_id) == contest_connection.created_at.replace(tzinfo=UTC)
+    assert func(123) == datetime.datetime.utcfromtimestamp(0).replace(tzinfo=UTC)
 
 
 def test_simple_view(client, monitor, workshop_connection_builder):
