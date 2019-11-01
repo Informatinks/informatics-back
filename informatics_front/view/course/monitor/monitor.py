@@ -35,7 +35,6 @@ class WorkshopMonitorApi(MethodView):
 
     @login_required
     def get(self, workshop_id):
-
         args = parser.parse(self.get_args, request, error_status_code=400)
 
         if not self._ensure_permissions(workshop_id):
@@ -209,7 +208,7 @@ class WorkshopMonitorApi(MethodView):
 
         def time_by_cc(user_id: int):
             time = user_id_time.get(user_id) or datetime.datetime.utcfromtimestamp(0)
-            return time.astimezone()
+            return time.replace(tzinfo=UTC)
 
         return time_by_cc
 
