@@ -48,6 +48,10 @@ class ContestApi(MethodView):
         response = cc_schema.dump(cc)
 
         if is_created is True:
+            # Allow modify contest object without
+            # saving changes
+            db.session.expunge(contest)
+            
             db.session.commit()
 
         return jsonify(response.data)

@@ -5,6 +5,7 @@ from flask import url_for, g
 from werkzeug.exceptions import NotFound
 
 from informatics_front.model import db
+from informatics_front.model.contest.contest import Contest
 from informatics_front.utils.enums import WorkshopConnectionStatus
 from informatics_front.view.course.contest.contest import ContestApi
 
@@ -87,6 +88,9 @@ def test_contest_api(client, ongoing_workshop, workshop_connection_builder, lang
         assert serialized_language.get('code') == language.code
         assert serialized_language.get('title') == language.title
         assert serialized_language.get('mode') == language.mode
+        
+    contest_from_db = db.session.query(Contest).get(contest.id)
+    assert not contest_from_db.languages
 
 
 @pytest.mark.contest_problem
